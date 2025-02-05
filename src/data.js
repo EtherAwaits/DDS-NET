@@ -120,12 +120,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const getParty = () => JSON.parse(localStorage.getItem("party")) || {}; // const party = getParty();
   const getPlayers = () => JSON.parse(localStorage.getItem("players")) || []; // const players = getPlayers();
   const getSystem = () => JSON.parse(localStorage.getItem("system")) || []; // const system = getSystem();
-
+  const getskillComp = () => JSON.parse(localStorage.getItem("skillComp")) || []; // const skillsCompendium = getskillsCompendium();
   //Centralized Updates
   const setParty = (party) => localStorage.setItem("party", JSON.stringify(party));
   const setPlayers = (players) => localStorage.setItem("players", JSON.stringify(players));
   const setSystem = (system) => localStorage.setItem("system", JSON.stringify(system));
-	
+	const setskillComp = (skillComp) => localStorage.setItem("skillComp", JSON.stringify(skillsComp));
+
   const sys = getSystem();
   const user = sys.username;
   const theme = sys.config1;
@@ -173,7 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			case 'Charm':
 				document.getElementById(`party-slot-${i}`).classList.add(`bg-pink-600`);
 			break;
-			case 'Curse':
+			case 'Cursed':
 				document.getElementById(`party-slot-${i}`).classList.add(`bg-purple-600`);
 				document.getElementById(`party-slot-${i}`).classList.add("animate-pulse");
 			break;
@@ -653,15 +654,21 @@ document.addEventListener("DOMContentLoaded", () => {
 					<div class="flex justify-center p-4  motion-reduced">
 						<div class="menu card grid grid-cols-2 gap-2 flex bg-gradient-to-b shadow-lg from-slate-950 to- bg-#000 p-4 w-full text-white rounded-md bg-opacity-50 shadow-primary/50">
 							<div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-volume="0.5" data-clicksound="sounds/Okay.mp3" id="reorder-button">Party Order</div>
-							<!-- <div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-volume="0.5" data-clicksound="sounds/Okay.mp3">Export Log (WIP)</div> -->
+							<div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-volume="0.5" data-clicksound="sounds/Okay.mp3" id="skillcomp-button">Skill Compendium</div>
 							<div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-volume="0.5" data-clicksound="sounds/Okay.mp3" id="config-button">Config</div>
 							<div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" id="cancel-button" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Negative.mp3" data-volume="0.5">Cancel</div>
 						</div>
 					</div>
 				`;
         const reorder = document.getElementById("reorder-button");
+        const skillcomp = document.getElementById("skillcomp-button");
         const cancel5 = document.getElementById("cancel-button");
         const config = document.getElementById("config-button");
+        if (skillcomp) {
+          skillcomp.addEventListener("click", () => {
+            openForm("skillcomp");
+          });
+        }
         if (config) {
           config.addEventListener("click", () => {
             openForm("config");
@@ -785,7 +792,7 @@ document.addEventListener("DOMContentLoaded", () => {
 					   <option>Bind</option>  
 					   <option>Dead</option>  
 					   <option>Charm</option>  
-					   <option>Curse</option>  
+					   <option>Cursed</option>  
 					   <option>Fly</option>  
 					   <option>Freeze</option>  
 					   <option>Frog</option>  
@@ -1294,7 +1301,7 @@ document.addEventListener("DOMContentLoaded", () => {
 							   <option>Bind</option>  
 							   <option>Dead</option>  
 							   <option>Charm</option>  
-							   <option>Curse</option>  
+							   <option>Cursed</option>  
 							   <option>Fly</option>  
 							   <option>Freeze</option>  
 							   <option>Frog</option>  
@@ -2071,7 +2078,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
 
                 // Check for cursed status
-                if (currentPlayer.Status === "Curse" && roll >= 86 && roll <= 99) {
+                if (currentPlayer.Status === "Cursed" && roll >= 86 && roll <= 99) {
                   result = "Fumble";
                 }
 
@@ -2150,7 +2157,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                     if (rules === "1") {
                       termtext(`<anim:term-red><color:darkred>Warning</color> <color:blue>${currentPlayer.Name}</color> <color:gray>has been cursed.</color>\n`);
-                      currentPlayer.Status = "Curse";
+                      currentPlayer.Status = "Cursed";
                     }
                     break;
                   case "Fumble":
@@ -2825,11 +2832,46 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
       break;
+      case "skillcomp":
+        formDisplay.innerHTML = `
+        <div class="form text-white p-4 max-w-[640px] bg-gradient-to-b from-secondary to- shadow-lg shadow-secondary/50">  
+          <h2 class="text-center font-bold mb-4">Skill Compendium</h2>
+          
+          <div id="compendium-display"></div>
+
+          <div class="w-full justify-center gap-6 p-4 flex">
+          <input class="btn btn-sm form-input hover-sfx click-sfx" type="submit" id="form-create" value="Create Skill" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
+            <input class="btn btn-sm btn-square form-input hover-sfx click-sfx" type="submit" id="form-cancel" value="X" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Negative.mp3">
+          </div>
+        </div>
+         `;
+        let formCancelered = document.getElementById("form-cancel");
+        termtext(`<color:yellow>Opening</color> Skill Compendium Program.\n`);
+        formCancelered.addEventListener("click", closeForm);
+        let compendiumDisplay = document.getElementById("compendium-display");
+        let compendium = getskillComp();
+        
+        compendiumDisplay.innerHTML = `
+        <div class="card grid grid-cols-1 p-12 gap-2 bg-base-300 border-neutral border-2 max-h-80 overflow-y-auto">
+          ${compendium.map((skill) => `
+            <div class="btn grid grid-cols-5 bg-gradient-to-br from-primary to- hover:border-accent hover:border-single hover:border-2 hover:shadow-lg hover:shadow-accent/50 p-2 tooltip tooltip-secondary" data-tip="${skill.description}">
+              <img alt="${skill.Type}" class="xs:min-w-6 sm:size-7 sm:min-w-7 md:min-w-8 md:size-8 size-6" src="views/${skill.type}.png">
+              <h3 class="font-bold">${skill.name}</h3>
+              <p class="place-self-end opacity-80 rounded-full p-1 text-right w-20 bg-base-300 border-neutral border-2">${skill.costNum} <span class="text-yellow-400">${skill.costType}</span></p>
+              <input class="btn btn-xs form-input hover-sfx click-sfx" type="submit" id="form-edit-${skill.id}" value="Edit" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
+              <input class="btn btn-xs form-input hover-sfx click-sfx" type="submit" id="form-delete-${skill.id}" value="Remove" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
+            </div>
+          `).join("")}
+        </div>
+        `;
+        
+
+      break;
       default:
         formDisplay.innerHTML = `
-					<div class="form text-white rounded-lg rounded-tl-3xl p-4 w-1/2 shadow-lg bg-gradient-to-b from-accent to- shadow-lg shadow-secondary/50">  
-						<h2 class="text-center font-bold mb-4">Sorry! This feature isn't ready yet. </h2>
-						<input class="btn btn-sm form-input hover-sfx click-sfx" type="submit" id="form-cancel" value="X" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Negative.mp3">
+					<div class="form text-white rounded-lg rounded-tl-3xl p-4 w-1/2 bg-gradient-to-b from-accent to- shadow-lg shadow-secondary/50">  
+						<h2 class="align-text-center font-bold mb-4">Sorry! This feature isn't ready yet. </h2>
+						<input class="btn btn-sm place-self-center btn-square form-input hover-sfx click-sfx" type="submit" id="form-cancel" value="X" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Negative.mp3">
 					</div>
 				   `;
         let formCancelerrrrrrrr = document.getElementById("form-cancel");
