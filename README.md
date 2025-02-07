@@ -135,7 +135,9 @@ If for any reason you have problems, suggestions, questions ect. Feel free to co
 
 ## 📄Credits
 
-This project features a heavily reduced version of the CRT filter from [aleclownes.com](https://aleclownes.com/2017/02/01/crt-display.html).
+This project features a reduced CRT filter from [aleclownes.com](https://aleclownes.com/2017/02/01/crt-display.html).
+
+Skill icons created by Q-Bit.
 
 ## 📜License
 
