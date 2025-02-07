@@ -230,7 +230,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			</div>
 			
 			<div class="w-3/4">
-              <h3 class="text-white"><i>Lv. ${player.Level}</i> ${player.Name}</h3>
+              <h3 class="text-white"><i>Lv<b>${player.Level}</b></i> ${player.Name}</h3>
               <div class="stat-bar">
                 <div class="bar-bg relative">
                   <div class="bar-fill bg-gradient-to-r from-red-600 to-orange-400" style="width: ${(player.HP_Current / player.HP_Max) * 100}%;"></div>
@@ -621,7 +621,7 @@ document.addEventListener("DOMContentLoaded", () => {
 					<div class="flex justify-center p-4  motion-reduced">
 						<div class="menu card grid grid-cols-2 gap-2 flex bg-gradient-to-b shadow-lg from-slate-950 to- bg-#000 p-4 w-full text-white rounded-md bg-opacity-50 shadow-primary/50">
 							<div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-volume="0.5" data-clicksound="sounds/Okay.mp3" id="edituser-button">Edit User</div>
-							<!-- <div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-volume="0.5" data-clicksound="sounds/Okay.mp3">Export Users (WIP)</div> -->
+						  <div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-volume="0.5" data-clicksound="sounds/Okay.mp3" id="assign-button">Assign Skills</div>
 							<!-- <div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-volume="0.5" data-clicksound="sounds/Okay.mp3">Import Users (WIP)</div> -->
 							<div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-volume="0.5" data-clicksound="sounds/Okay.mp3" id="help-button">Help</div>
 							<div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" id="cancel-button" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Negative.mp3" data-volume="0.5">Cancel</div>
@@ -638,6 +638,12 @@ document.addEventListener("DOMContentLoaded", () => {
         if (edituser) {
           edituser.addEventListener("click", () => {
             openForm("edituser");
+          });
+        }
+        const assign = document.getElementById("assign-button");
+        if (assign) {
+          assign.addEventListener("click", () => {
+            openForm("assign");
           });
         }
         const cancel4 = document.getElementById("cancel-button");
@@ -747,7 +753,7 @@ document.addEventListener("DOMContentLoaded", () => {
       default:
         tabs.forEach((t) => t.classList.remove("tab-button-selected"));
         bottomDisplay.innerHTML = `
-					<div class="grid grid-cols-3 gap-2 flex p-4 party-menu motion-reduce" id="party-list">
+					<div class="grid grid-cols-3 gap-2 p-4 party-menu motion-reduce" id="party-list">
 						<!-- Party Member Cards -->
 						<div class="party-member card bg-gradient-to-br from-primary to- hover:shadow-lg hover:shadow-accent/50" id="party-slot-1" tabindex="0"></div>
 						<div class="party-member card bg-gradient-to-br from-primary to- hover:shadow-lg hover:shadow-accent/50" id="party-slot-2" tabindex="0"></div>
@@ -1067,7 +1073,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!partyIds.has(player.id)) {
               const option = document.createElement("option");
               option.value = player.id;
-              option.textContent = `Lv. ${player.Level} ${player.Name}`;
+              option.textContent = `Lv${player.Level} ${player.Name}`;
               playerSelect.appendChild(option);
             }
           });
@@ -1267,7 +1273,7 @@ document.addEventListener("DOMContentLoaded", () => {
           players.forEach((player) => {
             const option = document.createElement("option");
             option.value = player.id;
-            option.textContent = `Lv. ${player.Level} ${player.Name}`;
+            option.textContent = `Lv${player.Level} ${player.Name}`;
             playerSelect.appendChild(option);
           });
         };
@@ -1564,7 +1570,7 @@ document.addEventListener("DOMContentLoaded", () => {
           players.forEach((player) => {
           const option = document.createElement("option");
           option.value = player.id;
-          option.textContent = `Lv. ${player.Level} ${player.Name}`;
+          option.textContent = `Lv${player.Level} ${player.Name}`;
           playerSelectt.appendChild(option);
           });
         };
@@ -2835,12 +2841,19 @@ document.addEventListener("DOMContentLoaded", () => {
       case "skillcomp":
         formDisplay.innerHTML = `
         <div class="form text-white p-4 max-w-[640px] bg-gradient-to-b from-secondary to- shadow-lg shadow-secondary/50">  
-          <h2 class="text-center font-bold mb-4">Skill Compendium</h2>
+          <h1 class="text-center font-bold mb-2">Skill Compendium</h1>
           
+          <div class="mb-2 flex gap-2 justify-center items-center">
+            <label for="search-skill">Search</label>
+            <input class="input form-input w-1/4 hover-sfx" type="text" id="search-skill" placeholder="Skill Name" data-hoversound="sounds/cursor.mp3">
+          </div>
+
           <div id="compendium-display"></div>
 
           <div class="w-full justify-center gap-6 p-4 flex">
-          <input class="btn btn-sm form-input hover-sfx click-sfx" type="submit" id="form-create" value="Create Skill" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
+            <input class="btn btn-sm form-input hover-sfx click-sfx" type="submit" id="form-create" value="Create Skill" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
+            <div class="tooltip tooltip-secondary" data-tip="Download Skill Compendium"><input class="btn btn-sm form-input hover-sfx click-sfx" type="submit" id="form-export" value="Export" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Comp.mp3"></div>
+            <div class="tooltip tooltip-secondary" data-tip="Overwrite Skill Compendium"><input class="btn btn-sm form-input hover-sfx click-sfx" type="submit" id="form-import" value="Import" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3"></div>
             <input class="btn btn-sm btn-square form-input hover-sfx click-sfx" type="submit" id="form-cancel" value="X" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Negative.mp3">
           </div>
         </div>
@@ -2849,23 +2862,351 @@ document.addEventListener("DOMContentLoaded", () => {
         termtext(`<color:yellow>Opening</color> Skill Compendium Program.\n`);
         formCancelered.addEventListener("click", closeForm);
         let compendiumDisplay = document.getElementById("compendium-display");
-        let compendium = getskillComp();
+        let searchSkillInput = document.getElementById("search-skill");
         
-        compendiumDisplay.innerHTML = `
-        <div class="card grid grid-cols-1 p-12 gap-2 bg-base-300 border-neutral border-2 max-h-80 overflow-y-auto">
-          ${compendium.map((skill) => `
-            <div class="btn grid grid-cols-5 bg-gradient-to-br from-primary to- hover:border-accent hover:border-single hover:border-2 hover:shadow-lg hover:shadow-accent/50 p-2 tooltip tooltip-secondary" data-tip="${skill.description}">
-              <img alt="${skill.Type}" class="xs:min-w-6 sm:size-7 sm:min-w-7 md:min-w-8 md:size-8 size-6" src="views/${skill.type}.png">
-              <h3 class="font-bold">${skill.name}</h3>
-              <p class="place-self-end opacity-80 rounded-full p-1 text-right w-20 bg-base-300 border-neutral border-2">${skill.costNum} <span class="text-yellow-400">${skill.costType}</span></p>
-              <input class="btn btn-xs form-input hover-sfx click-sfx" type="submit" id="form-edit-${skill.id}" value="Edit" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
-              <input class="btn btn-xs form-input hover-sfx click-sfx" type="submit" id="form-delete-${skill.id}" value="Remove" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
-            </div>
-          `).join("")}
-        </div>
-        `;
-        
+        function refreshcomp(searchTerm = "") {
+          let compendium = getskillComp();
+          // Sort compendium by type and then by name
+          compendium.sort((a, b) => {
+            if (a.type < b.type) return -1;
+            if (a.type > b.type) return 1;
+            if (a.name < b.name) return -1;
+            if (a.name > b.name) return 1;
+            return 0;
+          });
+          // Filter compendium based on search term
+          if (searchTerm) {
+            compendium = compendium.filter(skill => skill.name.toLowerCase().includes(searchTerm.toLowerCase()));
+          }
+          compendiumDisplay.innerHTML = `
+          <div class="card grid grid-cols-1 p-12 gap-2 bg-base-300 border-neutral border-2 max-h-80 overflow-y-auto">
+            ${compendium.map((skill) => `
+              <div class="btn grid grid-cols-2 bg-gradient-to-br from-primary to- hover:border-accent hover:border-single hover:border-2 hover:shadow-lg hover:shadow-accent/50 p-2 tooltip tooltip-secondary" data-tip="${skill.description}">
+          <div class="flex gap-2 justify-start items-center">
+              <img alt="${skill.Type}" class="size-8 rounded-full drop-shadow-lg" src="views/${skill.type}.png">
+          <h3 class="font-bold truncate text-sm text-left">${skill.name}</h3>
+          </div>
+          
+          
+          <div class="flex gap-2 justify-end items-center">
+          <p id="cost-label-${skill.id}" class="opacity-80 rounded-full p-1 place-self-center text-xs text-right w-16 sm:w-20 bg-base-300 border-neutral border-2">${skill.costNum} <span class="text-yellow-400">${skill.costType}</span></p>
+            <input class="btn btn-xs sm:btn-sm form-input hover-sfx place-self-center click-sfx" type="submit" id="form-edit-${skill.id}" value="Edit" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
+            <div class="tooltip tooltip-secondary tooltip-bottom" data-tip="Delete"><input class="btn btn-xs sm:btn-sm btn-square form-input place-self-end hover-sfx click-sfx" type="submit" id="form-delete-${skill.id}" value="X" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3"></div>
+          </div>
+              </div>
+            `).join("")}
+          </div>
+          `;
+          // Hide cost label if no cost
+          compendium.forEach((skill) => {
+          if (skill.costType === "None") {
+            document.querySelector(`#cost-label-${skill.id}`).classList.add("opacity-0");
+          }
+          });
+          // Add event listeners for delete buttons
+          compendium.forEach((skill) => {
+            document.getElementById(`form-delete-${skill.id}`).addEventListener('click', () => {
+              deleteSkill(skill.id);
+              refreshcomp(searchTerm);
+            });
+            document.getElementById(`form-edit-${skill.id}`).addEventListener('click', () => {
+              editSkill(skill.id);
+            });
+          });
+        }
 
+        searchSkillInput.addEventListener("input", (event) => {
+          refreshcomp(event.target.value);
+        });
+
+        refreshcomp();
+
+        function editSkill(skillId) {
+          let compendium = getskillComp();
+          let skill = compendium.find(skill => skill.id === skillId);
+
+          if (!skill) {
+            skill = {
+              id: skillId,
+              name: "New Skill",
+              type: "Physical",
+              costNum: 0,
+              costType: "None",
+              description: "Describe the skill here.",
+              baseTN: "None",
+              bonusTN: 0,
+              basePower: 0,
+              bonusPower: 0,
+              roll: "Attack"
+            };
+            compendium.push(skill);
+          }
+
+          termtext(`<color:yellow>Editing</color> <color:purple>${skill.name}</color>.\n`);
+          formDisplay.innerHTML = `
+            <div class="form text-white max-w-[640px] p-4 bg-gradient-to-b from-secondary to- shadow-lg shadow-secondary/50">
+              <h2 class="text-center font-bold mb-4">Edit Skill</h2>
+              <div class="grid grid-cols-2 gap-2 place-items-start">
+          <div>
+            <label for="skill-name">Skill Name</label>
+            <input class="input form-input hover-sfx" type="text" id="skill-name" data-hoversound="sounds/cursor.mp3" value="${skill.name}" required>
+          </div>
+              
+          <div class="justify-items-center tooltip tooltip-primary" data-tip="Only Changes Icon Displayed">
+            <label for="skill-type">Affinity
+            <select id="skill-type" name="skill-type" class="select select-xs form-input hover-sfx w-24" data-hoversound="sounds/cursor.mp3">
+              <option value="Physical">Physical</option>
+              <option value="Fire">Fire</option>
+              <option value="Ice">Ice</option>
+              <option value="Electric">Electric</option>
+              <option value="Force">Force</option>
+              <option value="Light">Light</option>
+              <option value="Dark">Dark</option>
+              <option value="Almighty">Almighty</option>
+              <option value="Ailment">Ailment</option>
+              <option value="Ruin">Ruin</option>
+              <option value="Nerve">Nerve</option>
+              <option value="Recovery">Recovery</option>
+              <option value="Support">Support</option>
+              <option value="Special">Special</option>
+              <option value="Passive">Passive</option>
+            </select>
+          </label>
+          </div>
+          <div>
+            <label for="skill-cost">Skill Cost</label>
+            <input class="input form-input w-16 hover-sfx" type="number" id="skill-cost" data-hoversound="sounds/cursor.mp3" value="${skill.costNum}" required>
+          </div>
+          <div>
+            <label for="skill-cost-type">Cost Type</label>
+            <select id="skill-cost-type" name="skill-cost-type" class="w-20 select select-xs form-input hover-sfx" data-hoversound="sounds/cursor.mp3">
+              <option value="HP">HP</option>
+              <option value="MP">MP</option>
+              <option value="FATE">FATE</option>
+              <option value="CARD">CARD</option>
+              <option value="None">None</option>
+            </select>
+          </div>
+              </div>
+              <br>
+          <fieldset id="roll-type" class="flex place-self-center">
+           <legend class="text-center w-full">Roll Type</legend>
+           <div role="tablist" class="tabs tabs-bordered">
+            <input type="radio" name="rollType" value="Attack" role="tab" class="tab" aria-label="Attack (TN & POW)">
+            <div role="tabpanel" class="tab-content p-2">
+            <p class="text-center text-sm">Performs a TN roll, followed by a Power roll on success.</p><br>
+            <div class="grid grid-cols-2 gap-2 place-items-end">
+              <div>
+                <label id="attack_basetn-label" for="attack_base_tn">Base TN
+                <select id="attack_base_tn" name="attack_base_tn" class="select max-w-32 select-xs form-input hover-sfx" data-hoversound="sounds/cursor.mp3">
+                  <option value="None">None (0 TN)</option>
+                  <option value="Strength">Strength TN</option>
+                  <option value="Magic">Magic TN</option>
+                  <option value="Vitality">Vitality TN</option>
+                  <option value="Agility">Agility TN</option>
+                  <option value="Luck">Luck TN</option>
+                  <option value="Dodge">Dodge TN</option>
+                  <option value="Talk">Talk TN</option>
+                </select></label>
+              </div>
+
+              <div>
+                <label for="attack_bonus_tn">Bonus TN</label>
+                <input class="input form-input w-16 hover-sfx" type="number" id="attack_bonus_tn" data-hoversound="sounds/cursor.mp3" value="">
+              </div>
+
+              <div>
+                <label id="attack_basepow-label" for="attack_base_pow">Base Power
+                <select id="attack_base_pow" name="attack_base_pow" class="select select-xs form-input hover-sfx w-24" data-hoversound="sounds/cursor.mp3">
+                  <option value="0">None (0)</option>
+                  <option value="Melee">Melee Power</option>
+                  <option value="Magic">Magic Power</option>
+                  <option value="Ranged">Ranged Power</option>
+                  <option value="Initiative">Initiative</option>
+                </select></label>
+              </div>
+
+                <div>
+            <label for="attack_bonus_pow">Bonus Power</label>
+            <input class="input form-input w-16 hover-sfx" type="number" id="attack_bonus_pow" data-hoversound="sounds/cursor.mp3" value="">
+                </div>
+              </div>
+            </div>
+
+            <input type="radio" name="rollType" value="TN" role="tab" class="tab" aria-label="Target Number">
+            <div role="tabpanel" class="tab-content p-2">
+              <div class="grid grid-cols-2 gap-2 place-items-end">
+
+                <div>
+            <label id="basetn-label" for="base_tn">Base TN
+            <select id="base_tn" name="base_tn" class="select max-w-32 select-xs form-input hover-sfx" data-hoversound="sounds/cursor.mp3">
+              <option value="None">None (0 TN)</option>
+              <option value="Strength">Strength TN</option>
+              <option value="Magic">Magic TN</option>
+              <option value="Vitality">Vitality TN</option>
+              <option value="Agility">Agility TN</option>
+              <option value="Luck">Luck TN</option>
+              <option value="Dodge">Dodge TN</option>
+              <option value="Talk">Talk TN</option>
+            </select></label>
+                </div>
+
+                <div>
+            <label for="bonus_tn">Bonus TN</label>
+            <input class="input form-input w-16 hover-sfx" type="number" id="bonus_tn" data-hoversound="sounds/cursor.mp3" value="">
+                </div>
+              </div>
+            </div>
+
+            <input type="radio" name="rollType" value="Power" role="tab" class="tab" aria-label="Power">
+            <div role="tabpanel" class="tab-content p-2">
+              <div class="grid grid-cols-2 gap-2 place-items-end">
+                <div>
+              <label id="basepow-label" for="base_pow">Base Power
+              <select id="base_pow" name="base_pow" class="select select-xs form-input hover-sfx w-24" data-hoversound="sounds/cursor.mp3">
+                <option value="0">None (0)</option>
+                <option value="Melee">Melee Power</option>
+                <option value="Magic">Magic Power</option>
+                <option value="Ranged">Ranged Power</option>
+                <option value="Initiative">Initiative</option>
+              </select></label>
+            </div>
+
+            <div>
+              <label for="bonus_pow">Bonus Power</label>
+              <input class="input form-input w-16 hover-sfx" type="number" id="bonus_pow" data-hoversound="sounds/cursor.mp3" value="">
+            </div>
+                
+                </div>
+
+              </div>
+
+              <input type="radio" name="rollType" value="Passive" role="tab" class="tab" aria-label="None (Auto)">
+              <div role="tabpanel" class="tab-content p-2">No Roll Needed</div>
+            </div>
+          </fieldset>        
+
+          <div>
+              <label for="skill-description">Skill Description</label>
+              <textarea class="textarea form-input w-full hover-sfx" id="skill-description" data-hoversound="sounds/cursor.mp3" required>${skill.description}</textarea>
+            </div>
+          <div class="w-full justify-center gap-6 p-4 flex">
+            <input class="btn btn-sm form-input hover-sfx click-sfx" type="submit" id="form-save" value="Save" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
+            <input class="btn btn-sm form-input hover-sfx click-sfx" type="submit" id="form-cancel" value="Cancel" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Negative.mp3">
+          </div>
+              </div>
+            </div>
+          `;
+          // Loading Values
+          document.getElementById("skill-type").value = skill.type;
+          document.getElementById("skill-cost-type").value = skill.costType;
+          document.getElementById("attack_base_tn").value = skill.baseTN;
+          document.getElementById("attack_bonus_tn").value = skill.bonusTN;
+          document.getElementById("attack_base_pow").value = skill.basePower;
+          document.getElementById("attack_bonus_pow").value = skill.bonusPower;
+          document.getElementById("base_tn").value = skill.baseTN;
+          document.getElementById("bonus_tn").value = skill.bonusTN;
+          document.getElementById("base_pow").value = skill.basePower;
+          document.getElementById("bonus_pow").value = skill.bonusPower;
+          const rollTypeInput = document.querySelector(`input[name="rollType"][value="${skill.roll}"]`);
+          if (rollTypeInput) {
+            rollTypeInput.checked = true;
+          }
+
+          document.getElementById("form-save").addEventListener("click", () => {
+            skill.name = document.getElementById("skill-name").value;
+            skill.type = document.getElementById("skill-type").value;
+            skill.costNum = document.getElementById("skill-cost").value;
+            skill.costType = document.getElementById("skill-cost-type").value;
+            skill.description = document.getElementById("skill-description").value;
+            skill.baseTN = document.getElementById("base_tn").value;
+            skill.bonusTN = document.getElementById("bonus_tn").value;
+            skill.basePower = document.getElementById("base_pow").value;
+            skill.bonusPower = document.getElementById("bonus_pow").value;
+            skill.roll = document.querySelector('input[name="rollType"]:checked').value;
+            if (skill.costType === "None") {
+              skill.costNum = 0;
+            }
+            switch (skill.roll) {
+              case "Attack":
+          skill.baseTN = document.getElementById("attack_base_tn").value;
+          skill.bonusTN = document.getElementById("attack_bonus_tn").value;
+          skill.basePower = document.getElementById("attack_base_pow").value;
+          skill.bonusPower = document.getElementById("attack_bonus_pow").value;
+              break;
+              case "TN":
+          skill.baseTN = document.getElementById("base_tn").value;
+          skill.bonusTN = document.getElementById("bonus_tn").value;
+          skill.basePower = 0;
+          skill.bonusPower = 0;
+              break;
+              case "Power":
+          skill.basePower = document.getElementById("base_pow").value;
+          skill.bonusPower = document.getElementById("bonus_pow").value;
+          skill.baseTN = 0;
+          skill.bonusTN = 0;
+              break;
+              case "Passive":
+          skill.basePower = 0;
+          skill.bonusPower = 0;
+          skill.baseTN = 0;
+          skill.bonusTN = 0;
+            }
+            localStorage.setItem('skillComp', JSON.stringify(compendium));
+            termtext(`<anim:term-blue><color:green>Success</color> <color:purple>${skill.name}</color> has been updated.\n`);
+            closeForm();
+          });
+
+          document.getElementById("form-cancel").addEventListener("click", closeForm);
+        }
+
+
+        function deleteSkill(skillId) {
+          let compendium = getskillComp();
+          let skill = compendium.find(skill => skill.id === skillId);
+          termtext(`<anim:term-shake><color:green>Success</color> <color:purple>${skill.name}</color> has been <color:red>deleted</color>.\n`);
+          playSound("sounds/Dead.mp3");
+          compendium = compendium.filter(skill => skill.id !== skillId);
+          localStorage.setItem('skillComp', JSON.stringify(compendium));
+        }
+
+        document.getElementById(`form-create`).addEventListener('click', () => {
+          editSkill(Date.now());
+        });
+
+        document.getElementById(`form-export`).addEventListener('click', () => {
+          let compendium = getskillComp();
+          let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(compendium));
+          let downloadAnchorNode = document.createElement('a');
+          downloadAnchorNode.setAttribute("href", dataStr);
+          downloadAnchorNode.setAttribute("download", "skillComp.json");
+          document.body.appendChild(downloadAnchorNode); // required for firefox
+          downloadAnchorNode.click();
+          downloadAnchorNode.remove();
+          termtext(`<anim:term-bounce><color:green>Success</color> Exported Skill Compendium.\n`);
+
+        });
+
+        document.getElementById(`form-import`).addEventListener('click', () => {
+          let input = document.createElement('input');      
+          input.type = 'file';
+          input.accept = '.json';
+          input.click();
+          input.onchange = e => {
+            let file = e.target.files[0];
+            let reader = new FileReader();
+            reader.readAsText(file,'UTF-8');
+            reader.onload = readerEvent => {
+              let content = readerEvent.target.result;
+              let compendium = JSON.parse(content);
+              localStorage.setItem('skillComp', JSON.stringify(compendium));
+              refreshcomp();
+              playSound("sounds/Comp.mp3");
+              termtext(`<anim:term-bounce><color:green>Success</color> Imported Skill Compendium.\n`);
+            }
+          };
+        });
+          
       break;
       default:
         formDisplay.innerHTML = `
