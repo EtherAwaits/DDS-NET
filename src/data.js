@@ -304,14 +304,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let currentPlayer = null;
 
-  function openForm(formType, player = null) {
+  function openForm(formType, player = null, playerid = null, skillid = null) {
     const formDisplay = document.getElementById("player-form"); // Ensure this element exists
     if (!formDisplay) {
       console.error("Error: 'formDisplay' element not found.");
       return;
     }
     // Update the form display dynamically based on the formType
-    updateFormDisplay(formType, player);
+    updateFormDisplay(formType, player, playerid, skillid);
 
     // Remove the hidden class to show the form
     playerForm.classList.remove("hidden");
@@ -771,7 +771,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   const formDisplay = document.getElementById("player-form");
 
-  function updateFormDisplay(formName, mode = null) {
+  function updateFormDisplay(formName, mode = null, playerid = null, skillid = null) {
     const formDisplay = document.getElementById("player-form");
     switch (formName) {
       case "quick":
@@ -790,7 +790,7 @@ document.addEventListener("DOMContentLoaded", () => {
 					<input type="number" id="form-mp" class="input form-input hover-sfx" data-hoversound="sounds/cursor.mp3">  
 				  </div>  
 				  <!-- Status Dropdown -->  
-				  <div class="grid grid-cols-4 gap-2 max-w-80">  
+				  <div class="mb-4 grid grid-cols-4 gap-2 max-w-80">  
 					<label>Status</label>  
 					<select id="form-status" class="select select-xs max-w-xs form-input hover-sfx" data-hoversound="sounds/cursor.mp3">  
 					   <option>Normal</option>  
@@ -820,6 +820,8 @@ document.addEventListener("DOMContentLoaded", () => {
 					   <button id="fate-increase" class="btn btn-xs btn-square form-input hover-sfx" data-hoversound="sounds/cursor.mp3">+</button>   
 				  </div>  
 				  </div>  
+
+          <div id="skill-display"></div>
 				  
 				  <!-- Buttons -->  
 				  <div class="flex justify-center space-x-4 mt-4 w-full">  
@@ -830,7 +832,89 @@ document.addEventListener("DOMContentLoaded", () => {
 				`;
         setupFormEventListenersQuick();
         updateFormValuesQuick(currentPlayer);
-        break;
+        let player = currentPlayer;
+        compendium = getskillComp();
+        if (!player.skills) {
+          players = getPlayers();
+          player = players.find((p) => p.id === player.id);
+          player.skills = [];
+          localStorage.setItem('players', JSON.stringify(players));
+        }
+        document.getElementById("skill-display").innerHTML = `
+          <div class="card grid grid-cols-1 p-12 gap-2 bg-base-300 border-neutral border-2 max-h-80 overflow-y-auto">
+            ${compendium.filter(skill => player.skills.includes(skill.id)).map((skill) => {
+            return `
+          <div class="btn grid grid-cols-2 bg-gradient-to-br from-primary to- hover:border-accent hover:border-single hover:border-2 hover:shadow-lg hover:shadow-accent/50 p-2 tooltip tooltip-secondary" data-tip="${skill.description}" id="skill-${skill.id}">
+            <div class="flex gap-2 justify-start items-center">
+              <img alt="${skill.Type}" class="size-8 rounded-full drop-shadow-lg" src="views/${skill.type}.png">
+              <h3 class="font-bold truncate text-sm text-left">${skill.name}</h3>
+            </div>
+            <div class="flex gap-2 justify-end items-center">
+              <p id="cost-label-${skill.id}" class="opacity-80 rounded-full p-1 place-self-center text-xs text-right w-16 sm:w-20 bg-base-300 border-neutral border-2">${skill.costNum} <span class="text-yellow-400">${skill.costType}</span></p>
+            </div>
+          </div>
+            `;
+          }).join("")}
+        </div>
+        `;
+        // Hide cost label if no cost
+        compendium.forEach((skill) => {
+          const costLabel = document.querySelector(`#cost-label-${skill.id}`);
+          if (skill.costType === "None" && costLabel) {
+            costLabel.classList.add("opacity-0");
+          }
+        });
+
+        compendium.forEach((skill) => {
+          const skillButton = document.getElementById(`skill-${skill.id}`);
+          if (skillButton) {
+            skillButton.addEventListener("click", () => {
+              useSkill(player.id, skill.id);
+            });
+          }
+        });
+
+        // Implements the logic for using a skill
+        function useSkill(playerId, skillId) {
+          const players = getPlayers();
+          const player = players.find((p) => p.id === playerId);
+          const skill = compendium.find((s) => s.id === skillId);
+          playSound("sounds/Okay.mp3");
+          termtext(`<color:yellow>${player.Name}</color> used <color:blue>${skill.name}</color>.\n${skill.description}\n`);
+          switch (skill.roll) {
+            case "Attack":
+              openForm("tnroll", "attack", player.id, skill.id);
+            break;
+            case "TN":
+              openForm("tnroll", "skill", player.id, skill.id);
+            break;
+            case "Power":
+              openForm("proll", "skill", player.id, skill.id);
+            break;
+            case "Passive":
+              switch (skill.costType) {
+                case "HP":
+                  player.HP_Current = Math.min(player.HP_Max, Math.max(0, player.HP_Current - skill.costNum));
+                break;
+                case "MP":
+                  player.MP_Current = Math.min(player.MP_Max, Math.max(0, player.MP_Current - skill.costNum));
+                  break;
+                case "FATE":
+                  player.Fate_Current = Math.min(player.Fate_Max, Math.max(0, player.Fate_Current - skill.costNum));
+                  console.log(player.Fate_Current);
+                break;
+                default:
+              }
+              setPlayers(players);
+              populatePartySlots(getPlayers(), getParty());
+              closeForm();
+            break;
+          }
+          
+          
+        }
+
+      break;
       case "usercreation":
         termtext(`<color:yellow>Opening</color> User Creator.\n`);
         formDisplay.innerHTML = ` 
@@ -1776,6 +1860,10 @@ document.addEventListener("DOMContentLoaded", () => {
           case "melee":
             termtext(`<color:yellow>Opening</color> Melee Attack Program.\n`);
             break;
+          case "attack":
+            break;
+          case "skill":
+            break;
           default:
             termtext(`<color:yellow>Opening</color> Target Number Program.\n`);
         }
@@ -1806,7 +1894,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const formConfirmrd = document.getElementById("form-confirm");
         const innerDisplay = document.getElementById("inner-display");
         formCancelrd.addEventListener("click", closeForm);
-
+        
         document.querySelectorAll(".party-member").forEach((slot, index) => {
           slot.addEventListener("click", () => {
             const party = getParty();
@@ -1814,6 +1902,20 @@ document.addEventListener("DOMContentLoaded", () => {
             const slotKey = `slot${index + 1}`;
             if (party[slotKey] !== null) {
               let playerId = party[slotKey];
+              roller(playerId);
+            } else {
+              playSound("sounds/Dead.mp3");
+              termtext(`<anim:term-red><color:red>ERROR!!!</color> Slot is empty.\n`);
+            }
+          });
+        });
+
+        if (mode === "skill"){
+            roller(playerid);
+        }
+
+          function roller(playerId) {
+              let players = getPlayers();
               let currentPlayer = players.find((p) => p.id === playerId);
 
               // Reset the formula
@@ -1838,7 +1940,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (modifier !== "None") {
                   document.getElementById("multivisor").classList.remove("hidden");
                   formula += ` ${modifier === "Multiply" ? "×" : "÷"} ${
-			      document.getElementById("multivisor").value || 1}`;
+			            document.getElementById("multivisor").value || 1}`;
                 } else {
                   document.getElementById("multivisor").value = 1;
                   document.getElementById("multivisor").classList.add("hidden");
@@ -2282,7 +2384,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         }, 250);
                         break;
                       default:
-                        termtext(`<anim:term-red><color:red> Automatic Fail</color> <color:blue>${currentPlayer.Name}</color> rolled <color:red>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n`);
+                        termtext(`<anim:term-red><color:red>Fail</color> <color:blue>${currentPlayer.Name}</color> rolled <color:red>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n`);
                         setTimeout(() => {
                           playSound("sounds/Closebig.mp3", 1);
                         }, 250);
@@ -2410,12 +2512,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 console.log({ finalTN, roll, result, mode, rules });
                 closeForm();
               });
-            } else {
-              playSound("sounds/Dead.mp3");
-              termtext(`<anim:term-red><color:red>ERROR!!!</color> Slot is empty.\n`);
+  
             }
-          });
-        });
+          
+        
       break;
       case "proll":
         switch (mode) {
@@ -2862,7 +2962,7 @@ document.addEventListener("DOMContentLoaded", () => {
         termtext(`<color:yellow>Opening</color> Skill Compendium Program.\n`);
         formCancelered.addEventListener("click", closeForm);
         let compendiumDisplay = document.getElementById("compendium-display");
-        let searchSkillInput = document.getElementById("search-skill");
+        searchSkillInput = document.getElementById("search-skill");
         
         function refreshcomp(searchTerm = "") {
           let compendium = getskillComp();
@@ -3208,6 +3308,177 @@ document.addEventListener("DOMContentLoaded", () => {
         });
           
       break;
+      case "assign":
+        formDisplay.innerHTML = `
+          <div class="form text-white p-4 max-w-[640px] bg-gradient-to-b from-secondary to- shadow-lg shadow-secondary/50">  
+            <h1 class="text-center font-bold mb-2">Assign Skills</h1>
+            <h3 class="text-center font-bold mb-2">Select User for Assignment</h3>
+            <div>
+              <div class="mb-2">
+                <label for="search-player">Search</label>
+                <input class="input form-input w-1/4 hover-sfx" type="text" id="search-player" placeholder="Player Name" data-hoversound="sounds/cursor.mp3">
+              </div>
+            </div>
+            <div id="assign-display"></div>
+            <div class="w-full justify-center gap-6 p-4 flex">
+              <input class="btn btn-sm form-input hover-sfx click-sfx" type="submit" id="form-cancel" value="X" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Negative.mp3">
+            </div>
+          </div>
+        `;
+        let formCancelerrrrrrrrr = document.getElementById("form-cancel");
+        termtext(`<color:yellow>Opening</color> Skill Assignment.\n`);
+        formCancelerrrrrrrrr.addEventListener("click", closeForm);
+        let assignDisplay = document.getElementById("assign-display");
+        searchSkillInput = document.getElementById("search-skill");
+        searchPlayerInput = document.getElementById("search-player");
+
+        function refreshAssign(searchTerm = "") {
+          let players = getPlayers();
+          // Filter players based on search term
+          if (searchTerm) {
+            players = players.filter(player => player.Name.toLowerCase().includes(searchTerm.toLowerCase()));
+          }
+            assignDisplay.innerHTML = `
+            <div class="card grid grid-cols-1 p-12 gap-2 bg-base-300 border-neutral border-2 max-h-80 overflow-y-auto">
+            ${players.map((player) => `
+              <div class="btn grid grid-cols-2 bg-gradient-to-br from-primary to- hover:border-accent hover:border-single hover:border-2 hover:shadow-lg hover:shadow-accent/50 p-2">
+              <div class="flex gap-2 justify-start items-center">
+                <img alt="${player.Name}" class="pic card xs:min-w-6 sm:size-7 sm:min-w-7 md:min-w-8 md:size-8 size-6 border-4 border-double border-neutral" id="avatar-${player.id}">
+                <h3 class="font-bold truncate text-sm text-left"><i>Lv<b>${player.Level}</b></i> ${player.Name}</h3>
+              </div>
+              <div class="flex gap-2 justify-end items-center">
+                <input class="btn btn-sm form-input hover-sfx place-self-center click-sfx" type="submit" id="form-assign-${player.id}" value="Assign" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
+              </div>
+              </div>
+            `).join("")}
+            </div>
+            `;
+
+            // Load avatars from IndexedDB
+            players.forEach(async (player) => {
+            const file = await getImageFromIndexedDB(player.id);
+            if (file) {
+              const url = URL.createObjectURL(file);
+              const avatar = document.getElementById(`avatar-${player.id}`);
+              avatar.src = url;
+            }
+            else {
+              document.getElementById(`avatar-${player.id}`).classList.add("opacity-0");
+            }
+            });
+          // Add event listeners for assign buttons
+          players.forEach((player) => {
+            document.getElementById(`form-assign-${player.id}`).addEventListener('click', () => {
+              assignSkills(player.id);
+            });
+          });
+        }
+
+        searchPlayerInput.addEventListener("input", (event) => {
+          refreshAssign(event.target.value);
+        });
+
+        refreshAssign();
+
+        function assignSkills(playerId) {
+          let players = getPlayers();
+          let player = players.find(player => player.id === playerId);
+          if (!player.skills) {
+            player.skills = [];
+            localStorage.setItem('players', JSON.stringify(players));
+          }
+          termtext(`<anim:term-blue><color:yellow>Assigning</color> Skills to <color:blue>${player.Name}</color>.\n`);
+          formDisplay.innerHTML = `
+            <div class="form text-white max-w-[640px] p-4 bg-gradient-to-b from-secondary to- shadow-lg shadow-secondary/50">
+              <h2 class="text-center font-bold mb-4">Assign Skills to ${player.Name}</h2>
+              <div class="grid grid-cols-2 gap-2 place-items-start">
+          <div class="mb-2">
+            <label for="search-skill">Search</label>
+            <input class="input form-input hover-sfx" type="text" id="search-skill" placeholder="Skill Name" data-hoversound="sounds/cursor.mp3">
+          </div>
+              </div>
+              <div id="assign-skill-display"></div>
+              <div class="w-full justify-center gap-6 p-4 flex">
+          <input class="btn btn-sm btn-square form-input hover-sfx click-sfx" type="submit" id="form-cancel" value="X" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Negative.mp3">
+              </div>
+            </div>
+          `;
+          let assignSkillDisplay = document.getElementById("assign-skill-display");
+          searchSkillInput = document.getElementById("search-skill");
+
+          function refreshAssignSkills(searchTerm = "") {
+            let compendium = getskillComp();
+            let players = getPlayers();
+            let player = players.find(player => player.id === playerId);
+            // Sort compendium by type and then by name
+            compendium.sort((a, b) => {
+              if (a.type < b.type) return -1;
+              if (a.type > b.type) return 1;
+              if (a.name < b.name) return -1;
+              if (a.name > b.name) return 1;
+              return 0;
+            });
+            // Filter compendium based on search term
+            if (searchTerm) {
+              compendium = compendium.filter(skill => skill.name.toLowerCase().includes(searchTerm.toLowerCase()));
+            }
+            assignSkillDisplay.innerHTML = `
+              <div class="card grid grid-cols-1 p-12 gap-2 bg-base-300 border-neutral border-2 max-h-80 overflow-y-auto">
+              ${compendium.map((skill) => {
+          const isAssigned = player.skills.includes(skill.id);
+          return `
+            <div class="btn grid grid-cols-2 bg-gradient-to-br from-primary to- hover:border-accent hover:border-single hover:border-2 hover:shadow-lg hover:shadow-accent/50 p-2 tooltip tooltip-secondary" data-tip="${skill.description}">
+              <div class="flex gap-2 justify-start items-center">
+                <img alt="${skill.Type}" class="size-8 rounded-full drop-shadow-lg" src="views/${skill.type}.png">
+                <h3 class="font-bold truncate text-sm text-left">${skill.name}</h3>
+              </div>
+              <div class="flex gap-2 justify-end items-center">
+                <p id="cost-label-${skill.id}" class="opacity-80 rounded-full p-1 place-self-center text-xs text-right w-16 sm:w-20 bg-base-300 border-neutral border-2">${skill.costNum} <span class="text-yellow-400">${skill.costType}</span></p>
+                <input class="btn btn-sm w-24 form-input hover-sfx place-self-center click-sfx" type="submit" id="form-assign-${skill.id}" value="${isAssigned ? 'X' : 'Assign'}" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
+              </div>
+            </div>
+          `;
+              }).join("")}
+              </div>
+            `;
+            // Hide cost label if no cost
+            compendium.forEach((skill) => {
+              if (skill.costType === "None") {
+                document.querySelector(`#cost-label-${skill.id}`).classList.add("opacity-0");
+              }
+            });
+            // Add event listeners for assign buttons
+            compendium.forEach((skill) => {
+              document.getElementById(`form-assign-${skill.id}`).addEventListener('click', () => {
+                toggleSkillAssignment(player.id, skill.id);
+                refreshAssignSkills(searchSkillInput.value);
+              });
+            });
+          }
+          
+          searchSkillInput.addEventListener("input", (event) => {
+            refreshAssignSkills(event.target.value);
+          });
+
+          function toggleSkillAssignment(playerid, skillid) {
+            let players = getPlayers();
+            let player = players.find(player => player.id === playerid);
+            let compendium = getskillComp();
+            let skill = compendium.find(skill => skill.id === skillid);
+            if (player.skills.includes(skill.id)) {
+              player.skills = player.skills.filter(id => id !== skill.id);
+              termtext(`<anim:term-blue><color:green>Success</color> <color:purple>${skill.name}</color> has been removed from <color:blue>${player.Name}</color>.\n`);
+            } else {
+              player.skills.push(skill.id);
+              termtext(`<anim:term-blue><color:green>Success</color> <color:purple>${skill.name}</color> has been assigned to <color:blue>${player.Name}</color>.\n`);
+            }
+            localStorage.setItem('players', JSON.stringify(players));
+          }
+          
+          document.getElementById("form-cancel").addEventListener("click", closeForm);
+          refreshAssignSkills();
+        }
+      break;
       default:
         formDisplay.innerHTML = `
 					<div class="form text-white rounded-lg rounded-tl-3xl p-4 w-1/2 bg-gradient-to-b from-accent to- shadow-lg shadow-secondary/50">  
@@ -3249,14 +3520,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const formStatus = document.getElementById("form-status");
 
         // Update currentPlayer's stats
-        currentPlayer.HP_Current = Math.min(
-          currentPlayer.HP_Max,
-          Math.max(0, currentPlayer.HP_Current - formHP.value),
-        );
-        currentPlayer.MP_Current = Math.min(
-          currentPlayer.MP_Max,
-          Math.max(0, currentPlayer.MP_Current - formMP.value),
-        );
+        currentPlayer.HP_Current = Math.min(currentPlayer.HP_Max, Math.max(0, currentPlayer.HP_Current - formHP.value));
+        currentPlayer.MP_Current = Math.min(currentPlayer.MP_Max, Math.max(0, currentPlayer.MP_Current - formMP.value));
         currentPlayer.Status = formStatus.value;
 
         // Check and update player status
