@@ -145,6 +145,8 @@ MIT License
 
 ## 📝Changelog
 
+- **1.2** 📖Custom Skills & Compendium
+
 - **1.1** 💅UI Customization
 
 - **1.0** 🎉Release
@@ -153,7 +155,7 @@ MIT License
 
 - ~~💅UI Customization~~
 
-- 📖Custom Skills & Compendium
+- ~~📖Custom Skills & Compendium~~
 
 - 😈Demon Compendium
 
