@@ -716,7 +716,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const about = document.getElementById("about-button");
         if (about) {
           about.addEventListener("click", () => {
-            termtext("<color:yellow>Help</color> <b>About DDS-NET</b>.\nDDS-NET was created by <u>EtherAwaits</u> as a tool for party management and dice rolling for the Shin Megami Tensei TTRPG. The layout and style is inspired by the classic SNES games. Images and Sound effects are from Shin Megami Tensei as well as Final Fantasy 6.\n\n");
+            termtext("<color:yellow>Help</color> <b>About DDS-NET</b>.\nDDS-NET was created by <u>EtherAwaits</u> as a tool for party management and dice rolling for the Shin Megami Tensei TTRPG. The layout and style is inspired by the classic SNES games. Images and Sound effects are from Shin Megami Tensei as well as Final Fantasy 6. Skill icons created by <u>Q-Bit</u>.\n\n");
           });
         }
         const controls = document.getElementById("controls-button");
@@ -880,10 +880,19 @@ document.addEventListener("DOMContentLoaded", () => {
           const player = players.find((p) => p.id === playerId);
           const skill = compendium.find((s) => s.id === skillId);
           playSound("sounds/Okay.mp3");
-          termtext(`<color:yellow>${player.Name}</color> used <color:blue>${skill.name}</color>.\n${skill.description}\n`);
+          termtext(`<color:blue>${player.Name}</color> used <color:purple>${skill.name}</color>.\n${skill.description}\n`);
+          if (skill.costType === "FATE") {
+            if (player.Fate_Current - skill.costNum >= 0) {
+              player.Fate_Current = Math.min(player.Fate_Max, Math.max(0, player.Fate_Current - skill.costNum));
+              console.log(player.Fate_Current);
+            } else {
+            playSound("sounds/Dead.mp3");
+            termtext(`<anim:term-red><color:red>ERROR </color><color:blue>${player.Name}</color> does not have enough Fate to use <color:purple>${skill.name}</color>.\n`);
+            }
+          }
           switch (skill.roll) {
             case "Attack":
-              openForm("tnroll", "attack", player.id, skill.id);
+              openForm("tnroll", "skill", player.id, skill.id);
             break;
             case "TN":
               openForm("tnroll", "skill", player.id, skill.id);
@@ -899,9 +908,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 case "MP":
                   player.MP_Current = Math.min(player.MP_Max, Math.max(0, player.MP_Current - skill.costNum));
                   break;
-                case "FATE":
-                  player.Fate_Current = Math.min(player.Fate_Max, Math.max(0, player.Fate_Current - skill.costNum));
-                  console.log(player.Fate_Current);
                 break;
                 default:
               }
@@ -1322,6 +1328,7 @@ document.addEventListener("DOMContentLoaded", () => {
           localStorage.removeItem("players");
           localStorage.removeItem("party");
           localStorage.removeItem("system");
+          localStorage.removeItem("skillComp");
           location.reload();
         }
       break;
@@ -1860,8 +1867,6 @@ document.addEventListener("DOMContentLoaded", () => {
           case "melee":
             termtext(`<color:yellow>Opening</color> Melee Attack Program.\n`);
             break;
-          case "attack":
-            break;
           case "skill":
             break;
           default:
@@ -1874,12 +1879,12 @@ document.addEventListener("DOMContentLoaded", () => {
 					  <h2 class="text-center font-bold mb-4">SELECT USER TO ROLL</h2>
 					  <div class="grid grid-cols-3 gap-2 flex p-4" id="party-list">
 						<!-- Party Member Cards -->
-						<div class="party-member bg-gradient-to-br from-primary to- hover:shadow-lg hover:shadow-accent/50" id="party-slot-1" tabindex="0"></div>
-						<div class="party-member bg-gradient-to-br from-primary to- hover:shadow-lg hover:shadow-accent/50" id="party-slot-2" tabindex="0"></div>
-						<div class="party-member bg-gradient-to-br from-primary to- hover:shadow-lg hover:shadow-accent/50" id="party-slot-3" tabindex="0"></div>
-						<div class="party-member bg-gradient-to-br from-primary to- hover:shadow-lg hover:shadow-accent/50" id="party-slot-4" tabindex="0"></div>
-						<div class="party-member bg-gradient-to-br from-primary to- hover:shadow-lg hover:shadow-accent/50" id="party-slot-5" tabindex="0"></div>
-						<div class="party-member bg-gradient-to-br from-primary to- hover:shadow-lg hover:shadow-accent/50" id="party-slot-6" tabindex="0"></div>
+						<div class="party-member roll bg-gradient-to-br from-primary to- hover:shadow-lg hover:shadow-accent/50" id="party-slot-1" tabindex="0"></div>
+						<div class="party-member roll bg-gradient-to-br from-primary to- hover:shadow-lg hover:shadow-accent/50" id="party-slot-2" tabindex="0"></div>
+						<div class="party-member roll bg-gradient-to-br from-primary to- hover:shadow-lg hover:shadow-accent/50" id="party-slot-3" tabindex="0"></div>
+						<div class="party-member roll bg-gradient-to-br from-primary to- hover:shadow-lg hover:shadow-accent/50" id="party-slot-4" tabindex="0"></div>
+						<div class="party-member roll bg-gradient-to-br from-primary to- hover:shadow-lg hover:shadow-accent/50" id="party-slot-5" tabindex="0"></div>
+						<div class="party-member roll bg-gradient-to-br from-primary to- hover:shadow-lg hover:shadow-accent/50" id="party-slot-6" tabindex="0"></div>
 					  </div>
 					</div>
 					<div class="flex gap-6 p-4 place-self-center">
@@ -1895,7 +1900,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const innerDisplay = document.getElementById("inner-display");
         formCancelrd.addEventListener("click", closeForm);
         
-        document.querySelectorAll(".party-member").forEach((slot, index) => {
+        document.querySelectorAll(".roll").forEach((slot, index) => {
           slot.addEventListener("click", () => {
             const party = getParty();
             const players = getPlayers();
@@ -1928,7 +1933,7 @@ document.addEventListener("DOMContentLoaded", () => {
               let criticalBonus = false;
 
               const updateFormulaDisplay = () => {
-                let modifiedTN = baseTN + bonus + fatePoints * 20;
+                let modifiedTN = Number(baseTN) + Number(bonus) + Number(fatePoints) * 20;
                 if (modifier === "Multiply") {
                   modifiedTN *=
                     document.getElementById("multivisor").value || 1;
@@ -1982,11 +1987,11 @@ document.addEventListener("DOMContentLoaded", () => {
 							
 							</div>
 							<div id="div-hp">
-								<label for="hp-cost">HP Cost</label>
+								<label id="hp-cost-label" for="hp-cost">HP Cost</label>
 								<input class="input input-xs max-w-16 form-input hover-sfx" type="number" id="hp-cost" name="hp_cost" min="0" data-hoversound="sounds/cursor.mp3" required>
 							</div>
 							<div id="div-mp">
-								<label for="mp-cost">MP Cost</label>
+								<label id="mp-cost-label" for="mp-cost">MP Cost</label>
 								<input class="input input-xs max-w-16 form-input hover-sfx" type="number" id="mp-cost" name="mp_cost" min="0" data-hoversound="sounds/cursor.mp3" required>
 							</div>
 							<div>
@@ -2124,15 +2129,82 @@ document.addEventListener("DOMContentLoaded", () => {
                   document.getElementById("basetn-label").textContent = `Strength TN ${currentPlayer.STR_TN}%`;
                   document.getElementById("base_tn").classList.add("hidden");
                   document.getElementById("div-mp").classList.add("hidden");
-                  updateFormulaDisplay();
+                  
                   break;
+                case "skill":
+                  compendium = getskillComp();
+                  let skill = compendium.find((s) => s.id === skillid);
+                  document.getElementById("form-title").textContent = `${skill.name}: ${currentPlayer.Name}`;
+                  document.getElementById("form-bonus").value = skill.bonusTN;
+                  document.getElementById("base_tn").classList.add("hidden");
+                  bonus = skill.bonusTN;
+                  switch (skill.baseTN) {
+                    case "None":
+                      document.getElementById("base_tn").value = 0;
+                      document.getElementById("basetn-label").textContent = `Skill TN 0%`;
+                     break;
+                    case "Strength":
+                      baseTN = currentPlayer.STR_TN;
+                      document.getElementById("base_tn").value = currentPlayer.STR_TN;
+                      document.getElementById("basetn-label").textContent = `Strength TN ${currentPlayer.STR_TN}%`;
+                    case "Magic":
+                      baseTN = currentPlayer.MG_TN;
+                      document.getElementById("base_tn").value = currentPlayer.MG_TN;
+                      document.getElementById("basetn-label").textContent = `Magic TN ${currentPlayer.MG_TN}%`;
+                      break;
+                    case "Vitality":
+                      baseTN = currentPlayer.VT_TN;
+                      document.getElementById("base_tn").value = currentPlayer.VT_TN;
+                      document.getElementById("basetn-label").textContent = `Vitality TN ${currentPlayer.VT_TN}%`;
+                      break;
+                    case "Agility":
+                      baseTN = currentPlayer.AG_TN;
+                      document.getElementById("base_tn").value = currentPlayer.AG_TN;
+                      document.getElementById("basetn-label").textContent = `Agility TN ${currentPlayer.AG_TN}%`;
+                      break;
+                    case "Luck":
+                      baseTN = currentPlayer.LK_TN;
+                      document.getElementById("base_tn").value = currentPlayer.LK_TN;
+                      document.getElementById("basetn-label").textContent = `Luck TN ${currentPlayer.LK_TN}%`;
+                      break;
+                    case "Dodge":
+                      baseTN = currentPlayer.Dodge_TN;
+                      document.getElementById("base_tn").value = currentPlayer.Dodge_TN;
+                      document.getElementById("basetn-label").textContent = `Dodge TN ${currentPlayer.Dodge_TN}%`;
+                      break;
+                    case "Talk":
+                      baseTN = currentPlayer.Talk_TN;
+                      document.getElementById("base_tn").value = currentPlayer.Talk_TN;
+                      document.getElementById("basetn-label").textContent = `Talk TN ${currentPlayer.Talk_TN}%`;
+                      break;
+                  }
+                  switch (skill.costType) {
+                    case "HP":
+                      document.getElementById("div-mp").classList.add("hidden");
+                      document.getElementById("hp-cost").value = skill.costNum;
+                      document.getElementById("hp-cost").classList.add("hidden");
+                      document.getElementById("hp-cost-label").textContent = `HP Cost ${skill.costNum}`;
+                      break;
+                    case "MP":
+                      document.getElementById("div-hp").classList.add("hidden");
+                      document.getElementById("mp-cost").value = skill.costNum;
+                      document.getElementById("mp-cost").classList.add("hidden");
+                      document.getElementById("mp-cost-label").textContent = `MP Cost ${skill.costNum}`;
+                      break;
+                    default:
+                      document.getElementById("div-hp").classList.add("hidden");
+                      document.getElementById("div-mp").classList.add("hidden");             
+                    break;
+                  }
+                  updateFormulaDisplay();
               }
 
               document.getElementById("multivisor").addEventListener("input", updateFormulaDisplay);
               formConfirmrd.addEventListener("click", () => {
-                const party = getParty();
-                const players = getPlayers();
-                const system = getSystem();
+                let result = "Failure";
+                let party = getParty();
+                let players = getPlayers();
+                let system = getSystem();
 
                 if (!currentPlayer) {
                   console.error("No player selected!");
@@ -2166,12 +2238,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 // Deduct HP and MP costs
                 currentPlayer.HP_Current = Math.max(currentPlayer.HP_Current - hpCost, 0);
-                currentPlayer.MP_Current = Math.max(currentPlayer.HP_Current - mpCost,0);
+                currentPlayer.MP_Current = Math.max(currentPlayer.MP_Current - mpCost,0);
                 currentPlayer.Fate_Current -= fatePoints;
 
                 // Perform dice roll
                 const roll = Math.floor(Math.random() * 100) + 1;
-                let result = "Failure";
+
 
                 // Handle criticals and failures
                 if (roll >= 96 && roll <= 99) {
@@ -2440,6 +2512,13 @@ document.addEventListener("DOMContentLoaded", () => {
                         setTimeout(() => {
                           playSound("sounds/Ting.mp3", 1);
                         }, 250);
+                        let compendium = getskillComp();
+                        let players = getPlayers();
+                        let player = players.find((p) => p.id === playerid);
+                        let skill = compendium.find((s) => s.id === skillid);
+                        if (skill.roll === "Attack") {
+                          openForm("proll", "skill", player.id, skill.id);
+                        }
                     }
                     break;
                   case "Critical Success":
@@ -2501,21 +2580,33 @@ document.addEventListener("DOMContentLoaded", () => {
                         setTimeout(() => {
                           playSound("sounds/Saveting.mp3", 1);
                         }, 250);
+                        let compendium = getskillComp();
+                        let players = getPlayers();
+                        let player = players.find((p) => p.id === playerid);
+                        let skill = compendium.find((s) => s.id === skillid);
+                        if (skill.roll === "Attack") {
+                          openForm("proll", "skill", player.id, skill.id);
+                        }
                     }
                 }
+                
+                let compendium = getskillComp();
+                players = getPlayers();
+                let skill = compendium.find((s) => s.id === skillid);
+               
                 // Update players data in localStorage
                 const updatedPlayers = players.map((player) =>
                   player.id === currentPlayer.id ? currentPlayer : player,
                 );
                 setPlayers(updatedPlayers);
 
-                console.log({ finalTN, roll, result, mode, rules });
-                closeForm();
+                if (mode === "skill") { populatePartySlots(getPlayers(), getParty()); 
+                  if (skill.roll !== "Attack" || (result !== "Success" && result !== "Critical Success")) {closeForm();}
+                }
+                else{closeForm();}
               });
   
             }
-          
-        
       break;
       case "proll":
         switch (mode) {
@@ -2531,6 +2622,8 @@ document.addEventListener("DOMContentLoaded", () => {
           case "meleep":
             termtext(`<color:yellow>Opening</color> Melee Power Program.\n`);
             break;
+          case "skill":
+            break;
           default:
             termtext(`<color:yellow>Opening</color> Power Program.\n`);
         }
@@ -2541,12 +2634,12 @@ document.addEventListener("DOMContentLoaded", () => {
 					  <h2 class="text-center font-bold mb-4">SELECT USER TO ROLL</h2>
 					  <div class="grid grid-cols-3 gap-2 flex p-4" id="party-list">
 						<!-- Party Member Cards -->
-						<div class="party-member bg-gradient-to-br from-primary to- hover:shadow-lg hover:shadow-accent/50" id="party-slot-1" tabindex="0"></div>
-						<div class="party-member bg-gradient-to-br from-primary to- hover:shadow-lg hover:shadow-accent/50" id="party-slot-2" tabindex="0"></div>
-						<div class="party-member bg-gradient-to-br from-primary to- hover:shadow-lg hover:shadow-accent/50" id="party-slot-3" tabindex="0"></div>
-						<div class="party-member bg-gradient-to-br from-primary to- hover:shadow-lg hover:shadow-accent/50" id="party-slot-4" tabindex="0"></div>
-						<div class="party-member bg-gradient-to-br from-primary to- hover:shadow-lg hover:shadow-accent/50" id="party-slot-5" tabindex="0"></div>
-						<div class="party-member bg-gradient-to-br from-primary to- hover:shadow-lg hover:shadow-accent/50" id="party-slot-6" tabindex="0"></div>
+						<div class="party-member roll bg-gradient-to-br from-primary to- hover:shadow-lg hover:shadow-accent/50" id="party-slot-1" tabindex="0"></div>
+						<div class="party-member roll bg-gradient-to-br from-primary to- hover:shadow-lg hover:shadow-accent/50" id="party-slot-2" tabindex="0"></div>
+						<div class="party-member roll bg-gradient-to-br from-primary to- hover:shadow-lg hover:shadow-accent/50" id="party-slot-3" tabindex="0"></div>
+						<div class="party-member roll bg-gradient-to-br from-primary to- hover:shadow-lg hover:shadow-accent/50" id="party-slot-4" tabindex="0"></div>
+						<div class="party-member roll bg-gradient-to-br from-primary to- hover:shadow-lg hover:shadow-accent/50" id="party-slot-5" tabindex="0"></div>
+						<div class="party-member roll bg-gradient-to-br from-primary to- hover:shadow-lg hover:shadow-accent/50" id="party-slot-6" tabindex="0"></div>
 					  </div>
 					</div>
 					<div class="w-full justify-center gap-6 p-4 flex">
@@ -2562,13 +2655,27 @@ document.addEventListener("DOMContentLoaded", () => {
         const innerrDisplay = document.getElementById("inner-display");
         formCancelrrd.addEventListener("click", closeForm);
 
-        document.querySelectorAll(".party-member").forEach((slot, index) => {
+        document.querySelectorAll(".roll").forEach((slot, index) => {
           slot.addEventListener("click", () => {
             const party = getParty();
             const players = getPlayers();
             const slotKey = `slot${index + 1}`;
             if (party[slotKey] !== null) {
               let playerId = party[slotKey];
+              rollerp(playerId);
+            } else {
+              playSound("sounds/Dead.mp3");
+              termtext(`<anim:term-red><color:red>ERROR!!!</color> Slot is empty.\n`);
+            }
+          });
+        });
+
+      if (mode === "skill"){
+        rollerp(playerid);
+      }
+
+          function rollerp(playerId) {
+              let players = getPlayers();
               let currentPlayer = players.find((p) => p.id === playerId);
 
               // Reset the formula
@@ -2626,11 +2733,11 @@ document.addEventListener("DOMContentLoaded", () => {
                   <button id="dice-increase" class="btn btn-xs form-input hover-sfx" data-hoversound="sounds/cursor.mp3">+</button>
                   </div>
                   <div id="div-hp">
-                    <label for="hp-cost">HP Cost</label>
+                    <label id="hp-cost-label" for="hp-cost">HP Cost</label>
                     <input class="input form-input w-16 hover-sfx" type="number" id="hp-cost" name="hp_cost" min="0" data-hoversound="sounds/cursor.mp3" required>
                   </div>
                   <div id="div-mp">
-                    <label for="mp-cost">MP Cost</label>
+                    <label id="mp-cost-label" for="mp-cost">MP Cost</label>
                     <input class="input form-input w-16 hover-sfx" type="number" id="mp-cost" name="mp_cost" min="0" data-hoversound="sounds/cursor.mp3" required>
                   </div>
                 
@@ -2729,6 +2836,58 @@ document.addEventListener("DOMContentLoaded", () => {
                   document.getElementById("div-hp").classList.add("hidden");
                   updateFormulaDisplay();
                   break;
+                case "skill":
+                  compendium = getskillComp();
+                  let skill = compendium.find((s) => s.id === skillid);
+                  document.getElementById("form-title").textContent = `${skill.name}: ${currentPlayer.Name}`;
+                  document.getElementById("form-bonus").value = skill.bonusPower;
+                  document.getElementById("base_tn").classList.add("hidden");
+                  bonus = skill.bonusPower;
+                  switch (skill.basePower) {
+                    case "None":
+                      document.getElementById("base_tn").value = 0;
+                      document.getElementById("basetn-label").textContent = `Power 0`;
+                    break;
+                    case "Melee":
+                      baseTN = currentPlayer.Melee_Power;
+                      document.getElementById("base_tn").value = currentPlayer.Melee_Power;
+                      document.getElementById("basetn-label").textContent = `Melee Power ${currentPlayer.Melee_Power}`;
+                    case "Magic":
+                      baseTN = currentPlayer.Magic_Power;
+                      document.getElementById("base_tn").value = currentPlayer.Magic_Power;
+                      document.getElementById("basetn-label").textContent = `Magic Power ${currentPlayer.Magic_Power}`;
+                      break;
+                    case "Ranged":
+                      baseTN = currentPlayer.Ranged_Power;
+                      document.getElementById("base_tn").value = currentPlayer.Ranged_Power;
+                      document.getElementById("basetn-label").textContent = `Ranged Power ${currentPlayer.Ranged_Power}`;
+                      break;
+                    case "Initiative":
+                      baseTN = currentPlayer.Initiative;
+                      document.getElementById("base_tn").value = currentPlayer.Initiative;
+                      document.getElementById("basetn-label").textContent = `Initiative ${currentPlayer.Initiative}`;
+                      break;
+                  }
+                    switch (skill.costType) {
+                      case "HP":
+                        document.getElementById("div-mp").classList.add("hidden");
+                        document.getElementById("hp-cost").value = skill.costNum;
+                        document.getElementById("hp-cost").classList.add("hidden");
+                        document.getElementById("hp-cost-label").textContent = `HP Cost ${skill.costNum}`;
+                        break;
+                      case "MP":
+                        document.getElementById("div-hp").classList.add("hidden");
+                        document.getElementById("mp-cost").value = skill.costNum;
+                        document.getElementById("mp-cost").classList.add("hidden");
+                        document.getElementById("mp-cost-label").textContent = `MP Cost ${skill.costNum}`;
+                        break;
+                      default:
+                        document.getElementById("div-hp").classList.add("hidden");
+                        document.getElementById("div-mp").classList.add("hidden");             
+                      break;
+                    }
+                    updateFormulaDisplay();
+                  break;
               }
 
               document.getElementById("multivisor").addEventListener("input", updateFormulaDisplay);
@@ -2759,7 +2918,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 // Deduct HP and MP costs
                 currentPlayer.HP_Current = Math.max(currentPlayer.HP_Current - hpCost,0);
-                currentPlayer.MP_Current = Math.max(currentPlayer.HP_Current - mpCost,0);
+                currentPlayer.MP_Current = Math.max(currentPlayer.MP_Current - mpCost,0);
 
                 let result = 0;
                 let roll = 0;
@@ -2817,7 +2976,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   default:
                     termtext(`<anim:term-blue><color:yellow>Power Roll</color> Resulting in a total of <color:lightgreen>${result} Power</color>.\n`);
                     setTimeout(() => {
-                      playSound("sounds/Okay.mp3", 1);
+                      playSound("sounds/Saveting.mp3", 1);
                     }, 250);
                 }
 
@@ -2826,14 +2985,11 @@ document.addEventListener("DOMContentLoaded", () => {
                   player.id === currentPlayer.id ? currentPlayer : player,
                 );
                 setPlayers(updatedPlayers);
+                if (mode === "skill") { populatePartySlots(getPlayers(), getParty(), true); }
                 closeForm();
               });
-            } else {
-              playSound("sounds/Dead.mp3");
-              termtext(`<anim:term-red><color:red>ERROR!!!</color> Slot is empty.\n`);
-            }
-          });
-        });
+            
+          }
       break;
       case "config":
         formDisplay.innerHTML = `
@@ -3118,7 +3274,7 @@ document.addEventListener("DOMContentLoaded", () => {
               <div>
                 <label id="attack_basepow-label" for="attack_base_pow">Base Power
                 <select id="attack_base_pow" name="attack_base_pow" class="select select-xs form-input hover-sfx w-24" data-hoversound="sounds/cursor.mp3">
-                  <option value="0">None (0)</option>
+                  <option value="None">None (0)</option>
                   <option value="Melee">Melee Power</option>
                   <option value="Magic">Magic Power</option>
                   <option value="Ranged">Ranged Power</option>
@@ -3164,7 +3320,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div>
               <label id="basepow-label" for="base_pow">Base Power
               <select id="base_pow" name="base_pow" class="select select-xs form-input hover-sfx w-24" data-hoversound="sounds/cursor.mp3">
-                <option value="0">None (0)</option>
+                <option value="None">None (0)</option>
                 <option value="Melee">Melee Power</option>
                 <option value="Magic">Magic Power</option>
                 <option value="Ranged">Ranged Power</option>

@@ -29,20 +29,6 @@ if (!localStorage.getItem("skillComp")) {
             description: "Refer to Core Rulebook pg. 87", // These will be kept with placeholders refering to the rulebook so that the players can fill it themselves.
             rules: "X", // Used to distinguish between TC rules and X rules.
         },
-        {
-            id: "test", // Randomized, will be referenced by the skills array saved to each player.
-            name: "Stand Around", // Name of the Skill
-            type: "Passive", // Affects the image that will accompany the skill when listed,
-            costNum: 0, // The number of the CostType to spend. 
-            costType: "HP", // Refers to either HP, MP, CARD or FATE.
-            roll: "Passive", // or "Power" for skills with no TN, or "Passive" for skills that require no rolls.     
-            baseTN: "Magic", // The base TN stat to roll against.
-            basePower: "Magic", // The base Power stat to add.
-            bonusTN: 0, // The bonus value provided to the TN roll.
-            bonusPower: 10, // The bonus value provided to the power rolls.
-            description: "Refer to Core Rulebook pg. 87", // These will be kept with placeholders refering to the rulebook so that the players can fill it themselves.
-            rules: "X", // Used to distinguish between TC rules and X rules.
-        },
     ];
     localStorage.setItem("skillComp", JSON.stringify(skills));
 }
