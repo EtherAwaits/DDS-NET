@@ -149,77 +149,96 @@ document.addEventListener("DOMContentLoaded", () => {
       party = getParty();
       players = getPlayers();
       const partySlot = document.getElementById(`party-slot-${i}`);
+      if (!partySlot) {return;} // Return if no slots found
       const playerId = party[`slot${i}`];
       if (playerId) {
         const player = players.find((p) => p.id === playerId);
         if (player) {
+          // Check and update player status
+          if (player.Status !== "Dead" && player.HP_Current === 0) {
+            player.Status = "Dead";
+            playSound("sounds/Dead.mp3", 1);
+            termtext(`<anim:term-pulse><color:red>WARNING!!!</color> <color:blue>${player.Name}</color> has been <color:red>killed</color>.\n`);
+          } 
+          else if (player.Status === "Normal" && player.HP_Current <= player.HP_Max / 2) {
+            player.Status = "Low_HP";  
+            termtext(`<anim:term-shake><color:red>WARNING!!!</color> <color:blue>${player.Name}</color> is in critical condition.\n`);
+            playSound("sounds/Bark.mp3", 0.5);
+          } 
+          else if (player.Status === "Dead" && player.HP_Current > 0) {  
+            player.Status = player.HP_Current <= player.HP_Max / 2 ? "Low_HP": "Normal";
+            playSound("sounds/Raise.mp3", 1);
+            termtext(`<anim:term-green><color:blue>${player.Name}</color> has been <color:green>revived</color>.\n`);
+          } 
+          else if (player.Status === "Low_HP" && player.HP_Current > player.HP_Max / 2) {
+            player.Status = "Normal";
+            playSound("sounds/Heal.mp3", 1);
+            termtext(`<anim:term-bounce><color:blue>${player.Name}</color> is no longer in critical condition.\n`);
+          }
+
+          if (player.HP_Current <= player.HP_Max / 2)
+          {
+            document.getElementById(`party-slot-${i}`).classList.remove(`from-primary`);
+            document.getElementById(`party-slot-${i}`).classList.add(`from-red-600`);
+          }
+          setPlayers(players);
           let icon = `${player.Status}.png`;
-          if (player.HP_Current < player.HP_Max / 2 && player.Status !== "Dead") {
-            if (player.Status === "Normal") {
-              icon = "Low_Hp.png";
-            }
-			document.getElementById(`party-slot-${i}`).classList.remove(`from-primary`);
-			document.getElementById(`party-slot-${i}`).classList.add(`from-red-600`);
-          }
-          if (player.HP_Current === 0 || player.Status === "Dead") {
-            icon = "Dead.png";
-			player.Status = "Dead";
+        switch (player.Status) {
+          case 'Dead':
             document.getElementById(`party-slot-${i}`).classList.add("grayscale");
-          }
-		switch (player.Status)
-		{
-			case 'Bind':
-				document.getElementById(`party-slot-${i}`).classList.add(`bg-yellow-600`);
-			break;
-			case 'Charm':
-				document.getElementById(`party-slot-${i}`).classList.add(`bg-pink-600`);
-			break;
-			case 'Cursed':
-				document.getElementById(`party-slot-${i}`).classList.add(`bg-purple-600`);
-				document.getElementById(`party-slot-${i}`).classList.add("animate-pulse");
-			break;
-			case 'Fly':
-				document.getElementById(`party-slot-${i}`).classList.add(`bg-gray-600`);
-				document.getElementById(`party-slot-${i}`).classList.add("animate-spin");
-			break;
-			case 'Freeze':
-				document.getElementById(`party-slot-${i}`).classList.add(`bg-blue-600`);
-			break;
-			case 'Frog':
-				document.getElementById(`party-slot-${i}`).classList.add(`bg-lime-600`);
-				document.getElementById(`party-slot-${i}`).classList.add(`animate-bounce`);
-			break;
-			case 'Happy':
-				document.getElementById(`party-slot-${i}`).classList.add(`bg-yellow-600`);
-				document.getElementById(`party-slot-${i}`).classList.add(`animate-bounce`);
-			break;
-			case 'Mute':
-				document.getElementById(`party-slot-${i}`).classList.add(`bg-slate-600`);
-			break;
-			case 'Panic':
-				document.getElementById(`party-slot-${i}`).classList.add(`bg-violet-600`);
-				document.getElementById(`party-slot-${i}`).classList.add(`animate-bounce`);
-			break;
-			case 'Poison':
-				document.getElementById(`party-slot-${i}`).classList.add(`bg-purple-600`);
-				document.getElementById(`party-slot-${i}`).classList.add("animate-pulse");
-			break;
-			case 'Shock':
-				document.getElementById(`party-slot-${i}`).classList.add(`bg-yellow-600`);
-				document.getElementById(`party-slot-${i}`).classList.add(`animate-bounce`);
-			break;
-			case 'Sleep':
-				document.getElementById(`party-slot-${i}`).classList.add(`bg-slate-600`);
-				document.getElementById(`party-slot-${i}`).classList.add(`rotate-180`);
-			break;
-			case 'Stone':
-				document.getElementById(`party-slot-${i}`).classList.add(`bg-gray-600`);
-			break;
-			case 'Stun':
-				document.getElementById(`party-slot-${i}`).classList.add(`bg-cyan-600`);
-			break;
-			default:	
-		}
+            break;
+          case 'Bind':
+            document.getElementById(`party-slot-${i}`).classList.add(`bg-yellow-600`);
+          break;
+          case 'Charm':
+            document.getElementById(`party-slot-${i}`).classList.add(`bg-pink-600`);
+          break;
+          case 'Cursed':
+            document.getElementById(`party-slot-${i}`).classList.add(`bg-purple-600`);
+            document.getElementById(`party-slot-${i}`).classList.add("animate-pulse");
+          break;
+          case 'Fly':
+            document.getElementById(`party-slot-${i}`).classList.add(`bg-gray-600`);
+            document.getElementById(`party-slot-${i}`).classList.add("animate-spin");
+          break;
+          case 'Freeze':
+            document.getElementById(`party-slot-${i}`).classList.add(`bg-blue-600`);
+          break;
+          case 'Frog':
+            document.getElementById(`party-slot-${i}`).classList.add(`bg-lime-600`);
+            document.getElementById(`party-slot-${i}`).classList.add(`animate-bounce`);
+          break;
+          case 'Happy':
+            document.getElementById(`party-slot-${i}`).classList.add(`bg-yellow-600`);
+            document.getElementById(`party-slot-${i}`).classList.add(`animate-bounce`);
+          break;
+          case 'Mute':
+            document.getElementById(`party-slot-${i}`).classList.add(`bg-slate-600`);
+          break;
+          case 'Panic':
+            document.getElementById(`party-slot-${i}`).classList.add(`bg-violet-600`);
+            document.getElementById(`party-slot-${i}`).classList.add(`animate-bounce`);
+          break;
+          case 'Poison':
+            document.getElementById(`party-slot-${i}`).classList.add(`bg-purple-600`);
+            document.getElementById(`party-slot-${i}`).classList.add("animate-pulse");
+          break;
+          case 'Shock':
+            document.getElementById(`party-slot-${i}`).classList.add(`bg-yellow-600`);
+            document.getElementById(`party-slot-${i}`).classList.add(`animate-bounce`);
+          break;
+          case 'Sleep':
+            document.getElementById(`party-slot-${i}`).classList.add(`bg-slate-600`);
+            document.getElementById(`party-slot-${i}`).classList.add(`rotate-180`);
+          break;
+          case 'Stone':
+            document.getElementById(`party-slot-${i}`).classList.add(`bg-gray-600`);
+          break;
+          case 'Stun':
+            document.getElementById(`party-slot-${i}`).classList.add(`bg-cyan-600`);
+          break;
+          default:	
+        }
 			
     partySlot.innerHTML = `
 			<div class="flex justify-center gap-3 cursor-pointer click-sfx w-full h-full" data-clicksound="sounds/Okay.mp3" data-volume="0.5">
@@ -269,7 +288,8 @@ document.addEventListener("DOMContentLoaded", () => {
 				avatar.classList.remove("hidden");
 				}
 			}
-		  	displayPlayer();
+      
+		  displayPlayer();
       }
       } else {
         partySlot.innerHTML = `
@@ -281,6 +301,7 @@ document.addEventListener("DOMContentLoaded", () => {
       attachPartySlotClickEvents();
     }
   }
+
   populatePartySlots(getPlayers(), getParty());
   updateCornerDisplay();
 
@@ -392,9 +413,7 @@ document.addEventListener("DOMContentLoaded", () => {
       tab.classList.add("tab-button-selected");
 
       // Update the bottom display based on the selected tab
-      if (currentTab) {
-       // termtext("<color:yellow>Closing</color>.\n\n");
-      }
+      if (currentTab) {}
       playSound("sounds/Okay.mp3");
       currentTab = tabName;
       updateBottomDisplay(tabName);
@@ -702,21 +721,22 @@ document.addEventListener("DOMContentLoaded", () => {
 							<div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-volume="0.5" data-clicksound="sounds/Okay.mp3" id="creation-button">Character Creation</div>
 							<div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-volume="0.5" data-clicksound="sounds/Okay.mp3" id="rolling-button">Dice Rolling</div>
 							<div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-volume="0.5" data-clicksound="sounds/Okay.mp3" id="management-button">Party Management</div>
+              <div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-volume="0.5" data-clicksound="sounds/Okay.mp3" id="skill-button">Skill Management</div>
 							<div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-volume="0.5" data-clicksound="sounds/Okay.mp3" id="controls-button">Keyboard Controls</div>
 							<div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" id="cancel-button" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Negative.mp3" data-volume="0.5">Cancel</div>
 						</div>
 					</div>
 				`;
-		const support = document.getElementById("support-button");
+	    	const skill = document.getElementById("support-button");
+        if (skill) {
+          skill.addEventListener("click", () => {
+          termtext(`<color:yellow>Help</color> <b>Skill Management</b>.\nSkills are the main method of rolling on DDS-NET. While various presets exist under the "FIGHT" and "SKILLS" tabs. But instead of typing in the information yourself every time, you can create a skill in the skill compendium. Simply go to the Skill Compendium under "CHANGE" and create all the skills you need with your own copy of the Core Rulebook. Once created, these skills can be assigned to players under the "STATUS" tab.\n\n`);
+          });
+        }
+        const support = document.getElementById("about-button");
         if (support) {
           support.addEventListener("click", () => {
             termtext("<color:yellow>Help</color> <b>Support / Contribution</b>.\nIf you have any questions or feedback feel free to reach out to etherawaits on discord. If you wish to support my project, please consider helping me with my hosting costs. You can donate at <u>https://ko-fi.com/etherawaits</u>. This project is open source! You can contribute and peek inside the system at <u>https://github.com/EtherAwaits/DDS-NET</u>.\n\n");
-          });
-        }
-        const about = document.getElementById("about-button");
-        if (about) {
-          about.addEventListener("click", () => {
-            termtext("<color:yellow>Help</color> <b>About DDS-NET</b>.\nDDS-NET was created by <u>EtherAwaits</u> as a tool for party management and dice rolling for the Shin Megami Tensei TTRPG. The layout and style is inspired by the classic SNES games. Images and Sound effects are from Shin Megami Tensei as well as Final Fantasy 6. Skill icons created by <u>Q-Bit</u>.\n\n");
           });
         }
         const controls = document.getElementById("controls-button");
@@ -765,8 +785,8 @@ document.addEventListener("DOMContentLoaded", () => {
 					`;
         currentTab = null;
         populatePartySlots(getPlayers(), getParty());
-		termtext(`<color:green>DDS-NET@${user}</color>:<color:blue>~</color>$ \n`);
-		triggerLED('/led/online');
+        termtext(`<color:green>DDS-NET@${user}</color>:<color:blue>~</color>$ \n`);
+        triggerLED('/led/online');
     }
   }
   const formDisplay = document.getElementById("player-form");
@@ -794,7 +814,7 @@ document.addEventListener("DOMContentLoaded", () => {
 					<label>Status</label>  
 					<select id="form-status" class="select select-xs max-w-xs form-input hover-sfx" data-hoversound="sounds/cursor.mp3">  
 					   <option>Normal</option>  
-					   <option>Low_HP</option>  
+					   <option value="Low_HP">Low HP</option>  
 					   <option>Bind</option>  
 					   <option>Dead</option>  
 					   <option>Charm</option>  
@@ -813,7 +833,7 @@ document.addEventListener("DOMContentLoaded", () => {
 					</select>  
 			   
 				  <!-- Adjust Fate -->  
-					<label>Fate</label>  
+					<label id="fate-label">Fate</label>  
 					<div class="flex justify-start items-center space-x-2">  
 					   <button id="fate-decrease" class="btn form-input btn-xs btn-square hover-sfx" data-hoversound="sounds/cursor.mp3">-</button>  
 					   <span id="form-fate" class="mx-2">0</span>  
@@ -834,8 +854,14 @@ document.addEventListener("DOMContentLoaded", () => {
         updateFormValuesQuick(currentPlayer);
         let player = currentPlayer;
         compendium = getskillComp();
+        if (player.Fate_Max === 0) {
+          document.getElementById(`form-fate`).classList.add("hidden");
+          document.getElementById(`fate-increase`).classList.add("hidden");
+          document.getElementById(`fate-decrease`).classList.add("hidden");
+          document.getElementById(`fate-label`).classList.add("hidden");
+        }
         if (!player.skills) {
-          players = getPlayers();
+          let players = getPlayers();
           player = players.find((p) => p.id === player.id);
           player.skills = [];
           localStorage.setItem('players', JSON.stringify(players));
@@ -868,28 +894,156 @@ document.addEventListener("DOMContentLoaded", () => {
         compendium.forEach((skill) => {
           const skillButton = document.getElementById(`skill-${skill.id}`);
           if (skillButton) {
-            skillButton.addEventListener("click", () => {
-              useSkill(player.id, skill.id);
-            });
+            skillButton.addEventListener("click", () => { useSkill(player.id, skill.id); });
           }
         });
 
         // Implements the logic for using a skill
         function useSkill(playerId, skillId) {
+          const system = getSystem();
           const players = getPlayers();
           const player = players.find((p) => p.id === playerId);
           const skill = compendium.find((s) => s.id === skillId);
-          playSound("sounds/Okay.mp3");
-          termtext(`<color:blue>${player.Name}</color> used <color:purple>${skill.name}</color>.\n${skill.description}\n`);
+          
+          // Check if the skill cost can be paid
           if (skill.costType === "FATE") {
             if (player.Fate_Current - skill.costNum >= 0) {
               player.Fate_Current = Math.min(player.Fate_Max, Math.max(0, player.Fate_Current - skill.costNum));
-              console.log(player.Fate_Current);
-            } else {
-            playSound("sounds/Dead.mp3");
-            termtext(`<anim:term-red><color:red>ERROR </color><color:blue>${player.Name}</color> does not have enough Fate to use <color:purple>${skill.name}</color>.\n`);
+              setPlayers(players);
+            } 
+            else {
+              playSound("sounds/Dead.mp3");
+              termtext(`<anim:term-red><color:red>ERROR </color><color:blue>${player.Name}</color> does not have enough Fate to use <color:purple>${skill.name}</color>.\n`);
+              closeForm();
+              return;
             }
           }
+          if (skill.costType === "MP" && player.MP_Current - skill.costNum < 0) {
+            playSound("sounds/Dead.mp3");
+            termtext(`<anim:term-red><color:red>ERROR </color><color:blue>${player.Name}</color> does not have enough MP to use <color:purple>${skill.name}</color>.\n`);
+            closeForm();
+            return;
+          }
+          
+          // Check for status effects
+          if (player.Status === "Mute" && skill.costType === "MP") {
+            playSound("sounds/Dead.mp3");
+            termtext(`<anim:term-red><color:red>ERROR </color><color:blue>${player.Name}</color> can't cast <color:purple>${skill.name}</color> while <color:pink>${player.Status}</color>.\n`);
+            closeForm();
+            return;
+          }
+          if (player.Status === "Shock" || player.Status === "Freeze" || player.Status === "Happy" || player.Status === "Bind") {
+            playSound("sounds/Dead.mp3");
+            termtext(`<anim:term-red><color:red>ERROR </color><color:blue>${player.Name}</color> can't use <color:purple>${skill.name}</color> while having <color:pink>${player.Status}</color>.\n`);
+            closeForm();
+            return;
+          }
+          if (player.Status === "Stone" && system.rules === 0) {
+            playSound("sounds/Dead.mp3");
+            termtext(`<anim:term-red><color:red>ERROR </color><color:blue>${player.Name}</color> can't use <color:purple>${skill.name}</color> while <color:pink>${player.Status}</color>.\n`);
+            closeForm();
+            return;
+          }
+          if (player.Status === "Sleep") {
+            playSound("sounds/Bark.mp3");
+            let recovery = Number(player.Vitality) + Number(player.Level)
+            player.HP_Current = Math.min(player.HP_Max, Math.max(0, player.HP_Current + recovery));
+            player.MP_Current = Math.min(player.MP_Max, Math.max(0, player.MP_Current + recovery));
+            termtext(`<anim:term-red><color:red>ERROR </color><color:blue>${player.Name}</color> can't use <color:purple>${skill.name}</color> while having <color:pink>${player.Status}</color>.\n<anim:term-green><color:blue>${player.Name}</color> rested and gained <color:purple>${recovery}</color> HP & MP\n`);
+            setPlayers(players);
+            populatePartySlots(getPlayers(), getParty());
+            closeForm();
+            return;
+          }
+          if (player.Status === "Poison" && skill.baseTN !== "Dodge") {
+            let roll = Math.floor(Math.random() * 10) + 1;
+            player.HP_Current = Math.min(player.HP_Max, Math.max(0, player.HP_Current - roll));
+            termtext(`<anim:term-red><color:darkred>WARNING </color><color:blue>${player.Name}</color> took <color:purple>${roll}</color> damage from <color:pink>${player.Status}</color>.\n<anim:term-shake>Any damage dealt by <color:blue>${player.Name}</color> will be halved.\n`);
+            setPlayers(players);
+            populatePartySlots(getPlayers(), getParty());
+          }
+          if (player.Status === "Panic") {
+            let roll = Math.floor(Math.random() * 100) + 1;
+            if (roll <= 50) {
+              let roll2 = Math.floor(Math.random() * 5) + 1;
+              console.log(roll2)
+              playSound("sounds/Bark.mp3");
+              termtext(`<anim:term-red><color:darkred>WARNING </color><color:blue>${player.Name}</color> has a <color:pink>${player.Status}</color> with a roll of <color:purple>${roll}</color>.\n<anim:term-shake>Rolling Panic Table.\n`);
+              switch (roll2) {
+                case 1:
+                  let sub =  Math.floor(system.macca * .1);
+                  termtext(`<anim:term-shake><color:blue>${player.Name}</color> begins to throw away <color:purple>${sub}ћ</color>.\n`);
+                  system.macca = Math.floor(system.macca - sub);
+                  updateCornerDisplay();
+                  setSystem(system);
+                  break;
+                case 2:
+                  termtext(`<anim:term-shake><color:blue>${player.Name}</color> begins to zone out. No actions can be used.\n`);
+                  break;
+                case 3:
+                  termtext(`<anim:term-shake><color:blue>${player.Name}</color> begins an awkward conversation with the enemy.\n<i>Perform a Talk roll, if you fail the enemy makes an attack. Gain an item on a Critical roll.</i>\n`);
+                  break;
+                case 4:
+                  termtext(`<anim:term-shake><color:blue>${player.Name}</color> begins to suddenly <color:pink>Sleep</color>.\n`);
+                  player.Status = "Sleep";
+                  let players = getPlayers();
+                  setPlayers(players);
+                  updateFormValuesQuick(player.id);
+                  break;
+                case 5:
+                  termtext(`<anim:term-shake><color:blue>${player.Name}</color> begins to dance and twirl. Everyone is laughing at you.\n`);
+                  break;
+              }
+              switch (skill.costType) {
+                case "HP":
+                  player.HP_Current = Math.min(player.HP_Max, Math.max(0, player.HP_Current - skill.costNum));
+                break;
+                case "MP":
+                  player.MP_Current = Math.min(player.MP_Max, Math.max(0, player.MP_Current - skill.costNum));                 
+                break;
+                default:
+              } 
+              setPlayers(players);
+              populatePartySlots(getPlayers(), getParty());
+              closeForm();
+              return;
+            }
+            else {
+              termtext(`<anim:term-bounce><color:darkred>WARNING </color><color:blue>${player.Name}</color> has avoided a <color:pink>${player.Status}</color> with a roll of <color:purple>${roll}</color>.\n`);
+            }
+          }
+            if (player.Status === "Cursed") {
+              let roll = Math.floor(Math.random() * 100) + 1;
+              if (roll <= 30) {
+                playSound("sounds/Bossdeath.mp3", 1);
+                termtext(`<anim:term-red><color:darkred>WARNING </color><color:blue>${player.Name}</color> has suffered a horrible <color:pink>Curse</color> with a roll of <color:purple>${roll}</color>.\n<i>Something unfortunate happens...</i>\n`);
+                switch (skill.costType) {
+                  case "HP":
+                    player.HP_Current = Math.min(player.HP_Max, Math.max(0, player.HP_Current - skill.costNum));
+                  break;
+                  case "MP":
+                    player.MP_Current = Math.min(player.MP_Max, Math.max(0, player.MP_Current - skill.costNum));                 
+                  break;
+                  default:
+                } 
+                setPlayers(players);
+                populatePartySlots(getPlayers(), getParty());
+                closeForm();
+                return;
+              }
+              else {
+                termtext(`<anim:term-red><color:red>ERROR </color><color:blue>${player.Name}</color> has avoided a horrible <color:pink>Curse</color> with a roll of <color:purple>${roll}</color>.\n<i>Your safe for now...</i>\n`);
+              }
+            }
+          
+          if (player.HP_Current === 0) {
+            playSound("sounds/Dead.mp3");
+            termtext(`<anim:term-red><color:red>ERROR </color><color:blue>${player.Name}</color> can't use <color:purple>${skill.name}</color> while <color:pink>Dead</color>.\n`);
+            closeForm();
+            return;
+          }
+          playSound("sounds/Okay.mp3");
+          termtext(`<color:blue>${player.Name}</color> used <color:purple>${skill.name}</color>.\n${skill.description}\n`);
           switch (skill.roll) {
             case "Attack":
               openForm("tnroll", "skill", player.id, skill.id);
@@ -906,20 +1060,18 @@ document.addEventListener("DOMContentLoaded", () => {
                   player.HP_Current = Math.min(player.HP_Max, Math.max(0, player.HP_Current - skill.costNum));
                 break;
                 case "MP":
-                  player.MP_Current = Math.min(player.MP_Max, Math.max(0, player.MP_Current - skill.costNum));
-                  break;
+                  player.MP_Current = Math.min(player.MP_Max, Math.max(0, player.MP_Current - skill.costNum));                 
                 break;
                 default:
-              }
-              setPlayers(players);
-              populatePartySlots(getPlayers(), getParty());
+              } 
               closeForm();
             break;
-          }
-          
-          
+            default:  
+          } 
+          setPlayers(players);
+          populatePartySlots(getPlayers(), getParty());
         }
-
+        
       break;
       case "usercreation":
         termtext(`<color:yellow>Opening</color> User Creator.\n`);
@@ -1916,7 +2068,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         if (mode === "skill"){
-            roller(playerid);
+          roller(playerid);
         }
 
           function roller(playerId) {
@@ -2129,7 +2281,6 @@ document.addEventListener("DOMContentLoaded", () => {
                   document.getElementById("basetn-label").textContent = `Strength TN ${currentPlayer.STR_TN}%`;
                   document.getElementById("base_tn").classList.add("hidden");
                   document.getElementById("div-mp").classList.add("hidden");
-                  
                   break;
                 case "skill":
                   compendium = getskillComp();
@@ -2147,6 +2298,7 @@ document.addEventListener("DOMContentLoaded", () => {
                       baseTN = currentPlayer.STR_TN;
                       document.getElementById("base_tn").value = currentPlayer.STR_TN;
                       document.getElementById("basetn-label").textContent = `Strength TN ${currentPlayer.STR_TN}%`;
+                      break;
                     case "Magic":
                       baseTN = currentPlayer.MG_TN;
                       document.getElementById("base_tn").value = currentPlayer.MG_TN;
@@ -2200,9 +2352,9 @@ document.addEventListener("DOMContentLoaded", () => {
               }
 
               document.getElementById("multivisor").addEventListener("input", updateFormulaDisplay);
+
               formConfirmrd.addEventListener("click", () => {
                 let result = "Failure";
-                let party = getParty();
                 let players = getPlayers();
                 let system = getSystem();
 
@@ -2236,6 +2388,15 @@ document.addEventListener("DOMContentLoaded", () => {
                   finalTN = Math.floor(finalTN / multivisor);
                 }
 
+                if (mode === "skill" ) {
+                  let compendium = getskillComp();
+                  let skill = compendium.find((s) => s.id === skillid);
+                  if (skill.roll === "Attack" && finalTN > 25 && currentPlayer.Status === "Stun") {
+                    finalTN = 25;
+                    termtext(`<anim:term-shake><color:darkred>WARNING </color><color:blue>${currentPlayer.Name}</color> has <color:pink>Shock</color> causing TN to lower to <color:purple>25</color>.\n`);
+                  }
+                }
+
                 // Deduct HP and MP costs
                 currentPlayer.HP_Current = Math.max(currentPlayer.HP_Current - hpCost, 0);
                 currentPlayer.MP_Current = Math.max(currentPlayer.MP_Current - mpCost,0);
@@ -2243,7 +2404,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 // Perform dice roll
                 const roll = Math.floor(Math.random() * 100) + 1;
-
 
                 // Handle criticals and failures
                 if (roll >= 96 && roll <= 99) {
@@ -2268,72 +2428,79 @@ document.addEventListener("DOMContentLoaded", () => {
                     switch (mode) {
                       case "talk":
                         termtext(`<anim:term-red><color:Yellow>Talk Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> Conversation has fumbled, tensions have greatly increased.\n`);
-                        setTimeout(() => {
-                          playSound("sounds/Bossdeath.mp3", 1);
-                        }, 250);
+                        setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
                         break;
                       case "recover":
                         switch (rules) {
                           case "1":
                             termtext(`<anim:term-red><color:Yellow>Recovery Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> Recovery fumbled, <color:blue>${currentPlayer.Name}</color> doesn't feel so good.\n`);
-                            setTimeout(() => {
-                              playSound("sounds/Bossdeath.mp3", 1);
-                            }, 250);
+                            setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
                             break;
                           default:
                             termtext(`<anim:term-red><color:Yellow>Recovery Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> Recovery fumbled, <color:blue>${currentPlayer.Name}</color> doesn't feel so good, HP & MP are halved.\n`);
                             currentPlayer.HP_Current = Math.floor(currentPlayer.HP_Current / 2);
                             currentPlayer.MP_Current = Math.floor(currentPlayer.MP_Current / 2);
-                            setTimeout(() => {
-                              playSound("sounds/Bossdeath.mp3", 1);
-                            }, 250);
+                            setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
                         }
                         break;
                       case "surprise":
                         switch (rules) {
                           case "1":
                             termtext(`<anim:term-red><color:Yellow>Encounter Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> <color:blue>${currentPlayer.Name}</color> is surprised.\n`);
-                            setTimeout(() => {
-                              playSound("sounds/Bossdeath.mp3", 1);
-                            }, 250);
+                            setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
                             break;
                           default:
                             termtext(`<anim:term-red><color:Yellow>Encounter Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> <color:blue>${currentPlayer.Name}</color> is shocked! No power dice given in the Initiative roll.\n`);
                             currentPlayer.Status = "Shock";
-                            setTimeout(() => {
-                              playSound("sounds/Bossdeath.mp3", 1);
-                            }, 250);
+                            setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
                         }
                         break;
                       case "evade":
                         termtext(`<anim:term-red><color:Yellow>Evasion Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> Evasion fumbled, <color:blue>${currentPlayer.Name}</color> is wide open for attack.\n`);
-                        setTimeout(() => {
-                          playSound("sounds/Bossdeath.mp3", 1);
-                        }, 250);
+                        setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
                         break;
                       case "ranged":
                         termtext(`<anim:term-red><color:Yellow>Ranged Attack Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> Attack fumbled, <color:blue>${currentPlayer.Name}'s</color> fires wildly!\n`);
-                        setTimeout(() => {
-                          playSound("sounds/Bossdeath.mp3", 1);
-                        }, 250);
+                        setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
                         break;
                       case "magic":
                         termtext(`<anim:term-red><color:Yellow>Magic Attack Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> Attack fumbled, <color:blue>${currentPlayer.Name}'s</color> casts wildly!\n`);
-                        setTimeout(() => {
-                          playSound("sounds/Bossdeath.mp3", 1);
-                        }, 250);
+                        setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
                         break;
                       case "melee":
                         termtext(`<anim:term-red><color:Yellow>Melee Attack Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> Attack fumbled, <color:blue>${currentPlayer.Name}'s</color> swings wildly!\n`);
-                        setTimeout(() => {
-                          playSound("sounds/Bossdeath.mp3", 1);
-                        }, 250);
+                        setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
+                        break;
+                      case "skill":
+                        let compendium = getskillComp();
+                        let players = getPlayers();
+                        let player = players.find((p) => p.id === playerid);
+                        let skill = compendium.find((s) => s.id === skillid);
+                        switch (skill.baseTN) {
+                          case 'Strength':
+                            termtext(`<anim:term-red><color:Yellow>${skill.name}</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> Attack fumbled, <color:blue>${currentPlayer.Name}'s</color> swings wildly!\n`);
+                            setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1);}, 250);
+                            break;
+                          case 'Magic':
+                            termtext(`<anim:term-red><color:Yellow>${skill.name}</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> Attack fumbled, <color:blue>${currentPlayer.Name}'s</color> casts wildly!\n`);
+                            setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
+                            break;  
+                          case 'Agility':
+                            termtext(`<anim:term-red><color:Yellow>${skill.name}</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> Attack fumbled, <color:blue>${currentPlayer.Name}'s</color> fires wildly!\n`);
+                            setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
+                            break;
+                          case 'Talk':
+                            termtext(`<anim:term-red><color:Yellow>${skill.name}</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> Conversation has fumbled, tensions have greatly increased.\n`);
+                            setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
+                            break;
+                          default:
+                            termtext(`<anim:term-red><color:Yellow>${skill.name}</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n`);
+                            setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
+                        }
                         break;
                       default:
                         termtext(`<anim:term-red><color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n`);
-                        setTimeout(() => {
-                          playSound("sounds/Bossdeath.mp3", 1);
-                        }, 250);
+                        setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
                     }
                     if (rules === "1") {
                       termtext(`<anim:term-red><color:darkred>Warning</color> <color:blue>${currentPlayer.Name}</color> <color:gray>has been cursed.</color>\n`);
@@ -2344,249 +2511,281 @@ document.addEventListener("DOMContentLoaded", () => {
                     switch (mode) {
                       case "talk":
                         termtext(`<anim:term-red><color:Yellow>Talk Roll</color> <color:red>Automatic Fail!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:red>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-shake><color:red>Warning</color> talk has failed, tensions have increased.\n`);
-                        setTimeout(() => {
-                          playSound("sounds/Bark.mp3", 1);
-                        }, 250);
+                        setTimeout(() => { playSound("sounds/Bark.mp3", 1); }, 250);
                         break;
                       case "recover":
                         termtext(`<anim:term-red><color:Yellow>Recovery Roll</color> <color:red>Automatic Fail!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:red>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-shake><color:red>Warning</color> Recovery failed, <color:blue>${currentPlayer.Name}</color> doesn't feel so good.\n`);
-                        setTimeout(() => {
-                          playSound("sounds/Imp.mp3", 1);
-                        }, 250);
+                        setTimeout(() => { playSound("sounds/Imp.mp3", 1); }, 250);
                         break;
                       case "surprise":
                         switch (rules) {
                           case "1":
                             termtext(`<anim:term-red><color:Yellow>Encounter Roll</color> <color:red>Automatic Fail!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:red>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-shake><color:red>Warning</color> <color:blue>${currentPlayer.Name}</color> is caught by surprise.\n`);
-                            setTimeout(() => {
-                              playSound("sounds/Switch.mp3", 1);
-                            }, 250);
+                            setTimeout(() => { playSound("sounds/Switch.mp3", 1); }, 250);
                             break;
                           default:
                             termtext(`<anim:term-red><color:Yellow>Encounter Roll</color> <color:red>Automatic Fail!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:red>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-shake><color:red>Warning</color> <color:blue>${currentPlayer.Name}</color> is caught by surprise and shocked!\n`);
                             currentPlayer.Status = "Shock";
-                            setTimeout(() => {
-                              playSound("sounds/Switch.mp3", 1);
-                            }, 250);
+                            setTimeout(() => { playSound("sounds/Switch.mp3", 1); }, 250);
                         }
                         break;
                       case "evade":
                         termtext(`<anim:term-red><color:Yellow>Evasion Roll</color> <color:red>Automatic Fail!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:red>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-shake><color:red>Warning</color> Evasion failed, <color:blue>${currentPlayer.Name}</color> is unable to get out of the way.\n`);
-                        setTimeout(() => {
-                          playSound("sounds/Closebig.mp3", 1);
-                        }, 250);
+                        setTimeout(() => { playSound("sounds/Closebig.mp3", 1); }, 250);
                         break;
                       case "ranged":
                         termtext(`<anim:term-red><color:Yellow>Ranged Attack Roll</color> <color:red>Automatic Fail!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:red>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-shake>Attack failed, <color:blue>${currentPlayer.Name}'s</color> shot missed\n`);
-                        setTimeout(() => {
-                          playSound("sounds/Dirk.mp3", 1);
-                        }, 250);
+                        setTimeout(() => { playSound("sounds/Dirk.mp3", 1); }, 250);
                         break;
                       case "magic":
                         termtext(`<anim:term-red><color:Yellow>Magic Attack Roll</color> <color:red>Automatic Fail!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:red>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-shake>Attack failed, <color:blue>${currentPlayer.Name}'s</color> cast missed.\n`);
-                        setTimeout(() => {
-                          playSound("sounds/Zap.mp3", 1);
-                        }, 250);
+                        setTimeout(() => { playSound("sounds/Zap.mp3", 1); }, 250);
                         break;
                       case "melee":
                         termtext(`<anim:term-red><color:Yellow>Melee Attack Roll</color> <color:red>Automatic Fail!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:red>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-shake>Attack failed, <color:blue>${currentPlayer.Name}'s</color> swing missed.\n`);
-                        setTimeout(() => {
-                          playSound("sounds/Thief.mp3", 1);
-                        }, 250);
+                        setTimeout(() => { playSound("sounds/Thief.mp3", 1); }, 250);
+                        break;
+                      case "skill":
+                        let compendium = getskillComp();
+                        let players = getPlayers();
+                        let player = players.find((p) => p.id === playerid);
+                        let skill = compendium.find((s) => s.id === skillid);
+                        switch (skill.baseTN) {
+                          case 'Strength':
+                            termtext(`<anim:term-red><color:Yellow>${skill.name}</color> <color:red>Automatic Fail!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:red>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-shake>Attack failed, <color:blue>${currentPlayer.Name}'s</color> swing missed.\n`);
+                            setTimeout(() => { playSound("sounds/Thief.mp3", 1);}, 250);
+                            break;
+                          case 'Magic':
+                            termtext(`<anim:term-red><color:Yellow>${skill.name}</color> <color:red>Automatic Fail!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:red>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-shake>Attack failed, <color:blue>${currentPlayer.Name}'s</color> cast missed.\n`);
+                            setTimeout(() => { playSound("sounds/Zap.mp3", 1); }, 250);
+                            break;  
+                          case 'Agility':
+                            termtext(`<anim:term-red><color:Yellow>${skill.name}</color> <color:red>Automatic Fail!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:red>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-shake>Attack failed, <color:blue>${currentPlayer.Name}'s</color> shot missed\n`);
+                            setTimeout(() => { playSound("sounds/Dirk.mp3", 1); }, 250);
+                            break;
+                          case 'Talk':
+                            termtext(`<anim:term-red><color:Yellow>${skill.name}</color> <color:red>Automatic Fail!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:red>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-shake><color:red>Warning</color> talk has failed, tensions have increased.\n`);
+                            setTimeout(() => { playSound("sounds/Bark.mp3", 1); }, 250);
+                            break;
+                          default:
+                            termtext(`<anim:term-red><color:Yellow>${skill.name}</color> <color:red>Fail</color> <color:blue>${currentPlayer.Name}</color> rolled <color:red>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n`);
+                            setTimeout(() => { playSound("sounds/Closebig.mp3", 1); }, 250);
+                        }
                         break;
                       default:
                         termtext(`<anim:term-red><color:red> Automatic Fail</color> <color:blue>${currentPlayer.Name}</color> rolled <color:red>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n`);
-                        setTimeout(() => {
-                          playSound("sounds/Closebig.mp3", 1);
-                        }, 250);
+                        setTimeout(() => { playSound("sounds/Closebig.mp3", 1); }, 250);
                     }
                     break;
                   case "Failure":
                     switch (mode) {
                       case "talk":
                         termtext(`<anim:term-red><color:Yellow>Talk Roll</color> <color:red>Fail</color> <color:blue>${currentPlayer.Name}</color> rolled <color:red>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-shake><color:red>Warning</color> talk has failed, tensions have increased.\n`);
-                        setTimeout(() => {
-                          playSound("sounds/Bark.mp3", 1);
-                        }, 250);
+                        setTimeout(() => { playSound("sounds/Bark.mp3", 1); }, 250);
                         break;
                       case "recover":
                         termtext(`<anim:term-red><color:Yellow>Recovery Roll</color> <color:red>Fail</color> <color:blue>${currentPlayer.Name}</color> rolled <color:red>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-shake>Recovery failed, <color:blue>${currentPlayer.Name}</color> doesn't feel so good.\n`);
-                        setTimeout(() => {
-                          playSound("sounds/Imp.mp3", 1);
-                        }, 250);
+                        setTimeout(() => { playSound("sounds/Imp.mp3", 1); }, 250);
                         break;
                       case "surprise":
                         switch (rules) {
                           case "1":
                             termtext(`<anim:term-red><color:Yellow>Encounter Roll</color> <color:red>Fail</color> <color:blue>${currentPlayer.Name}</color> rolled <color:red>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-shake><color:red>Warning</color> <color:blue>${currentPlayer.Name}</color> is caught by surprise!\n`);
-                            setTimeout(() => {
-                              playSound("sounds/Switch.mp3", 1);
-                            }, 250);
+                            setTimeout(() => { playSound("sounds/Switch.mp3", 1); }, 250);
                             break;
                           default:
                             termtext(`<anim:term-red><color:Yellow>Encounter Roll</color> <color:red>Fail</color> <color:blue>${currentPlayer.Name}</color> rolled <color:red>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-shake><color:red>Warning</color> <color:blue>${currentPlayer.Name}</color> is caught by surprise and shocked!\n`);
                             currentPlayer.Status = "Shock";
-                            setTimeout(() => {
-                              playSound("sounds/Switch.mp3", 1);
-                            }, 250);
+                            setTimeout(() => { playSound("sounds/Switch.mp3", 1); }, 250);
                         }
                         break;
                       case "evade":
                         termtext(`<anim:term-red><color:Yellow>Evasion Roll</color> <color:red>Fail</color> <color:blue>${currentPlayer.Name}</color> rolled <color:red>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-shake><color:red>Warning</color> Evasion failed, <color:blue>${currentPlayer.Name}</color> is unable to get out of the way.\n`);
-                        setTimeout(() => {
-                          playSound("sounds/Closebig.mp3", 1);
-                        }, 250);
+                        setTimeout(() => { playSound("sounds/Closebig.mp3", 1); }, 250);
                         break;
                       case "ranged":
                         termtext(`<anim:term-red><color:Yellow>Ranged Attack Roll</color> <color:red>Fail</color> <color:blue>${currentPlayer.Name}</color> rolled <color:red>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-shake>Attack failed, <color:blue>${currentPlayer.Name}'s</color> shot missed\n`);
-                        setTimeout(() => {
-                          playSound("sounds/Dirk.mp3", 1);
-                        }, 250);
+                        setTimeout(() => { playSound("sounds/Dirk.mp3", 1); }, 250);
                         break;
                       case "magic":
                         termtext(`<anim:term-red><color:Yellow>Magic Attack Roll</color> <color:red>Fail</color> <color:blue>${currentPlayer.Name}</color> rolled <color:red>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-shake>Attack failed, <color:blue>${currentPlayer.Name}'s</color> cast missed.\n`);
-                        setTimeout(() => {
-                          playSound("sounds/Zap.mp3", 1);
-                        }, 250);
+                        setTimeout(() => { playSound("sounds/Zap.mp3", 1); }, 250);
                         break;
                       case "melee":
                         termtext(`<anim:term-red><color:Yellow>Melee Attack Roll</color> <color:red>Fail</color> <color:blue>${currentPlayer.Name}</color> rolled <color:red>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-shake>Attack failed, <color:blue>${currentPlayer.Name}'s</color> swing missed.\n`);
-                        setTimeout(() => {
-                          playSound("sounds/Thief.mp3", 1);
-                        }, 250);
+                        setTimeout(() => { playSound("sounds/Thief.mp3", 1); }, 250);
+                        break;
+                      case "skill":
+                        let compendium = getskillComp();
+                        let players = getPlayers();
+                        let player = players.find((p) => p.id === playerid);
+                        let skill = compendium.find((s) => s.id === skillid);
+                        switch (skill.baseTN) {
+                          case 'Strength':
+                            termtext(`<anim:term-red><color:Yellow>${skill.name}</color> <color:red>Fail</color> <color:blue>${currentPlayer.Name}</color> rolled <color:red>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-shake>Attack failed, <color:blue>${currentPlayer.Name}'s</color> swing missed.\n`);
+                            setTimeout(() => { playSound("sounds/Thief.mp3", 1);}, 250);
+                            break;
+                          case 'Magic':
+                            termtext(`<anim:term-red><color:Yellow>${skill.name}</color> <color:red>Fail</color> <color:blue>${currentPlayer.Name}</color> rolled <color:red>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-shake>Attack failed, <color:blue>${currentPlayer.Name}'s</color> cast missed.\n`);
+                            setTimeout(() => { playSound("sounds/Zap.mp3", 1); }, 250);
+                            break;  
+                          case 'Agility':
+                            termtext(`<anim:term-red><color:Yellow>${skill.name}</color> <color:red>Fail</color> <color:blue>${currentPlayer.Name}</color> rolled <color:red>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-shake>Attack failed, <color:blue>${currentPlayer.Name}'s</color> shot missed\n`);
+                            setTimeout(() => { playSound("sounds/Dirk.mp3", 1); }, 250);
+                            break;
+                          case 'Talk':
+                            termtext(`<anim:term-red><color:Yellow>${skill.name}</color> <color:red>Fail</color> <color:blue>${currentPlayer.Name}</color> rolled <color:red>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-shake><color:red>Warning</color> talk has failed, tensions have increased.\n`);
+                            setTimeout(() => { playSound("sounds/Bark.mp3", 1); }, 250);
+                            break;
+                          default:
+                            termtext(`<anim:term-red><color:Yellow>${skill.name}</color> <color:red>Fail</color> <color:blue>${currentPlayer.Name}</color> rolled <color:red>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n`);
+                            setTimeout(() => { playSound("sounds/Closebig.mp3", 1); }, 250);
+                        }
                         break;
                       default:
                         termtext(`<anim:term-red><color:red>Fail</color> <color:blue>${currentPlayer.Name}</color> rolled <color:red>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n`);
-                        setTimeout(() => {
-                          playSound("sounds/Closebig.mp3", 1);
-                        }, 250);
+                        setTimeout(() => { playSound("sounds/Closebig.mp3", 1); }, 250);
                     }
                     break;
                   case "Success":
                     switch (mode) {
                       case "talk":
                         termtext(`<anim:term-green><color:Yellow>Talk Roll</color> <color:green>Success!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:green>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-bounce>Talk succeeded, favor has increased by 1.\n`);
-                        setTimeout(() => {
-                          playSound("sounds/Ting.mp3", 1);
-                        }, 250);
+                        setTimeout(() => { playSound("sounds/Ting.mp3", 1); }, 250);
                         break;
                       case "recover":
                         termtext(`<anim:term-green><color:Yellow>Recovery Roll</color> <color:green>Success!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:green>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-bounce>${currentPlayer.Name} is feeling better.\n`);
                         currentPlayer.Status = "Normal";
-                        setTimeout(() => {
-                          playSound("sounds/Heal.mp3", 1);
-                        }, 250);
+                        setTimeout(() => { playSound("sounds/Heal.mp3", 1); }, 250);
                         break;
                       case "surprise":
                         termtext(`<anim:term-green><color:Yellow>Encounter Roll</color> <color:green>Success!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:green>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-bounce>${currentPlayer.Name} is prepared.\n`);
-                        setTimeout(() => {
-                          playSound("sounds/Ting.mp3", 1);
-                        }, 250);
+                        setTimeout(() => { playSound("sounds/Ting.mp3", 1); }, 250);
                         break;
                       case "evade":
                         termtext(`<anim:term-green><color:Yellow>Evasion Roll</color> <color:green>Success!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:green>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-bounce>${currentPlayer.Name} downgrades the attack.\n`);
-                        setTimeout(() => {
-                          playSound("sounds/RunAway.mp3", 1);
-                        }, 250);
+                        setTimeout(() => { playSound("sounds/RunAway.mp3", 1); }, 250);
                         break;
                       case "ranged":
                         termtext(`<anim:term-green><color:Yellow>Ranged Attack Roll</color> <color:green>Success!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:green>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-bounce>${currentPlayer.Name}'s shot is successful.\n`);
-                        setTimeout(() => {
-                          playSound("sounds/15Bolt3.mp3", 1);
-                        }, 250);
+                        setTimeout(() => { playSound("sounds/15Bolt3.mp3", 1); }, 250);
                         break;
                       case "magic":
                         termtext(`<anim:term-green><color:Yellow>Magic Attack Roll</color> <color:green>Success!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:green>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-bounce>${currentPlayer.Name}'s cast is successful.\n`);
-                        setTimeout(() => {
-                          playSound("sounds/Bolt.mp3", 1);
-                        }, 250);
+                        setTimeout(() => { playSound("sounds/Bolt.mp3", 1); }, 250);
                         break;
                       case "melee":
                         termtext(`<anim:term-green><color:Yellow>Melee Attack Roll</color> <color:green>Success!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:green>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-bounce>${currentPlayer.Name}'s swing is successful.\n`);
-                        setTimeout(() => {
-                          playSound("sounds/Slash.mp3", 1);
-                        }, 250);
+                        setTimeout(() => { playSound("sounds/Slash.mp3", 1); }, 250);
                         break;
-                      default:
-                        termtext(`<anim:term-green><color:green>Success!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:green>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n`);
-                        setTimeout(() => {
-                          playSound("sounds/Ting.mp3", 1);
-                        }, 250);
+                      case "skill":
                         let compendium = getskillComp();
                         let players = getPlayers();
                         let player = players.find((p) => p.id === playerid);
                         let skill = compendium.find((s) => s.id === skillid);
-                        if (skill.roll === "Attack") {
-                          openForm("proll", "skill", player.id, skill.id);
+                        switch (skill.baseTN) {
+                          case 'Strength':
+                            termtext(`<anim:term-green><color:Yellow>${skill.name}</color> <color:green>Success!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:green>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-bounce>${currentPlayer.Name}'s swing is successful.\n`);
+                            setTimeout(() => { playSound("sounds/Slash.mp3", 1);}, 250);
+                            break;
+                          case 'Magic':
+                            termtext(`<anim:term-green><color:Yellow>${skill.name}</color> <color:green>Success!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:green>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-bounce>${currentPlayer.Name}'s cast is successful.\n`);
+                            setTimeout(() => { playSound("sounds/Bolt.mp3", 1); }, 250);
+                            break;  
+                          case 'Agility':
+                            termtext(`<anim:term-green><color:Yellow>${skill.name}</color> <color:green>Success!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:green>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-bounce>${currentPlayer.Name}'s shot is successful.\n`);
+                            setTimeout(() => { playSound("sounds/15Bolt3.mp3", 1); }, 250);
+                            break;
+                          case 'Talk':
+                            termtext(`<anim:term-green><color:Yellow>${skill.name}</color> <color:green>Success!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:green>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-bounce>Talk succeeded, favor has increased by 1.\n`);
+                            setTimeout(() => { playSound("sounds/Ting.mp3", 1); }, 250);
+                            break;
+                          default:
+                            termtext(`<anim:term-green><color:Yellow>${skill.name}</color> <color:green>Success!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:green>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n`);
+                            setTimeout(() => { playSound("sounds/Ting.mp3", 1); }, 250);
                         }
+                        console.log(`${skill.roll} `);
+                        if (skill.roll === "Attack") {
+                          console.log(`Running `);
+                          setTimeout(() => { openForm("proll", "skill", player.id, skill.id); }, 750);
+                        }
+                        break;
+                      default:
+                        termtext(`<anim:term-green><color:green>Success!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:green>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n`);
+                        setTimeout(() => { playSound("sounds/Ting.mp3", 1); }, 250);
                     }
                     break;
                   case "Critical Success":
                     switch (mode) {
                       case "talk":
                         termtext(`<anim:term-green><color:Yellow>Talk Roll</color> <color:lightgreen>Critical Success!!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:lightgreen>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-bounce>Talk succeeded, favor has greatly increased.\n`);
-                        setTimeout(() => {
-                          playSound("sounds/Saveting.mp3", 1);
-                        }, 250);
+                        setTimeout(() => { playSound("sounds/Saveting.mp3", 1); }, 250);
                         break;
                       case "recover":
                         termtext(`<anim:term-green><color:Yellow>Recovery Roll</color> <color:lightgreen>Critical Success!!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:lightgreen>${roll}%</color> with <color:purple>${finalTN}% TN</color>\n<anim:term-bounce>${currentPlayer.Name} is feeling great!\n`);
                         currentPlayer.Status = "Normal";
-                        setTimeout(() => {
-                          playSound("sounds/Saveting.mp3", 1);
-                        }, 250);
+                        setTimeout(() => { playSound("sounds/Saveting.mp3", 1); }, 250);
                         break;
                       case "surprise":
                         switch (rules) {
                           case "1":
                             termtext(`<anim:term-green><color:Yellow>Encounter Roll</color> <color:lightgreen>Critical Success!!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:lightgreen>${roll}%</color> with <color:purple>${finalTN}% TN</color>\n<anim:term-bounce>${currentPlayer.Name} is ready for anything.\n`);
-                            setTimeout(() => {
-                              playSound("sounds/Saveting.mp3", 1);
-                            }, 250);
+                            setTimeout(() => { playSound("sounds/Saveting.mp3", 1); }, 250);
                             break;
                           default:
                             termtext(`<anim:term-green><color:Yellow>Encounter Roll</color> <color:lightgreen>Critical Success!!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:lightgreen>${roll}%</color> with <color:purple>${finalTN}% TN</color>\n<anim:term-bounce>${currentPlayer.Name} is ready for anything (<color:lightgreen>+2d10</color> to Initiative).\n`);
-                            setTimeout(() => {
-                              playSound("sounds/Saveting.mp3", 1);
-                            }, 250);
+                            setTimeout(() => { playSound("sounds/Saveting.mp3", 1); }, 250);
                         }
                         break;
                       case "evade":
                         termtext(`<anim:term-green><color:Yellow>Evasion Roll</color> <color:lightgreen>Critical Success!!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:lightgreen>${roll}%</color> with <color:purple>${finalTN}% TN</color>\n<anim:term-bounce>${currentPlayer.Name} evades all attacks!\n`);
-                        setTimeout(() => {
-                          playSound("sounds/Saveting.mp3", 1);
-                        }, 250);
+                        setTimeout(() => { playSound("sounds/Saveting.mp3", 1); }, 250);
                         break;
                       case "ranged":
-                        termtext(`<anim:term-green><color:Yellow>Talk Roll</color> <color:lightgreen>Critical Success!!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:lightgreen>${roll}%</color> with <color:purple>${finalTN}% TN</color>\n<anim:term-bounce>${currentPlayer.Name}'s shot is critical, power is doubled and ignores resistance!\n`);
-                        setTimeout(() => {
-                          playSound("sounds/Deathtoll.mp3", 1);
-                        }, 250);
+                        termtext(`<anim:term-green><color:Yellow>Ranged Attack Roll</color> <color:lightgreen>Critical Success!!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:lightgreen>${roll}%</color> with <color:purple>${finalTN}% TN</color>\n<anim:term-bounce>${currentPlayer.Name}'s shot is critical, power is doubled and ignores resistance!\n`);
+                        setTimeout(() => { playSound("sounds/Deathtoll.mp3", 1); }, 250);
                         break;
                       case "magic":
                         termtext(`<anim:term-green><color:Yellow>Magic Attack Roll</color> <color:lightgreen>Critical Success!!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:lightgreen>${roll}%</color> with <color:purple>${finalTN}% TN</color>\n<anim:term-bounce>${currentPlayer.Name}'s cast is critical, power is doubled and ignores resistance!\n`);
-                        setTimeout(() => {
-                          playSound("sounds/Dragon.mp3", 1);
-                        }, 250);
+                        setTimeout(() => { playSound("sounds/Dragon.mp3", 1); }, 250);
                         break;
                       case "melee":
                         termtext(`<anim:term-green><color:Yellow>Melee Attack Roll</color> <color:lightgreen>Critical Success!!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:lightgreen>${roll}%</color> with <color:purple>${finalTN}% TN</color>\n<anim:term-bounce>${currentPlayer.Name}'s swing is critical, damage is doubled and ignores resistance!\n`);
-                        setTimeout(() => {
-                          playSound("sounds/Fighting.mp3", 1);
-                        }, 250);
+                        setTimeout(() => { playSound("sounds/Fighting.mp3", 1); }, 250);
                         break;
-                      default:
-                        termtext(`<anim:term-green><color:lightgreen>Critical Success!!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:lightgreen>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n`);
-                        setTimeout(() => {
-                          playSound("sounds/Saveting.mp3", 1);
-                        }, 250);
+                      case "skill":
                         let compendium = getskillComp();
                         let players = getPlayers();
                         let player = players.find((p) => p.id === playerid);
                         let skill = compendium.find((s) => s.id === skillid);
-                        if (skill.roll === "Attack") {
-                          openForm("proll", "skill", player.id, skill.id);
+                        switch (skill.baseTN) {
+                          case 'Strength':
+                            termtext(`<anim:term-green><color:Yellow>${skill.name}</color> <color:lightgreen>Critical Success!!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:lightgreen>${roll}%</color> with <color:purple>${finalTN}% TN</color>\n<anim:term-bounce>${currentPlayer.Name}'s swing is critical, damage is doubled and ignores resistance!\n`);
+                            setTimeout(() => { playSound("sounds/Fighting.mp3", 1);}, 250);
+                            break;
+                          case 'Magic':
+                            termtext(`<anim:term-green><color:Yellow>${skill.name}</color> <color:lightgreen>Critical Success!!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:lightgreen>${roll}%</color> with <color:purple>${finalTN}% TN</color>\n<anim:term-bounce>${currentPlayer.Name}'s cast is critical, power is doubled and ignores resistance!\n`);
+                            setTimeout(() => { playSound("sounds/Dragon.mp3", 1);}, 250);
+                            break;  
+                          case 'Agility':
+                            termtext(`<anim:term-green><color:Yellow>${skill.name}</color> <color:lightgreen>Critical Success!!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:lightgreen>${roll}%</color> with <color:purple>${finalTN}% TN</color>\n<anim:term-bounce>${currentPlayer.Name}'s shot is critical, power is doubled and ignores resistance!\n`);
+                            setTimeout(() => { playSound("sounds/Deathtoll.mp3", 1);}, 250);
+                            break;
+                          case 'Talk':
+                            termtext(`<anim:term-green><color:Yellow>${skill.name}</color> <color:lightgreen>Critical Success!!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:lightgreen>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-bounce>Talk succeeded, favor has greatly increased.\n`);
+                            setTimeout(() => { playSound("sounds/Saveting.mp3", 1); }, 250);
+                            break;
+                          default:
+                            termtext(`<anim:term-green><color:Yellow>${skill.name}</color> <color:lightgreen>Critical Success!!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:lightgreen>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n`);
+                            setTimeout(() => { playSound("sounds/Saveting.mp3", 1);}, 250);
                         }
+                        if (skill.roll === "Attack") {
+                          setTimeout(() => { openForm("proll", "skill", player.id, skill.id); }, 750);
+                        }
+                        break;
+                      default:
+                        termtext(`<anim:term-green><color:lightgreen>Critical Success!!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:lightgreen>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n`);
+                        setTimeout(() => { playSound("sounds/Saveting.mp3", 1);}, 250);
                     }
                 }
                 
@@ -2599,11 +2798,8 @@ document.addEventListener("DOMContentLoaded", () => {
                   player.id === currentPlayer.id ? currentPlayer : player,
                 );
                 setPlayers(updatedPlayers);
-
-                if (mode === "skill") { populatePartySlots(getPlayers(), getParty()); 
-                  if (skill.roll !== "Attack" || (result !== "Success" && result !== "Critical Success")) {closeForm();}
-                }
-                else{closeForm();}
+                populatePartySlots(getPlayers(), getParty());
+                closeForm();
               });
   
             }
@@ -2670,9 +2866,9 @@ document.addEventListener("DOMContentLoaded", () => {
           });
         });
 
-      if (mode === "skill"){
-        rollerp(playerid);
-      }
+        if (mode === "skill"){
+          rollerp(playerid);
+        }
 
           function rollerp(playerId) {
               let players = getPlayers();
@@ -2688,12 +2884,7 @@ document.addEventListener("DOMContentLoaded", () => {
               let criticalBonus = false;
 
               const updateFormulaDisplay = () => {
-                let modifiedTN = baseTN + bonus;
-                if (modifier === "Multiply") {
-                  modifiedTN *= document.getElementById("multivisor").value || 1;
-                } else if (modifier === "Divide") {
-                  modifiedTN /= document.getElementById("multivisor").value || 1;
-                }
+                let modifiedTN = Number(baseTN) + Number(bonus);
                 let formula = `Base (${baseTN}) + Bonus (${bonus})`;
                 document.getElementById("multivisor").classList.add("hidden");
                 formula += ` = <strong>${Math.floor(modifiedTN)}</strong> + ${dice}d10 Power`;
@@ -2852,6 +3043,7 @@ document.addEventListener("DOMContentLoaded", () => {
                       baseTN = currentPlayer.Melee_Power;
                       document.getElementById("base_tn").value = currentPlayer.Melee_Power;
                       document.getElementById("basetn-label").textContent = `Melee Power ${currentPlayer.Melee_Power}`;
+                      break;
                     case "Magic":
                       baseTN = currentPlayer.Magic_Power;
                       document.getElementById("base_tn").value = currentPlayer.Magic_Power;
@@ -2868,23 +3060,29 @@ document.addEventListener("DOMContentLoaded", () => {
                       document.getElementById("basetn-label").textContent = `Initiative ${currentPlayer.Initiative}`;
                       break;
                   }
-                    switch (skill.costType) {
-                      case "HP":
-                        document.getElementById("div-mp").classList.add("hidden");
-                        document.getElementById("hp-cost").value = skill.costNum;
-                        document.getElementById("hp-cost").classList.add("hidden");
-                        document.getElementById("hp-cost-label").textContent = `HP Cost ${skill.costNum}`;
+                    if (skill.roll !== "Attack") {
+                      switch (skill.costType) {
+                        case "HP":
+                          document.getElementById("div-mp").classList.add("hidden");
+                          document.getElementById("hp-cost").value = skill.costNum;
+                          document.getElementById("hp-cost").classList.add("hidden");
+                          document.getElementById("hp-cost-label").textContent = `HP Cost ${skill.costNum}`;
+                          break;
+                        case "MP":
+                          document.getElementById("div-hp").classList.add("hidden");
+                          document.getElementById("mp-cost").value = skill.costNum;
+                          document.getElementById("mp-cost").classList.add("hidden");
+                          document.getElementById("mp-cost-label").textContent = `MP Cost ${skill.costNum}`;
+                          break;
+                        default:
+                          document.getElementById("div-hp").classList.add("hidden");
+                          document.getElementById("div-mp").classList.add("hidden");             
                         break;
-                      case "MP":
-                        document.getElementById("div-hp").classList.add("hidden");
-                        document.getElementById("mp-cost").value = skill.costNum;
-                        document.getElementById("mp-cost").classList.add("hidden");
-                        document.getElementById("mp-cost-label").textContent = `MP Cost ${skill.costNum}`;
-                        break;
-                      default:
-                        document.getElementById("div-hp").classList.add("hidden");
-                        document.getElementById("div-mp").classList.add("hidden");             
-                      break;
+                      }
+                    }
+                    else {
+                      document.getElementById("div-hp").classList.add("hidden");
+                      document.getElementById("div-mp").classList.add("hidden");
                     }
                     updateFormulaDisplay();
                   break;
@@ -2892,8 +3090,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
               document.getElementById("multivisor").addEventListener("input", updateFormulaDisplay);
               formConfirmrrd.addEventListener("click", () => {
-                const party = getParty();
-                const players = getPlayers();
+                let players = getPlayers();
 
                 if (!currentPlayer) {
                   console.error("No player selected!");
@@ -2932,7 +3129,6 @@ document.addEventListener("DOMContentLoaded", () => {
                   } else {
                     termtext(`<anim:term-bounce><color:blue>${currentPlayer.Name}</color> rolled a <color:green>${roll}</color>.\n`);
                   }
-
                   dice--;
                 }
                 result = Number(result) + Number(finalTN);
@@ -2949,35 +3145,46 @@ document.addEventListener("DOMContentLoaded", () => {
                 switch (mode) {
                   case "initiative":
                     termtext(`<anim:term-blue><color:yellow>Initiative Roll</color> Resulting in a total initiative of <color:lightgreen>${result} Power</color>.\n`);
-                    setTimeout(() => {
-                      playSound("sounds/Boots.mp3", 1);
-                    }, 250);
-
+                    setTimeout(() => { playSound("sounds/Boots.mp3", 1); }, 250);
                     break;
                   case "rangedp":
                     termtext(`<anim:term-blue><color:yellow>Ranged Power Roll</color> Resulting in a total ranged attack of <color:lightgreen>${result} Power</color>.\n`);
-                    setTimeout(() => {
-                      playSound("sounds/15Bolt3.mp3", 1);
-                    }, 250);
+                    setTimeout(() => { playSound("sounds/15Bolt3.mp3", 1); }, 250);
                     break;
                   case "magicp":
                     termtext(`<anim:term-blue><color:yellow>Magic Power Roll</color> Resulting in a total magic attack of <color:lightgreen>${result} Power</color>.\n`);
-                    setTimeout(() => {
-                      playSound("sounds/Bolt.mp3", 1);
-                    }, 250);
+                    setTimeout(() => { playSound("sounds/Bolt.mp3", 1); }, 250);
                     break;
-
                   case "meleep":
                     termtext(`<anim:term-blue><color:yellow>Melee Power Roll</color> Resulting in a total melee attack of <color:lightgreen>${result} Power</color>.\n`);
-                    setTimeout(() => {
-                      playSound("sounds/Slash.mp3", 1);
-                    }, 250);
+                    setTimeout(() => { playSound("sounds/Slash.mp3", 1); }, 250);
+                    break;
+                  case "skill":
+                    let compendium = getskillComp();
+                    let players = getPlayers();
+                    let player = players.find((p) => p.id === playerid);
+                    let skill = compendium.find((s) => s.id === skillid);
+                    switch (skill.baseTN) {
+                      case "Melee":
+                        termtext(`<anim:term-blue><color:yellow>${skill.name}</color> Resulting in a total melee attack of <color:lightgreen>${result} Power</color>.\n`);
+                        setTimeout(() => { playSound("sounds/Slash.mp3", 1); }, 250);
+                      break;
+                      case "Magic":
+                        termtext(`<anim:term-blue><color:yellow>${skill.name}</color> Resulting in a total magic attack of <color:lightgreen>${result} Power</color>.\n`);
+                        setTimeout(() => { playSound("sounds/Bolt.mp3", 1); }, 250);
+                      break;
+                      case "Ranged":
+                        termtext(`<anim:term-blue><color:yellow>${skill.name}</color> Resulting in a total ranged attack of <color:lightgreen>${result} Power</color>.\n`);
+                        setTimeout(() => { playSound("sounds/15Bolt3.mp3", 1); }, 250);
+                      break;
+                      default:
+                        termtext(`<anim:term-blue><color:yellow>${skill.name}</color> Resulting in a total of <color:lightgreen>${result} Power</color>.\n`);
+                        setTimeout(() => { playSound("sounds/Saveting.mp3", 1); }, 250);
+                    }
                     break;
                   default:
                     termtext(`<anim:term-blue><color:yellow>Power Roll</color> Resulting in a total of <color:lightgreen>${result} Power</color>.\n`);
-                    setTimeout(() => {
-                      playSound("sounds/Saveting.mp3", 1);
-                    }, 250);
+                    setTimeout(() => { playSound("sounds/Saveting.mp3", 1); }, 250);
                 }
 
                 // Update players data in localStorage
@@ -3191,7 +3398,7 @@ document.addEventListener("DOMContentLoaded", () => {
               description: "Describe the skill here.",
               baseTN: "None",
               bonusTN: 0,
-              basePower: 0,
+              basePower: "None",
               bonusPower: 0,
               roll: "Attack"
             };
@@ -3204,7 +3411,7 @@ document.addEventListener("DOMContentLoaded", () => {
               <h2 class="text-center font-bold mb-4">Edit Skill</h2>
               <div class="grid grid-cols-2 gap-2 place-items-start">
           <div>
-            <label for="skill-name">Skill Name</label>
+            <label for="skill-name">Name</label>
             <input class="input form-input hover-sfx" type="text" id="skill-name" data-hoversound="sounds/cursor.mp3" value="${skill.name}" required>
           </div>
               
@@ -3230,7 +3437,7 @@ document.addEventListener("DOMContentLoaded", () => {
           </label>
           </div>
           <div>
-            <label for="skill-cost">Skill Cost</label>
+            <label for="skill-cost">Cost #</label>
             <input class="input form-input w-16 hover-sfx" type="number" id="skill-cost" data-hoversound="sounds/cursor.mp3" value="${skill.costNum}" required>
           </div>
           <div>
@@ -3250,7 +3457,7 @@ document.addEventListener("DOMContentLoaded", () => {
            <div role="tablist" class="tabs tabs-bordered">
             <input type="radio" name="rollType" value="Attack" role="tab" class="tab" aria-label="Attack (TN & POW)">
             <div role="tabpanel" class="tab-content p-2">
-            <p class="text-center text-sm">Performs a TN roll, followed by a Power roll on success.</p><br>
+            <p class="text-center text-sm">TN roll, followed by a Power roll on success</p><br>
             <div class="grid grid-cols-2 gap-2 place-items-end">
               <div>
                 <label id="attack_basetn-label" for="attack_base_tn">Base TN
@@ -3332,18 +3539,16 @@ document.addEventListener("DOMContentLoaded", () => {
               <label for="bonus_pow">Bonus Power</label>
               <input class="input form-input w-16 hover-sfx" type="number" id="bonus_pow" data-hoversound="sounds/cursor.mp3" value="">
             </div>
-                
                 </div>
-
               </div>
 
               <input type="radio" name="rollType" value="Passive" role="tab" class="tab" aria-label="None (Auto)">
-              <div role="tabpanel" class="tab-content p-2">No Roll Needed</div>
+              <div role="tabpanel" class="tab-content p-2">No roll needed</div>
             </div>
           </fieldset>        
 
           <div>
-              <label for="skill-description">Skill Description</label>
+              <label for="skill-description">Description</label>
               <textarea class="textarea form-input w-full hover-sfx" id="skill-description" data-hoversound="sounds/cursor.mp3" required>${skill.description}</textarea>
             </div>
           <div class="w-full justify-center gap-6 p-4 flex">
@@ -3354,7 +3559,7 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
           `;
           // Loading Values
-          document.getElementById("skill-type").value = skill.type;
+          
           document.getElementById("skill-cost-type").value = skill.costType;
           document.getElementById("attack_base_tn").value = skill.baseTN;
           document.getElementById("attack_bonus_tn").value = skill.bonusTN;
@@ -3364,6 +3569,7 @@ document.addEventListener("DOMContentLoaded", () => {
           document.getElementById("bonus_tn").value = skill.bonusTN;
           document.getElementById("base_pow").value = skill.basePower;
           document.getElementById("bonus_pow").value = skill.bonusPower;
+          document.getElementById("skill-type").value = skill.type;
           const rollTypeInput = document.querySelector(`input[name="rollType"][value="${skill.roll}"]`);
           if (rollTypeInput) {
             rollTypeInput.checked = true;
@@ -3385,28 +3591,28 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             switch (skill.roll) {
               case "Attack":
-          skill.baseTN = document.getElementById("attack_base_tn").value;
-          skill.bonusTN = document.getElementById("attack_bonus_tn").value;
-          skill.basePower = document.getElementById("attack_base_pow").value;
-          skill.bonusPower = document.getElementById("attack_bonus_pow").value;
+                skill.baseTN = document.getElementById("attack_base_tn").value;
+                skill.bonusTN = document.getElementById("attack_bonus_tn").value;
+                skill.basePower = document.getElementById("attack_base_pow").value;
+                skill.bonusPower = document.getElementById("attack_bonus_pow").value;
               break;
               case "TN":
-          skill.baseTN = document.getElementById("base_tn").value;
-          skill.bonusTN = document.getElementById("bonus_tn").value;
-          skill.basePower = 0;
-          skill.bonusPower = 0;
+                skill.baseTN = document.getElementById("base_tn").value;
+                skill.bonusTN = document.getElementById("bonus_tn").value;
+                skill.basePower = 0;
+                skill.bonusPower = 0;
               break;
               case "Power":
-          skill.basePower = document.getElementById("base_pow").value;
-          skill.bonusPower = document.getElementById("bonus_pow").value;
-          skill.baseTN = 0;
-          skill.bonusTN = 0;
+                skill.basePower = document.getElementById("base_pow").value;
+                skill.bonusPower = document.getElementById("bonus_pow").value;
+                skill.baseTN = 0;
+                skill.bonusTN = 0;
               break;
               case "Passive":
-          skill.basePower = 0;
-          skill.bonusPower = 0;
-          skill.baseTN = 0;
-          skill.bonusTN = 0;
+                skill.basePower = 0;
+                skill.bonusPower = 0;
+                skill.baseTN = 0;
+                skill.bonusTN = 0;
             }
             localStorage.setItem('skillComp', JSON.stringify(compendium));
             termtext(`<anim:term-blue><color:green>Success</color> <color:purple>${skill.name}</color> has been updated.\n`);
@@ -3680,34 +3886,6 @@ document.addEventListener("DOMContentLoaded", () => {
         currentPlayer.MP_Current = Math.min(currentPlayer.MP_Max, Math.max(0, currentPlayer.MP_Current - formMP.value));
         currentPlayer.Status = formStatus.value;
 
-        // Check and update player status
-        if (currentPlayer.Status !== "Dead" && currentPlayer.HP_Current === 0) {
-          playSound("sounds/Dead.mp3", 1);
-          currentPlayer.Status = "Dead";
-          termtext(`<anim:term-pulse> <color:red>WARNING!!!</color> <color:blue>${currentPlayer.Name}</color> has been <color:red>killed</color>.\n`);
-        } else if (
-          currentPlayer.Status === "Normal" &&
-          currentPlayer.HP_Current <= currentPlayer.HP_Max / 2
-        ) {
-          playSound("sounds/Attack.mp3", 0.5);
-          currentPlayer.Status = "Low_HP";
-          termtext(`<anim:term-shake><color:red>WARNING!!!</color> <color:blue>${currentPlayer.Name}</color> is in critical condition.\n`);
-        } else if (
-          currentPlayer.Status === "Dead" &&
-          currentPlayer.HP_Current > 0
-        ) {
-          playSound("sounds/Raise.mp3", 1);
-          termtext(`<anim:term-green><color:blue>${currentPlayer.Name}</color> has been <color:green>revived</color>.\n`);
-          currentPlayer.Status = currentPlayer.HP_Current <= currentPlayer.HP_Max / 2 ? "Low_HP": "Normal";
-        } else if (
-          currentPlayer.Status === "Low_HP" &&
-          currentPlayer.HP_Current > currentPlayer.HP_Max / 2
-        ) {
-          playSound("sounds/Heal.mp3", 1);
-          termtext(`<anim:term-bounce><color:blue>${currentPlayer.Name}</color> is no longer in critical condition.\n`);
-          currentPlayer.Status = "Normal";
-        }
-
         // Save updated players to local storage
         const updatedPlayers = players.map((player) => player.id === currentPlayer.id ? currentPlayer : player);
         setPlayers(updatedPlayers);
@@ -3786,18 +3964,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const currentPartyIndex = partySlotsArray.indexOf(focusedPartySlot);
 
     if (isFormActive) {
-      const formElements = Array.from(
-        activeForm.querySelectorAll(
-          "input, button, select, textarea, [tabindex]:not([tabindex='-1'])",
-        ),
-      );
+      const formElements = Array.from(activeForm.querySelectorAll("input, button, select, textarea, [tabindex]:not([tabindex='-1'])"));
 
       const focusableElements = formElements.filter((el) => {
-        return (
-          el.offsetParent !== null &&
-          !el.classList.contains("hidden") &&
-          el.getAttribute("tabindex") !== "-1"
-        );
+        return (el.offsetParent !== null && !el.classList.contains("hidden") && el.getAttribute("tabindex") !== "-1");
       });
 
       // Focus trap logic for the form

@@ -1,7 +1,7 @@
 const MAX_LINES = 50; // Maximum number of visible lines. Keep low for low perfomance systems
 const queue = []; // Message queue
 const terminal = document.getElementById('terminal');
-const typespeed = 10;
+const typespeed = 8;
 
 let currentLine = document.createElement('div'); // Current line container
 const cursor = document.createElement('span'); // Typing cursor
