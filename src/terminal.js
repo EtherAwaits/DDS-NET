@@ -69,7 +69,7 @@ function typechar(message, index, callback) {
     }
     // Handle tabs
     else if (message[index] === '\t') {
-      const tab = document.createTextNode('\u00A0\u00A0\u00A0\u00A0'); // Four spaces for tab
+      const tab = document.createTextNode('\u00A0\u00A0'); // Four spaces for tab
       currentLine.insertBefore(tab, cursor); // Insert tab before the cursor
       index++; // Move past the tab
     }
@@ -104,6 +104,21 @@ function typechar(message, index, callback) {
       if (endTag !== -1) {
         animationClass = message.substring(index + 6, endTag); // Extract animation class
         index = endTag + 1; // Move past the animation tag
+      }
+    } else if (message.startsWith('<link:', index)) {
+      const endLink = message.indexOf(',', index) + 1;
+      const endTag = message.indexOf('>', index);
+      if (endTag !== -1) {
+        const link = message.substring(index + 6, endLink - 1); // Extract link
+        const span = document.createElement('a');
+        span.style.textDecoration = 'underline';
+        span.target = '_blank'; // Open link in a new tab
+        span.style.color = 'blue'; // Set link color
+        span.href = link; // Set the link
+        span.className = 'link'; 
+        span.textContent = message.substring(endLink, endTag); // Set the text content to the link
+        currentLine.insertBefore(span, cursor); // Add link to the current line
+        index = endTag + 1; // Move past the link tag
       }
     }
     // Handle regular characters
@@ -148,4 +163,4 @@ if (!localStorage.getItem("system")) {
   system = JSON.parse(localStorage.getItem("system")).username;
 }
 // Bootup message
-termtext(`RESET:\n\tSEI\n\tCLC\n\tXCE\n\tCLD\n\n\tX16\n\tM8\n\n\tLDX\t#1FFFH\n\tTXS\n\tSTZ\tNMITIME\n\tLDA\t#BLANKING\n\tSTA\tINIDSP\n\n\tBJSR\tATLUS\n\n\t'EL ELOHIM ELOHO ELOHIM SEBAOTH'\n\t'ELION EIECH ADIER EIECH ADONAI'\n\t'JAH SADAI TETRAGRAMMATON SADAI'\n\t'AGIOS O THEOS ISCHIROS ATHANATOS'\n\t'AGLA AMEN'\n\n<anim:term-blue><color:yellow>Connecting</color> to DDS-NET...<color:green> Complete</color>.\nWelcome <color:blue>${system}</color>, input command...\n\n<color:green>DDS-NET@${system}</color>:<color:blue>~</color>$\n`);
+termtext(`RESET:\n\t\t\t\tSEI\n\t\t\t\tCLC\n\t\t\t\tXCE\n\t\t\t\tCLD\n\n\t\t\t\tX16\n\t\t\t\tM8\n\n\t\t\t\tLDX\t #1FFFH\n\t\t\t\tTXS\n\t\t\t\tSTZ\t NMITIME\n\t\t\t\tLDA\t #BLANKING\n\t\t\t\tSTA\t INIDSP\n\n\t\t\t\tBJSR\tATLUS\n\t\t\t\t _____\t_____\t _____\n\t\t\t\t|\t__ \\|\t__ \\ / ____|\n\t\t\t\t| |\t| | |\t| | (___\n\t\t\t\t| |\t| | |\t| |\\___ \\\n\t\t\t\t| |__| | |__| |____) |\n\t\t\t\t|_____/|_____/|_____/\n\t\t\t\t| \\ | |\t____|__\t __|\n\t\t\t\t|\t\\| | |__\t\t | |\n\t\t\t\t| . \` |\t__|\t\t| |\n\t\t\t\t| |\\\t| |____\t | |\n\t\t\t\t|_| \\_|______|\t|_|\n\n\n<anim:term-blue><color:yellow>Connecting</color> to DDS-NET...<color:green> Complete</color>.\nWelcome <color:blue>${system}</color>, input command...\n\n<color:green>DDS-NET@${system}</color>:<color:blue>~</color>$\n`);

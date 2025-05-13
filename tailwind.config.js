@@ -2,7 +2,6 @@
 module.exports = {
 	content: [
 	`./src/*.{html,js}`,
-	`./src-cpr/*.{html,js}`
 	],
 	theme: {
     extend: {},

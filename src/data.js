@@ -40,6 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
         MP_Current: 36,
         Fate_Max: 0,
         Fate_Current: 0,
+        skills:["electric-01","healing-01"],
       },
       {
         id: "675d0675edf082e1619b55dc",
@@ -69,6 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
         MP_Current: 18,
         Fate_Max: 6,
         Fate_Current: 6,
+        skills:["weapon-03","fire-01"],
       },
     ];
 
@@ -116,16 +118,81 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("Initialized 'system' in localStorage.");
   }
 
+    // Check if 'players' key exists in localStorage
+    if (!localStorage.getItem("userComp")) {
+      // Set one example compendium user.
+      const defaultPlayers = [
+        {
+          id: "675d0a6e255a537876729d15",
+          Name: "Fairy Jack Frost",
+          Type: "Demon",
+          Level: 5,
+          Strength: 5,
+          Magic: 7,
+          Vitality: 5,
+          Agility: 6,
+          Luck: 7,
+          STR_TN: 30,
+          MG_TN: 40,
+          VT_TN: 30,
+          AG_TN: 35,
+          LK_TN: 40,
+          Melee_Power: 10,
+          Ranged_Power: 6,
+          Magic_Power: 12,
+          Initiative: 5,
+          Dodge_TN: 16,
+          Talk_TN: 34,
+          HP_Max: 60,
+          MP_Max: 36,
+          Fate_Max: 0,
+          skills:["ice-01","healing-01"],
+        },
+        {
+          id: "675d3a6e255a567836776d15",
+          Name: "Best Cait Sith",
+          Type: "Demon",
+          Level: 5,
+          Strength: 6,
+          Magic: 7,
+          Vitality: 5,
+          Agility: 7,
+          Luck: 4,
+          STR_TN: 35,
+          MG_TN: 40,
+          VT_TN: 30,
+          AG_TN: 40,
+          LK_TN: 25,
+          Melee_Power: 11,
+          Ranged_Power: 6,
+          Magic_Power: 12,
+          Initiative: 6,
+          Dodge_TN: 17,
+          Talk_TN: 28,
+          HP_Max: 60,
+          MP_Max: 36,
+          Fate_Max: 0,
+          skills:["buff-01","healing-01"],
+        },
+      ];
+  
+      // Store the userComp array in localStorage
+      localStorage.setItem("userComp", JSON.stringify(defaultPlayers));
+      console.log("Initialized 'userComp' in localStorage.");
+    }
+
   // Centralized Retrieval
   const getParty = () => JSON.parse(localStorage.getItem("party")) || {}; // const party = getParty();
   const getPlayers = () => JSON.parse(localStorage.getItem("players")) || []; // const players = getPlayers();
   const getSystem = () => JSON.parse(localStorage.getItem("system")) || []; // const system = getSystem();
   const getskillComp = () => JSON.parse(localStorage.getItem("skillComp")) || []; // const skillsCompendium = getskillsCompendium();
+  const getuserComp = () => JSON.parse(localStorage.getItem("userComp")) || []; // const userCompendium = getuserCompendium();
   //Centralized Updates
   const setParty = (party) => localStorage.setItem("party", JSON.stringify(party));
   const setPlayers = (players) => localStorage.setItem("players", JSON.stringify(players));
   const setSystem = (system) => localStorage.setItem("system", JSON.stringify(system));
 	const setskillComp = (skillComp) => localStorage.setItem("skillComp", JSON.stringify(skillsComp));
+  const setuserComp = (userComp) => localStorage.setItem("userComp", JSON.stringify(userComp));
 
   const sys = getSystem();
   const user = sys.username;
@@ -307,15 +374,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const cornerdisplay = document.getElementById("corner-display");
   const playerForm = document.getElementById("player-form");
-  const formPlayerName = document.getElementById("form-player-name");
-  const formHP = document.getElementById("form-hp");
-  const formMP = document.getElementById("form-mp");
-  const formFate = document.getElementById("form-fate");
-  const formStatus = document.getElementById("form-status");
-  const fateIncrease = document.getElementById("fate-increase");
-  const fateDecrease = document.getElementById("fate-decrease");
-  const formCancel = document.getElementById("form-cancel");
-  const formConfirm = document.getElementById("form-confirm");
 
   if (cornerdisplay) {
     cornerdisplay.addEventListener("click", () => {
@@ -346,8 +404,6 @@ document.addEventListener("DOMContentLoaded", () => {
 		// Add the 'closing' class to trigger the animation
 		formElement.classList.add("closing");
 		currentPlayer = null;
-		let formCancel = document.getElementById(null);
-		let formConfirm = document.getElementById(null);
 		const partySlots = document.querySelectorAll(".party-member");
 		partySlots.forEach((slot) => {
 		  slot.classList.remove("party-member-selected");
@@ -641,7 +697,6 @@ document.addEventListener("DOMContentLoaded", () => {
 						<div class="menu card grid grid-cols-2 gap-2 flex bg-gradient-to-b shadow-lg from-slate-950 to- bg-#000 p-4 w-full text-white rounded-md bg-opacity-50 shadow-primary/50">
 							<div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-volume="0.5" data-clicksound="sounds/Okay.mp3" id="edituser-button">Edit User</div>
 						  <div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-volume="0.5" data-clicksound="sounds/Okay.mp3" id="assign-button">Assign Skills</div>
-							<!-- <div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-volume="0.5" data-clicksound="sounds/Okay.mp3">Import Users (WIP)</div> -->
 							<div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-volume="0.5" data-clicksound="sounds/Okay.mp3" id="help-button">Help</div>
 							<div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" id="cancel-button" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Negative.mp3" data-volume="0.5">Cancel</div>
 						</div>
@@ -680,15 +735,22 @@ document.addEventListener("DOMContentLoaded", () => {
 						<div class="menu card grid grid-cols-2 gap-2 flex bg-gradient-to-b shadow-lg from-slate-950 to- bg-#000 p-4 w-full text-white rounded-md bg-opacity-50 shadow-primary/50">
 							<div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-volume="0.5" data-clicksound="sounds/Okay.mp3" id="reorder-button">Party Order</div>
 							<div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-volume="0.5" data-clicksound="sounds/Okay.mp3" id="skillcomp-button">Skill Compendium</div>
-							<div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-volume="0.5" data-clicksound="sounds/Okay.mp3" id="config-button">Config</div>
-							<div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" id="cancel-button" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Negative.mp3" data-volume="0.5">Cancel</div>
+              <div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-volume="0.5" data-clicksound="sounds/Okay.mp3" id="config-button">Config</div>
+							<div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-volume="0.5" data-clicksound="sounds/Okay.mp3" id="usercomp-button">User Compendium</div>
+              <div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" id="cancel-button" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Negative.mp3" data-volume="0.5">Cancel</div>
 						</div>
 					</div>
 				`;
+        const usercomp = document.getElementById("usercomp-button");
         const reorder = document.getElementById("reorder-button");
         const skillcomp = document.getElementById("skillcomp-button");
         const cancel5 = document.getElementById("cancel-button");
         const config = document.getElementById("config-button");
+        if (usercomp) {
+          usercomp.addEventListener("click", () => {
+            openForm("usercomp");
+          });
+        }
         if (skillcomp) {
           skillcomp.addEventListener("click", () => {
             openForm("skillcomp");
@@ -789,7 +851,6 @@ document.addEventListener("DOMContentLoaded", () => {
         triggerLED('/led/online');
     }
   }
-  const formDisplay = document.getElementById("player-form");
 
   function updateFormDisplay(formName, mode = null, playerid = null, skillid = null) {
     const formDisplay = document.getElementById("player-form");
@@ -1144,15 +1205,23 @@ document.addEventListener("DOMContentLoaded", () => {
 					
 					<div class="flex justify-center space-x-12 mt-4 p-2">
 						<input class="btn btn-sm btn-square form-input hover-sfx click-sfx" type="submit" id="form-cancel" value="X" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Negative.mp3">
-						<input class="btn btn-sm btn-square form-input hover-sfx" type="submit" id="form-confirm" value="✔" data-hoversound="sounds/cursor.mp3">
+						<input class="btn btn-sm form-input hover-sfx" type="submit" id="form-confirm" value="Create User" data-hoversound="sounds/cursor.mp3">
+            <input class="btn btn-sm form-input hover-sfx" type="submit" id="form-comp" value="Create Compendium User" data-hoversound="sounds/cursor.mp3">
 					</div>
 				`;
 
         let formCancel = document.getElementById("form-cancel");
-        let formConfirm = document.getElementById("form-confirm");
         formCancel.addEventListener("click", closeForm);
 
         document.getElementById("form-confirm").addEventListener("click", function (event) {
+          createuser("stock");
+        });
+
+        document.getElementById("form-comp").addEventListener("click", function (event) {
+          createuser("comp");
+        })
+
+        function createuser(mode) {
             event.preventDefault(); // Prevent default form submission behavior
 
             // Helper function to validate numeric inputs
@@ -1213,9 +1282,11 @@ document.addEventListener("DOMContentLoaded", () => {
               return id;
             };
 
+            new_id = generateId();
+
             // Create player object
             const player = {
-              id: generateId(),
+              id: new_id,
               Name: formElements.Name,
               Type: formElements.Type,
               Level: parseInt(formElements.Level),
@@ -1242,25 +1313,48 @@ document.addEventListener("DOMContentLoaded", () => {
               MP_Current: parseInt(formElements.MP_Max), // Match Max
               Fate_Max: parseInt(formElements.Fate_Max),
               Fate_Current: parseInt(formElements.Fate_Max), // Match Max
+              skills: [],
+            };
+            
+            const compPlayer = {
+              id: new_id,
+              Name: formElements.Name,
+              Type: formElements.Type,
+              Level: parseInt(formElements.Level),
+              Strength: parseInt(formElements.Strength),
+              Magic: parseInt(formElements.Magic),
+              Vitality: parseInt(formElements.Vitality),
+              Agility: parseInt(formElements.Agility),
+              Luck: parseInt(formElements.Luck),
+              STR_TN: parseInt(formElements.STR_TN),
+              MG_TN: parseInt(formElements.MG_TN),
+              VT_TN: parseInt(formElements.VT_TN),
+              AG_TN: parseInt(formElements.AG_TN),
+              LK_TN: parseInt(formElements.LK_TN),
+              Melee_Power: parseInt(formElements.Melee_Power),
+              Ranged_Power: parseInt(formElements.Ranged_Power),
+              Magic_Power: parseInt(formElements.Magic_Power),
+              Initiative: parseInt(formElements.Initiative),
+              Dodge_TN: parseInt(formElements.Dodge_TN),
+              Talk_TN: parseInt(formElements.Talk_TN),
+              HP_Max: parseInt(formElements.HP_Max),
+              MP_Max: parseInt(formElements.MP_Max),
+              Fate_Max: parseInt(formElements.Fate_Max),
+              skills: [],
             };
 
             // Retrieve existing players from local storage
             const players = getPlayers();
-
-            // Add the new player to the array
-            players.push(player);
-
-            // Save the updated players array back to local storage
-            setPlayers(players);
-            
+            const userComp = getuserComp();
             playerimage = document.getElementById("playerImage");
+
             if (playerimage.value !== "")
             {
               const file = playerimage.files[0];
               
               if(file.type.match('image.*'))
               {
-                saveImageToIndexedDB(player.id, file);
+                saveImageToIndexedDB(new_id, file);
               }
               else
               {
@@ -1269,11 +1363,26 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
               }
             }
+
+            if (mode === "stock") {
+              // Add the new player to the array
+              players.push(player);
+              // Save the updated players array back to local storage
+              setPlayers(players);
+              playSound("sounds/Comp.mp3");
+              termtext(`<anim:term-blue><color:green>Success!</color> User <color:blue>${formElements.Name}</color> has been registered.\n`);
+            }
+            else {
+              // Add the new player to the array
+              userComp.push(compPlayer);
+              // Save the updated usercomp array back to local storage
+              setuserComp(userComp);
+              playSound("sounds/Comp.mp3");
+              termtext(`<anim:term-blue><color:green>Success!</color> User <color:blue>${formElements.Name}</color> has been registered to the Compendium.\n`);
+            }
             
-            playSound("sounds/Comp.mp3");
-            termtext(`<anim:term-blue><color:green>Success!</color> User <color:blue>${formElements.Name}</color> has been registered.\n`);
             closeForm();
-          });
+          }
       break;
       case "summonuser":
         termtext(`<color:yellow>Opening</color> Summoning Program.\n`);
@@ -1481,12 +1590,14 @@ document.addEventListener("DOMContentLoaded", () => {
           localStorage.removeItem("party");
           localStorage.removeItem("system");
           localStorage.removeItem("skillComp");
+          localStorage.removeItem("userComp");
           location.reload();
         }
       break;
       case "edituser":
         termtext(`<color:yellow>Opening</color> User Editor.\n`);
         // Initialize form display
+        
         formDisplay.innerHTML = `
 					<div class="form text-xs text-white text-bold p-4 max-w-[640px] max-w-none bg-gradient-to-b from-secondary to- shadow-lg shadow-secondary/50  motion-reduced">  
 						<h2 class="text-center font-bold text-lg mb-4">Edit User</h2>
@@ -1496,16 +1607,17 @@ document.addEventListener("DOMContentLoaded", () => {
 						<div id="user-form-content" class="hidden"></div>
 						<div class="flex justify-center space-x-12 mt-4 p-2">
 							<input class="btn btn-sm btn-square form-input hover-sfx click-sfx" type="button" id="form-cancel" value="X" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Negative.mp3">
-							<input class="btn btn-sm btn-square form-input hover-sfx hidden" type="submit" id="form-confirm" value="✔" data-hoversound="sounds/cursor.mp3">
+							<input class="btn btn-sm form-input hover-sfx hidden" type="submit" id="form-confirm" value="Update User" data-hoversound="sounds/cursor.mp3">
+              <input class="btn btn-sm form-input hover-sfx hidden" type="submit" id="form-copy" value="Copy to Compendium" data-hoversound="sounds/cursor.mp3">
 						</div>
 					</div>
 				`;
 
         const playerSelect = document.getElementById("player-select-inclusive");
-        const userFormContent = document.getElementById("user-form-content");
         const formCancellllll = document.getElementById("form-cancel");
-        const formconfirmm = document.getElementById("form-confirm");
         formCancellllll.addEventListener("click", closeForm);
+
+        if (playerid === null) {
         // Function to populate the dropdown
         const updatePlayerDropdowninclusive = () => {
           const party = getParty(); // Retrieve party details
@@ -1521,15 +1633,30 @@ document.addEventListener("DOMContentLoaded", () => {
           });
         };
 
+        // Populate the dropdown on initialization
+        updatePlayerDropdowninclusive();
+
         // Event listener for dropdown selection
         playerSelect.addEventListener("change", (event) => {
           const selectedId = event.target.value;
-
           if (selectedId) {
+            editmode(selectedId);
+          }
+        });
+      }
+      else {
+        editmode(playerid);
+      }
+          function editmode(selectedId) {
             // Display the rest of the form once a user is selected
+            const playerSelect = document.getElementById("player-select-inclusive");
+            const userFormContent = document.getElementById("user-form-content");
+            const formconfirmm = document.getElementById("form-confirm");
+            const formcopy = document.getElementById("form-copy");
             playerSelect.classList.add("hidden");
             userFormContent.classList.remove("hidden");
-            formconfirmm.classList.remove("hidden");
+            formcopy.classList.remove("hidden");
+
             userFormContent.innerHTML = `
 							<div class="grid grid-cols-2 gap-2> 
 								<label for="Name">Edit Username:</label>  
@@ -1543,7 +1670,7 @@ document.addEventListener("DOMContentLoaded", () => {
 									<option value="Demon">Demon</option>  
 									<option value="Other">Other</option> 
 								</select>
-							<label for="Status">Status</label>  
+							<label for="Status" id="status-label">Status</label>  
 							<select id="Status" name="Type" class="select select-xs form-input hover-sfx w-20" data-hoversound="sounds/cursor.mp3">  
 							   <option>Normal</option>  
 							   <option>Low_HP</option>  
@@ -1569,15 +1696,15 @@ document.addEventListener("DOMContentLoaded", () => {
 							<input class="input form-input w-20 hover-sfx" type="number" id="Initiative" name="Initiative" min="0" data-hoversound="sounds/cursor.mp3" required>
 							<label for="HP_Max">Max HP:</label>  
 							<input class="input form-input w-20 hover-sfx" type="number" id="HP_Max" name="HP_Max" min="0" data-hoversound="sounds/cursor.mp3" required>
-							<label for="HP_Current">Current HP:</label>  
+							<label for="HP_Current" id="hp-label">Current HP:</label>  
 							<input class="input form-input w-20 hover-sfx" type="number" id="HP_Current" name="HP_Current" min="0" data-hoversound="sounds/cursor.mp3" required>  
 							<label for="MP_Max">Max MP:</label>  
 							<input class="input form-input w-20 hover-sfx" type="number" id="MP_Max" name="MP_Max" min="0" data-hoversound="sounds/cursor.mp3" required>  
-							<label for="MP_Current">Current MP:</label>  
+							<label for="MP_Current" id="mp-label">Current MP:</label>  
 							<input class="input form-input w-20 hover-sfx" type="number" id="MP_Current" name="MP_Current" min="0" data-hoversound="sounds/cursor.mp3" required>  
 							<label for="Fate_Max">Max Fate:</label>  
 							<input class="input form-input w-20 hover-sfx" type="number" id="Fate_Max" name="Fate_Max" min="0" data-hoversound="sounds/cursor.mp3" required>
-							<label for="Fate_Current">Current Fate:</label>  
+							<label for="Fate_Current" id="fate-label">Current Fate:</label>  
 							<input class="input form-input w-20 hover-sfx" type="number" id="Fate_Current" name="Fate_Current" min="0" data-hoversound="sounds/cursor.mp3" required>
 							
 							<label for="Strength">Strength:</label>				
@@ -1618,11 +1745,27 @@ document.addEventListener("DOMContentLoaded", () => {
 							<label for="playerImage">Edit Avatar:</label>
 							<input class="file-input form-input file-input-sm hover-sfx" type="file" id="playerImage" data-hoversound="sounds/cursor.mp3">
 							<input class="btn btn-sm form-input hover-sfx click-sfx" type="button" id="image-remove" value="Remove" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
-
 							</div>
 		      	`;
+
+            if (mode !== "copy") {
+              formconfirmm.classList.remove("hidden");
+            } else {
+              document.getElementById("HP_Current").classList.add("hidden");
+              document.getElementById("MP_Current").classList.add("hidden");
+              document.getElementById("Fate_Current").classList.add("hidden");
+              document.getElementById("Status").classList.add("hidden");
+              document.getElementById("hp-label").classList.add("hidden");
+              document.getElementById("mp-label").classList.add("hidden");
+              document.getElementById("fate-label").classList.add("hidden");
+              document.getElementById("status-label").classList.add("hidden");
+            }
+
             const players = getPlayers();
-            let currentPlayer = players.find((p) => p.id === selectedId);
+            const userComp = getuserComp();
+            const playersearch = mode === "copy" ? userComp : players;
+            
+            let currentPlayer = playersearch.find((p) => p.id === selectedId);
 
             document.getElementById("Name").value = currentPlayer.Name;
             document.getElementById("Type").value = currentPlayer.Type;
@@ -1659,10 +1802,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Function to update a player's data
             formconfirmm.addEventListener("click", (event) => {
+              edituser("edit");
+            });
+            
+            // Function to copy a player's data to the compendium
+            formcopy.addEventListener("click", (event) => {
+              edituser("copy");
+            });
+
+            function edituser(save) {
               const formElements = {
                 Name: document.getElementById("Name").value.trim(),
                 Type: document.getElementById("Type").value,
-                Status: document.getElementById("Status").value, //
+                Status: document.getElementById("Status").value, 
                 Level: document.getElementById("Level").value,
                 Strength: document.getElementById("Strength").value,
                 Magic: document.getElementById("Magic").value,
@@ -1688,7 +1840,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 Talk_TN: document.getElementById("Talk_TN").value,
               };
 
-              const parseValue = (value) => !isNaN(value) && value.trim() !== "" ? parseInt(value, 10) : 0;
               // Helper function to validate numeric inputs
               const validateNumber = (value, min, max) => {
                 const num = parseInt(value);
@@ -1723,6 +1874,34 @@ document.addEventListener("DOMContentLoaded", () => {
                 MP_Current: parseInt(formElements.MP_Current), 
                 Fate_Max: parseInt(formElements.Fate_Max),
                 Fate_Current: parseInt(formElements.Fate_Current), 
+                skills: currentPlayer.skills,
+              };
+
+              const compSave = {
+                id: currentPlayer.id,
+                Name: formElements.Name,
+                Type: formElements.Type,
+                Level: parseInt(formElements.Level),
+                Strength: parseInt(formElements.Strength),
+                Magic: parseInt(formElements.Magic),
+                Vitality: parseInt(formElements.Vitality),
+                Agility: parseInt(formElements.Agility),
+                Luck: parseInt(formElements.Luck),
+                STR_TN: parseInt(formElements.STR_TN),
+                MG_TN: parseInt(formElements.MG_TN),
+                VT_TN: parseInt(formElements.VT_TN),
+                AG_TN: parseInt(formElements.AG_TN),
+                LK_TN: parseInt(formElements.LK_TN),
+                Melee_Power: parseInt(formElements.Melee_Power),
+                Ranged_Power: parseInt(formElements.Ranged_Power),
+                Magic_Power: parseInt(formElements.Magic_Power),
+                Initiative: parseInt(formElements.Initiative),
+                Dodge_TN: parseInt(formElements.Dodge_TN),
+                Talk_TN: parseInt(formElements.Talk_TN),
+                HP_Max: parseInt(formElements.HP_Max),
+                MP_Max: parseInt(formElements.MP_Max),
+                Fate_Max: parseInt(formElements.Fate_Max),
+                skills: currentPlayer.skills,
               };
 
               player.HP_Current = Math.min(player.HP_Max, player.HP_Current);
@@ -1732,56 +1911,82 @@ document.addEventListener("DOMContentLoaded", () => {
               document.getElementById("MP_Current").value = player.MP_Current; 
               document.getElementById("Fate_Current").value = player.Fate_Current; 
 
-              const index = players.findIndex((p) => p.id === currentPlayer.id);
-              if (index === -1) return console.error("Player not found!");
+              
 
               if (formElements.Name === "") {
                 playSound("sounds/Dead.mp3");
                 termtext(`<anim:term-red><color:red>ERROR!!!</color> Missing Name for user.\n`);
                 return;
               }
-              for (const [key, value] of Object.entries(formElements)) {
-                if (key !== "Name" && key !== "Type" && key !== "Status") {
-                  if (!validateNumber(value, 0, 9999)) {
-                    playSound("sounds/Dead.mp3");
-                    termtext(`<anim:term-red><color:red>ERROR!!!</color> ${key} must be between 0-9999.\n`);
-                    return;
+
+              if (mode !== "copy") {
+                for (const [key, value] of Object.entries(formElements)) {
+                  if (key !== "Name" && key !== "Type" && key !== "Status") {
+                    if (!validateNumber(value, 0, 9999)) {
+                      playSound("sounds/Dead.mp3");
+                      termtext(`<anim:term-red><color:red>ERROR!!!</color> ${key} must be between 0-9999.\n`);
+                      return;
+                    }
+                  }
+                }
+              } else{
+                for (const [key, value] of Object.entries(formElements)) {
+                  if (key !== "Name" && key !== "Type" && key !== "Status" && key !== "HP_Current" && key !== "MP_Current" && key !== "Fate_Current") {
+                    if (!validateNumber(value, 0, 9999)) {
+                      playSound("sounds/Dead.mp3");
+                      termtext(`<anim:term-red><color:red>ERROR!!!</color> ${key} must be between 0-9999.\n`);
+                      return;
+                    }
                   }
                 }
               }
 			
-          playerimage = document.getElementById("playerImage");
-          const file = playerimage.files[0];
-          if (file)
-          {
-            if(file.type.match('image.*'))
-            {
-              saveImageToIndexedDB(player.id, file);
-            }
-            else
-            {
-              playSound("sounds/Dead.mp3");
-              termtext(`<anim:term-red><color:red>ERROR!!!</color> Avatar must be an image!\n`);
-              return;
-            }
-          }
-              players[index] = player;
-              setPlayers(players);
-              playSound("sounds/Comp.mp3");
-              termtext(`<anim:term-blue><color:green>Success</color> User <color:blue>${player.Name}</color> has been updated.\n`);
-              closeForm();
-            });
-          } else {
-            // Hide the form if no user is selected
-            userFormContent.classList.add("hidden");
-            formconfirmm.classList.add("hidden");
-            formconfirmm.removeEventListener("click", updatePlayer);
-            userFormContent.innerHTML = ``;
-          }
-        });
-        // Populate the dropdown on initialization
-        updatePlayerDropdowninclusive();
+              playerimage = document.getElementById("playerImage");
+              const file = playerimage.files[0];
+              if (file)
+              {
+                if(file.type.match('image.*'))
+                {
+                  saveImageToIndexedDB(player.id, file);
+                } else {
+                  playSound("sounds/Dead.mp3");
+                  termtext(`<anim:term-red><color:red>ERROR!!!</color> Avatar must be an image!\n`);
+                  return;
+                }
+              }
 
+              if (save === "edit") {
+                const index = players.findIndex((p) => p.id === currentPlayer.id);
+                players[index] = player;
+                setPlayers(players);
+                playSound("sounds/Comp.mp3");
+                termtext(`<anim:term-blue><color:green>Success</color> User <color:blue>${player.Name}</color> has been updated.\n`);
+                closeForm();
+              }
+              else if (save === "copy") {
+                // Check if the player already exists in the compendium
+                const existingCompendiumPlayer = userComp.find((p) => p.id === currentPlayer.id);
+                if (existingCompendiumPlayer) {
+                  // If the player already exists, update their comp data
+                  const compIndex = userComp.findIndex((p) => p.id === currentPlayer.id);
+                  userComp[compIndex] = compSave;
+                  setuserComp(userComp);
+                  playSound("sounds/Comp.mp3");
+                  termtext(`<anim:term-blue><color:green>Success</color> User <color:blue>${player.Name}</color> has been updated in the compendium.\n`);
+                  closeForm();
+                  return;
+                };
+
+                // Add the player to the compendium
+                userComp.push(compSave);
+                setuserComp(userComp);
+                playSound("sounds/Comp.mp3");
+                termtext(`<anim:term-blue><color:green>Success</color> User <color:blue>${player.Name}</color> has been copied to the Compendium.\n`);
+                closeForm();
+              }
+            }
+        }
+        
       break;
       case "deleteuser":
           formDisplay.innerHTML = `
@@ -1856,7 +2061,6 @@ document.addEventListener("DOMContentLoaded", () => {
           players.splice(index, 1);
           localStorage.setItem("players", JSON.stringify(players));
 
-          updatePlayerDropdowninclusivee();
           closeForm();
         }
     break;
@@ -3675,10 +3879,15 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="form text-white p-4 max-w-[640px] bg-gradient-to-b from-secondary to- shadow-lg shadow-secondary/50">  
             <h1 class="text-center font-bold mb-2">Assign Skills</h1>
             <h3 class="text-center font-bold mb-2">Select User for Assignment</h3>
-            <div>
-              <div class="mb-2">
+            <div class="grid grid-cols-2 gap-2">
+              <div class="mb-2 flex gap-2">
                 <label for="search-player">Search</label>
-                <input class="input form-input w-1/4 hover-sfx" type="text" id="search-player" placeholder="Player Name" data-hoversound="sounds/cursor.mp3">
+                <input class="input form-input w-full hover-sfx" type="text" id="search-player" placeholder="Player Name" data-hoversound="sounds/cursor.mp3">
+              </div>
+              <div class="flex gap-2">
+                <p>Stock</p>
+                <input type="checkbox" class="toggle" id="mode-toggle"/>
+                <p>Compendium</p>
               </div>
             </div>
             <div id="assign-display"></div>
@@ -3693,16 +3902,31 @@ document.addEventListener("DOMContentLoaded", () => {
         let assignDisplay = document.getElementById("assign-display");
         searchSkillInput = document.getElementById("search-skill");
         searchPlayerInput = document.getElementById("search-player");
+        let modeToggle = document.getElementById("mode-toggle");
+        let userComp = getuserComp();
+        let players = getPlayers();
 
+        modeToggle.addEventListener("change", () => {
+            refreshAssign(searchPlayerInput.value);
+          });
+          
         function refreshAssign(searchTerm = "") {
-          let players = getPlayers();
+          let mode = modeToggle.checked ? "comp" : "players";
+          let search = 0;
+
+          if (mode === "players") {
+            search = players;
+          } else {
+            search = userComp;
+          }
+          search = search.sort((a, b) => a.Name.localeCompare(b.Name));
           // Filter players based on search term
           if (searchTerm) {
-            players = players.filter(player => player.Name.toLowerCase().includes(searchTerm.toLowerCase()));
+            search = search.filter(player => player.Name.toLowerCase().includes(searchTerm.toLowerCase()));
           }
             assignDisplay.innerHTML = `
             <div class="card grid grid-cols-1 p-12 gap-2 bg-base-300 border-neutral border-2 max-h-80 overflow-y-auto">
-            ${players.map((player) => `
+            ${search.map((player) => `
               <div class="btn grid grid-cols-2 bg-gradient-to-br from-primary to- hover:border-accent hover:border-single hover:border-2 hover:shadow-lg hover:shadow-accent/50 p-2">
               <div class="flex gap-2 justify-start items-center">
                 <img alt="${player.Name}" class="pic card xs:min-w-6 sm:size-7 sm:min-w-7 md:min-w-8 md:size-8 size-6 border-4 border-double border-neutral" id="avatar-${player.id}">
@@ -3717,7 +3941,7 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
 
             // Load avatars from IndexedDB
-            players.forEach(async (player) => {
+            search.forEach(async (player) => {
             const file = await getImageFromIndexedDB(player.id);
             if (file) {
               const url = URL.createObjectURL(file);
@@ -3729,9 +3953,9 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             });
           // Add event listeners for assign buttons
-          players.forEach((player) => {
+          search.forEach((player) => {
             document.getElementById(`form-assign-${player.id}`).addEventListener('click', () => {
-              assignSkills(player.id);
+              assignSkills(player.id, mode);
             });
           });
         }
@@ -3742,12 +3966,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
         refreshAssign();
 
-        function assignSkills(playerId) {
+        function assignSkills(playerId, mode) {
           let players = getPlayers();
-          let player = players.find(player => player.id === playerId);
+          let userComp = getuserComp();
+          let users = mode === "players" ? players : userComp;
+
+          let player = users.find(player => player.id === playerId);
           if (!player.skills) {
             player.skills = [];
-            localStorage.setItem('players', JSON.stringify(players));
+            localStorage.setItem('players', JSON.stringify(users));
           }
           termtext(`<anim:term-blue><color:yellow>Assigning</color> Skills to <color:blue>${player.Name}</color>.\n`);
           formDisplay.innerHTML = `
@@ -3771,7 +3998,10 @@ document.addEventListener("DOMContentLoaded", () => {
           function refreshAssignSkills(searchTerm = "") {
             let compendium = getskillComp();
             let players = getPlayers();
-            let player = players.find(player => player.id === playerId);
+            let userComp = getuserComp();
+            let users = mode === "players" ? players : userComp;
+
+            let player = users.find(player => player.id === playerId);
             // Sort compendium by type and then by name
             compendium.sort((a, b) => {
               if (a.type < b.type) return -1;
@@ -3824,7 +4054,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
           function toggleSkillAssignment(playerid, skillid) {
             let players = getPlayers();
-            let player = players.find(player => player.id === playerid);
+            let userComp = getuserComp();
+            let users = mode === "players" ? players : userComp;
+            let player = users.find(player => player.id === playerid);
             let compendium = getskillComp();
             let skill = compendium.find(skill => skill.id === skillid);
             if (player.skills.includes(skill.id)) {
@@ -3834,13 +4066,228 @@ document.addEventListener("DOMContentLoaded", () => {
               player.skills.push(skill.id);
               termtext(`<anim:term-blue><color:green>Success</color> <color:purple>${skill.name}</color> has been assigned to <color:blue>${player.Name}</color>.\n`);
             }
-            localStorage.setItem('players', JSON.stringify(players));
+            
+            if (mode === "players") {
+              localStorage.setItem('players', JSON.stringify(users));
+            } else {
+              localStorage.setItem('userComp', JSON.stringify(users));
+            }
           }
           
           document.getElementById("form-cancel").addEventListener("click", closeForm);
           refreshAssignSkills();
         }
       break;
+      case "usercomp":
+        formDisplay.innerHTML = `
+        <div class="form text-white p-4 max-w-[640px] bg-gradient-to-b from-secondary to- shadow-lg shadow-secondary/50">  
+          <h1 class="text-center font-bold mb-2">User Compendium</h1>
+          
+          <div class="mb-2 flex gap-2 justify-center items-center">
+            <label for="search-user">Search</label>
+            <input class="input form-input w-1/4 hover-sfx" type="text" id="search-user" placeholder="Name" data-hoversound="sounds/cursor.mp3">
+          </div>
+
+          <div id="comp-display"></div>
+
+          <div class="w-full justify-center gap-6 p-4 flex">
+            <input class="btn btn-sm form-input hover-sfx click-sfx" type="submit" id="form-create" value="Create User" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
+            <div class="tooltip tooltip-secondary" data-tip="Download User Compendium"><input class="btn btn-sm form-input hover-sfx click-sfx" type="submit" id="form-export" value="Export" data-hoversound="sounds/cursor.mp3"></div>
+            <div class="tooltip tooltip-secondary" data-tip="Overwrite User Compendium"><input class="btn btn-sm form-input hover-sfx click-sfx" type="submit" id="form-import" value="Import" data-hoversound="sounds/cursor.mp3"></div>
+            <input class="btn btn-sm btn-square form-input hover-sfx click-sfx" type="submit" id="form-cancel" value="X" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Negative.mp3">
+          </div>
+        </div>
+         `;
+        let formCanceleredd = document.getElementById("form-cancel");
+        let userimport = document.getElementById("form-import");
+        let userexport = document.getElementById("form-export");
+        let usercreate = document.getElementById("form-create");
+        formCanceleredd.addEventListener("click", closeForm);
+        let compDisplay = document.getElementById("comp-display");
+        searchUserInput = document.getElementById("search-user");
+        termtext(`<color:yellow>Opening</color> User Compendium Program.\n`);
+
+        refreshcompendium();
+
+        searchUserInput.addEventListener("input", (event) => {
+          refreshcompendium(searchUserInput.value);
+        });
+
+        function refreshcompendium(searchTerm = "") {
+          let compendium = getuserComp();
+          compendium = compendium.sort((a, b) => a.Name.localeCompare(b.Name));
+          // Filter compendium based on search term
+          if (searchTerm) {
+            compendium = compendium.filter(player => player.Name.toLowerCase().includes(searchTerm.toLowerCase()));
+          }
+          compDisplay.innerHTML = `
+          <div class="card grid grid-cols-1 p-12 gap-2 bg-base-300 border-neutral border-2 max-h-80 overflow-y-auto">
+            ${compendium.map((player) => `
+              <div class="btn grid grid-cols-2 bg-gradient-to-br from-primary to- hover:border-accent hover:border-single hover:border-2 hover:shadow-lg hover:shadow-accent/50 p-2">
+              <div class="flex gap-2 justify-start items-center">
+                <img alt="${player.Name}" class="pic card xs:min-w-6 sm:size-7 sm:min-w-7 md:min-w-8 md:size-8 size-6 border-4 border-double border-neutral" id="avatar-${player.id}">
+                <h3 class="font-bold truncate text-sm text-left"><i>Lv<b>${player.Level}</b></i> ${player.Name}</h3>
+              </div>
+              <div class="flex gap-2 justify-end items-center">
+              <input class="btn btn-sm form-input hover-sfx place-self-center click-sfx" type="submit" id="form-stock-${player.id}" value="Add to Stock" data-hoversound="sounds/cursor.mp3">
+              <input class="btn btn-sm form-input hover-sfx place-self-center click-sfx" type="submit" id="form-edit-${player.id}" value="Edit" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
+              <input class="btn btn-sm btn-square form-input hover-sfx place-self-center click-sfx" type="submit" id="form-delete-${player.id}" value="X" data-hoversound="sounds/cursor.mp3">
+              </div>
+              </div>
+            `).join("")}
+            </div>
+          `;
+
+          // Load avatars from IndexedDB
+          compendium.forEach(async (player) => {
+            const file = await getImageFromIndexedDB(player.id);
+            if (file) {
+              const url = URL.createObjectURL(file);
+              const avatar = document.getElementById(`avatar-${player.id}`);
+              avatar.src = url;
+            }
+            else {
+              document.getElementById(`avatar-${player.id}`).classList.add("opacity-0");
+            }
+          });
+
+          // Add event listeners for buttons
+          compendium.forEach((player) => {
+            document.getElementById(`form-edit-${player.id}`).addEventListener('click', () => {
+              editUser(player.id);
+            });
+            document.getElementById(`form-delete-${player.id}`).addEventListener('click', () => {
+              deleteUser(player.id);
+              refreshcompendium(searchUserInput.value);
+            });
+            document.getElementById(`form-stock-${player.id}`).addEventListener('click', () => {
+              addToStock(player.id);
+            });
+          });
+          }
+
+          // Copy from compendium to stock
+          function addToStock(userId) {
+            let compendium = getuserComp();
+            let user = compendium.find(user => user.id === userId);
+            let stock = getPlayers();
+
+            // Generate a unique 24-character ID
+            const generateId = () => {
+              const chars = "0123456789abcdef";
+              let id = "";
+              for (let i = 0; i < 24; i++) {
+                id += chars[Math.floor(Math.random() * chars.length)];
+              }
+              return id;
+            };
+
+            newid = generateId();
+
+            const player = {
+              id: newid,
+              Name: user.Name,
+              Type: user.Type,
+              Level: user.Level,
+              Strength: user.Strength,
+              Magic: user.Magic,
+              Vitality: user.Vitality,
+              Agility: user.Agility,
+              Luck: user.Luck,
+              Status: "Normal",
+              STR_TN: user.STR_TN,
+              MG_TN: user.MG_TN,
+              VT_TN: user.VT_TN,
+              AG_TN: user.AG_TN,
+              LK_TN: user.LK_TN,
+              Melee_Power: user.Melee_Power,
+              Ranged_Power: user.Ranged_Power,
+              Magic_Power: user.Magic_Power,
+              Initiative: user.Initiative,
+              Dodge_TN: user.Dodge_TN,
+              Talk_TN: user.Talk_TN,
+              HP_Max: user.HP_Max,
+              HP_Current: user.HP_Max,
+              MP_Max: user.MP_Max,
+              MP_Current: user.MP_Max,
+              Fate_Max: user.Fate_Max,
+              Fate_Current: user.Fate_Max,
+              skills: user.skills,
+            };
+            stock.push(player);
+            localStorage.setItem('players', JSON.stringify(stock));
+
+            // Add image to IndexedDB if it exists
+            (async () => {
+              try {
+                const file = await getImageFromIndexedDB(userId);
+                if (file) {
+                  // Save image under new id
+                  await saveImageToIndexedDB(newid, file);
+                  //console.log(`Image saved under new ID: ${newid}`);
+                } else {
+                  //console.log("No file found for the given userId.");
+                }
+              } catch (error) {
+                //console.log("Error saving image under new ID:", error);
+              }
+            })();
+
+            termtext(`<anim:term-blue><color:green>Success</color> <color:blue>${user.Name}</color> has been added to Stock.\n`);
+            playSound("sounds/Ting.mp3");
+          }
+
+          function editUser(userId) {
+            openForm("edituser", "copy", userId);
+          }
+
+          function deleteUser(userId) {
+            let compendium = getuserComp();
+            playSound("sounds/Dead.mp3");
+            let player = compendium.find(player => player.id === userId);
+            compendium = compendium.filter(player => player.id !== userId);
+            termtext(`<anim:term-shake><color:green>Success</color> <color:blue>${player.Name}</color> has been <color:red>deleted</color> from the Compendium.\n`);
+            localStorage.setItem('userComp', JSON.stringify(compendium));
+          }
+
+          userexport.addEventListener('click', () => {
+            let compendium = getuserComp();
+            let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(compendium));
+            let downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "userComp.json");
+            document.body.appendChild(downloadAnchorNode); // required for firefox
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+            termtext(`<anim:term-bounce><color:green>Success</color> Exported User Compendium.\n<anim:term-pulse><color:purple>Note:</color> Assigned skills will not transfer and must be reassigned upon import.\n`);
+  
+          });
+  
+          userimport.addEventListener('click', () => {
+            let input = document.createElement('input');      
+            input.type = 'file';
+            input.accept = '.json';
+            input.click();
+            input.onchange = e => {
+              let file = e.target.files[0];
+              let reader = new FileReader();
+              reader.readAsText(file,'UTF-8');
+              reader.onload = readerEvent => {
+                let content = readerEvent.target.result;
+                let compendium = JSON.parse(content);
+                localStorage.setItem('userComp', JSON.stringify(compendium));
+                refreshcompendium(searchUserInput.value);
+                playSound("sounds/Comp.mp3");
+                termtext(`<anim:term-bounce><color:green>Success</color> Imported User Compendium.\n`);
+              }
+            };
+          });
+
+          usercreate.addEventListener('click', () => {
+            openForm("usercreation");
+          });
+
+        break;
       default:
         formDisplay.innerHTML = `
 					<div class="form text-white rounded-lg rounded-tl-3xl p-4 w-1/2 bg-gradient-to-b from-accent to- shadow-lg shadow-secondary/50">  
