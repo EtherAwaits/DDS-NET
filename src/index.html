@@ -19,6 +19,11 @@
 <body class="bg-#000 font-mono h-screen">
 	<!-- Overall Container -->
 	<div class="flex flex-col crt h-screen">
+
+		<!-- Optional Section: Enemy Display -->
+		<div id="enemy-display hidden">
+			<div class="grid grid-cols-3 card bg-gradient-to-b from-secondary to-base-300 shadow-lg shadow-secondary/50 gap-2 p-4 party-menu fixed top-0 w-5/6 max-h-[122px] lg:max-h-[222px] overflow-y-auto outline-secondary outline-double outline-4" id="enemy-list"></div>
+		</div>	
 		
 		<!-- Corner Display -->
 		<div id="corner-display" class="party-menu card font-bold select-none cursor-pointer p-2 bg-gradient-to-b from-secondary to- shadow-lg shadow-secondary/50 outline-secondary outline-double fixed top-4 right-4 corner-button hover:shadow-accent/50 click-sfx" data-clicksound="sounds/Okay.mp3">
@@ -32,7 +37,7 @@
 		<!-- Middle Section: Menu Display -->
 		<div class="flex justify-center">
 		  <div class="flex space-x-4 w-full justify-center party-menu motion-reduce" id="container">
-			<button class="tab-button btn btn-xs font-normal hover-sfx click-sfx bg-gradient-to-b from-secondary shadow-lg shadow-secondary/50 hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-tab="comp" aria-selected="true">COMP</button>
+			<button class="tab-button btn btn-xs font-normal hover-sfx click-sfx bg-gradient-to-b from-secondary shadow-lg shadow-secondary/50 hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-tab="comp" aria-selected="false">COMP</button>
 			<button class="tab-button btn btn-xs font-normal hover-sfx click-sfx bg-gradient-to-b from-secondary shadow-lg shadow-secondary/50 hover:shadow-accent/50" data-tab="fight" data-hoversound="sounds/cursor.mp3" aria-selected="false">FIGHT</button>
 			<button class="tab-button btn btn-xs font-normal hover-sfx click-sfx bg-gradient-to-b from-secondary shadow-lg shadow-secondary/50 hover:shadow-accent/50" data-tab="skills" data-hoversound="sounds/cursor.mp3" aria-selected="false">SKILLS</button>
 			<button class="tab-button btn btn-xs font-normal hover-sfx click-sfx bg-gradient-to-b from-secondary shadow-lg shadow-secondary/50 hover:shadow-accent/50" data-tab="status" data-hoversound="sounds/cursor.mp3" aria-selected="false">STATUS</button>
@@ -42,7 +47,7 @@
 
 		<!-- Bottom Section: Party Display -->
 		<div id="bottom-display">
-			<div class="grid grid-cols-3 gap-2 flex p-4 party-menu motion-reduce" id="party-list">
+			<div class="grid grid-cols-3 gap-2 p-4 party-menu motion-reduce" id="party-list">
 				<div class="party-member card bg-gradient-to-br from-primary to- hover:shadow-lg hover:shadow-accent/50" id="party-slot-1" tabindex="0"></div>
 				<div class="party-member card bg-gradient-to-br from-primary to- hover:shadow-lg hover:shadow-accent/50" id="party-slot-2" tabindex="0"></div>
 				<div class="party-member card bg-gradient-to-br from-primary to- hover:shadow-lg hover:shadow-accent/50" id="party-slot-3" tabindex="0"></div>
@@ -54,6 +59,7 @@
 		
 		<!-- Player Form -->
 		<div id="player-form" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden"></div>
+
 	</div>
 </body>
 </html>

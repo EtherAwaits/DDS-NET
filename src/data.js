@@ -95,28 +95,76 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("Initialized 'party' in localStorage.");
   }
 
-  // Check if 'system' key exists in localStorage
-  if (!localStorage.getItem("system")) {
-    termtext(`<color:purple>Note</color> <b>System</b> data not found, generated default system data.\nYou may change these in the Config within the CHANGE menu.\n\n<anim:term-pulse><color:yellow> UNREAD MESSAGES (1)</color>:\nTo everyone on this network...\n A serious threat is closing in on humanity at this very moment.\nThis program will surely be of use to you. <color:blue>-S</color>\n\n`);
-    // Set default party data
-    const defaultSystem = {
-      moon: 8, // New = 0, 1/8 = 1, 2/8 = 2, 3/8 = 3, 4/8... FULL = 8, 1/8 = 9, 2/8 = 10
-      macca: 100,
-      rules: 0, // 0 = X, 1 = TC
-      username: "<USER>",
-      config1: "ddsnet", // Theme, 0 = DDS
-      config2: 0,
-      config3: 0,
-      config4: 0,
-      config5: 0,
-      config6: 0,
-      config7: 0,
-      config8: 0,
-      config9: 0,
-    };
-    localStorage.setItem("system", JSON.stringify(defaultSystem));
-    console.log("Initialized 'system' in localStorage.");
-  }
+  // Check if 'enemy' key exists in localStorage
+  if (!localStorage.getItem("enemies")) {
+    termtext(`<color:purple>Note</color> <b>Enemy</b> data not found, generated default enemy data.\n`);
+    // Set default enemy data
+    const defaultEnemy = [
+    {
+      id: "675d0a6e255a537876669d15",
+      Name: "Fairy Jack Frost",
+      Type: "Demon",
+      Level: 5,
+      Strength: 5,
+      Magic: 7,
+      Vitality: 5,
+      Agility: 6,
+      Luck: 7,
+      Status: "Normal",
+      STR_TN: 30,
+      MG_TN: 40,
+      VT_TN: 30,
+      AG_TN: 35,
+      LK_TN: 40,
+      Melee_Power: 10,
+      Ranged_Power: 6,
+      Magic_Power: 12,
+      Initiative: 5,
+      Dodge_TN: 16,
+      Talk_TN: 34,
+      HP_Max: 60,
+      MP_Max: 36,
+      HP_Current: 60,
+      MP_Current: 36,
+      Fate_Max: 4,
+      Fate_Current: 4,
+      skills:["ice-01","healing-01"],
+    },
+    {
+      id: "675d3a6e255a56783666d15",
+      Name: "Beast Cait Sith",
+      Type: "Demon",
+      Level: 5,
+      Strength: 6,
+      Magic: 7,
+      Vitality: 5,
+      Agility: 7,
+      Luck: 4,
+      Status: "Normal",
+      STR_TN: 35,
+      MG_TN: 40,
+      VT_TN: 30,
+      AG_TN: 40,
+      LK_TN: 25,
+      Melee_Power: 11,
+      Ranged_Power: 6,
+      Magic_Power: 12,
+      Initiative: 6,
+      Dodge_TN: 17,
+      Talk_TN: 28,
+      HP_Max: 60,
+      MP_Max: 36,
+      HP_Current: 60,
+      MP_Current: 36,
+      Fate_Max: 0,
+      Fate_Current: 0,
+      skills:["buff-01","healing-01"],
+    },
+  ];
+    // Store the enemy array in localStorage
+    localStorage.setItem("enemies", JSON.stringify(defaultEnemy));
+    console.log("Initialized 'enemies' in localStorage.");
+}
 
     // Check if 'players' key exists in localStorage
     if (!localStorage.getItem("userComp")) {
@@ -150,7 +198,7 @@ document.addEventListener("DOMContentLoaded", () => {
         },
         {
           id: "675d3a6e255a567836776d15",
-          Name: "Best Cait Sith",
+          Name: "Beast Cait Sith",
           Type: "Demon",
           Level: 5,
           Strength: 6,
@@ -175,24 +223,49 @@ document.addEventListener("DOMContentLoaded", () => {
           skills:["buff-01","healing-01"],
         },
       ];
-  
+      termtext(`<color:purple>Note</color> <b>User Compendium</b> not found, generated default user compendium data.\n`);
       // Store the userComp array in localStorage
       localStorage.setItem("userComp", JSON.stringify(defaultPlayers));
       console.log("Initialized 'userComp' in localStorage.");
     }
 
+    // Check if 'system' key exists in localStorage
+      if (!localStorage.getItem("system")) {
+        termtext(`<color:purple>Note</color> <b>System</b> data not found, generated default system data.\nYou may change these in the Config within the CHANGE menu.\n\n<anim:term-pulse><color:yellow> UNREAD MESSAGES (1)</color>:\nTo everyone on this network...\n A serious threat is closing in on humanity at this very moment.\nThis program will surely be of use to you. <color:blue>-S</color>\n\n`);
+        // Set default party data
+        const defaultSystem = {
+          moon: 8, // New = 0, 1/8 = 1, 2/8 = 2, 3/8 = 3, 4/8... FULL = 8, 1/8 = 9, 2/8 = 10
+          macca: 100,
+          rules: 0, // 0 = X, 1 = TC
+          username: "<USER>",
+          config1: "ddsnet", // Theme, 0 = DDS
+          config2: 0,
+          config3: 0,
+          config4: 0,
+          config5: 0,
+          config6: 0,
+          config7: 0,
+          config8: 0,
+          config9: 0,
+        };
+        localStorage.setItem("system", JSON.stringify(defaultSystem));
+        console.log("Initialized 'system' in localStorage.");
+      }
+
   // Centralized Retrieval
   const getParty = () => JSON.parse(localStorage.getItem("party")) || {}; // const party = getParty();
   const getPlayers = () => JSON.parse(localStorage.getItem("players")) || []; // const players = getPlayers();
   const getSystem = () => JSON.parse(localStorage.getItem("system")) || []; // const system = getSystem();
-  const getskillComp = () => JSON.parse(localStorage.getItem("skillComp")) || []; // const skillsCompendium = getskillsCompendium();
-  const getuserComp = () => JSON.parse(localStorage.getItem("userComp")) || []; // const userCompendium = getuserCompendium();
+  const getskillComp = () => JSON.parse(localStorage.getItem("skillComp")) || []; // const skillsComp = getskillsComp();
+  const getuserComp = () => JSON.parse(localStorage.getItem("userComp")) || []; // const userComp = getuserCompe();
+  const getEnemies = () => JSON.parse(localStorage.getItem("enemies")) || []; // const enemies = getenemies();
   //Centralized Updates
   const setParty = (party) => localStorage.setItem("party", JSON.stringify(party));
   const setPlayers = (players) => localStorage.setItem("players", JSON.stringify(players));
   const setSystem = (system) => localStorage.setItem("system", JSON.stringify(system));
 	const setskillComp = (skillComp) => localStorage.setItem("skillComp", JSON.stringify(skillsComp));
   const setuserComp = (userComp) => localStorage.setItem("userComp", JSON.stringify(userComp));
+  const setEnemies = (enemy) => localStorage.setItem("enemies", JSON.stringify(enemy));
 
   const sys = getSystem();
   const user = sys.username;
@@ -208,7 +281,6 @@ document.addEventListener("DOMContentLoaded", () => {
   else{
     document.documentElement.setAttribute('data-theme', theme);
   }
-
 
   // Generates the 6 slots using the ID's in the "party" data
   function populatePartySlots(players, party, noevent = false) {
@@ -331,7 +403,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   <label class="absolute inset-0 flex items-center text-sm font-bold text-white">
                     MP ${player.MP_Current}/${player.MP_Max}
                   </label>
-			  </div>
+			          </div>
               </div>
 			  <div class="stat-bar" id="player-fate${i}">
                 <div class="bar-bg relative">
@@ -339,9 +411,10 @@ document.addEventListener("DOMContentLoaded", () => {
                   <label class="absolute inset-0 flex items-center text-sm font-bold text-white">
                     FATE ${player.Fate_Current}/${player.Fate_Max}
                   </label>
-			  </div>
+			          </div>
             </div>
           </div>
+        </div>
 		`;
     if (player.Fate_Max === 0) {
       document.getElementById(`player-fate${i}`).classList.add("hidden");
@@ -366,9 +439,99 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (!noevent) {
       attachPartySlotClickEvents();
+      populateEnemySlots();
     }
   }
 
+  function populateEnemySlots() {
+    document.getElementById("enemy-list").innerHTML = ""; // Clear existing enemy slots
+    const enemies = getEnemies();
+    if (enemies.length < 1) 
+    {
+      document.getElementById("enemy-list").classList.add("hidden");
+    } else {
+      document.getElementById("enemy-list").classList.remove("hidden");
+    }
+    enemies.forEach((enemy, index) => {
+      const enemySlot = document.createElement("div");
+      enemySlot.className = "enemy-member w-full card bg-gradient-to-br from-primary to-primary/30 shadow-secondary/50 shadow-lg outline outline-2 outline-double outline-secondary/50 hover:shadow-accent/50";
+      enemySlot.setAttribute("data-id", enemy.id);
+      enemySlot.id = `enemy-slot-${index + 1}`;
+      enemySlot.tabIndex = 0;
+      let icon = `${enemy.Status}.png`;
+      enemySlot.innerHTML = `
+        <div class="flex justify-center gap-3 cursor-pointer click-sfx w-full min-h-20 party-menu" data-clicksound="sounds/Okay.mp3" data-volume="0.5">
+
+        <input class="btn btn-xs btn-square form-input hover-sfx click-sfx absolute bottom-0 right-0 z-50" type="submit" id="form-delete-${index + 1}" value="X" data-hoversound="sounds/cursor.mp3">
+
+          <div class="space-y-3">
+            <img alt="${enemy.Name}" class="pic card xs:min-w-6 sm:size-7 sm:min-w-7 md:min-w-8 md:size-8 size-6 hidden border-4 border-double border-neutral" id="enemy-avatar-${index + 1}">
+            <img src="views/${icon}" alt="${enemy.Status}" class="xs:min-w-7 sm:size-8 sm:min-w-8 md:min-w-9 md:size-9 size-7">
+          </div>
+          
+          <div class="w-3/4">
+                  <h3 class="text-white"><i>Lv<b>${enemy.Level}</b></i> ${enemy.Name}</h3>
+                  <div class="stat-bar">
+                    <div class="bar-bg relative">
+                      <div class="bar-fill bg-gradient-to-r from-red-600 to-orange-400" style="width: ${(enemy.HP_Current / enemy.HP_Max) * 100}%;"></div>
+                      <label class="absolute inset-0 flex items-center text-sm font-bold text-white">
+                        HP ${enemy.HP_Current}/${enemy.HP_Max}
+                      </label>
+                    </div>
+                  </div>
+                  <div class="stat-bar">
+                    <div class="bar-bg relative">
+                      <div class="bar-fill2 bg-gradient-to-r from-blue-600 to-cyan-400" style="width: ${(enemy.MP_Current / enemy.MP_Max) * 100}%;"></div>
+                      <label class="absolute inset-0 flex items-center text-sm font-bold text-white">
+                        MP ${enemy.MP_Current}/${enemy.MP_Max}
+                      </label>
+                    </div>
+                  </div>
+            <div class="stat-bar ${enemy.Fate_Max <= 0 ? 'hidden' : ''}" id="enemy-fate${index + 1}">
+                    <div class="bar-bg relative">
+                      <div class="bar-fill3 bg-gradient-to-r from-green-600 to-lime-400" style="width: ${(enemy.Fate_Current / enemy.Fate_Max) * 100}%;"></div>
+                      <label class="absolute inset-0 flex items-center text-sm font-bold text-white">
+                        FATE ${enemy.Fate_Current}/${enemy.Fate_Max}
+                      </label>
+                    </div>
+              </div>
+            </div>
+        </div>
+      `;
+
+      async function displayPlayer() {
+        const file = await getImageFromIndexedDB(enemy.id);
+        if (file) {
+          console.log(enemy.id);
+          const url = URL.createObjectURL(file);
+          const avatar = document.getElementById(`enemy-avatar-${index + 1}`);	
+          avatar.src = url;
+          avatar.classList.remove("hidden");
+          }
+        }
+        
+      displayPlayer();
+      document.getElementById("enemy-list").appendChild(enemySlot);
+
+      const deleteButton = document.getElementById(`form-delete-${index + 1}`);
+      if (deleteButton) {
+        deleteButton.addEventListener("click", (event) => {
+          termtext(`<color:green>Success</color> <color:red>Enemy</color> <color:blue>${enemy.Name}</color> has been removed.\n`);
+          playSound("sounds/Dead.mp3", 1);
+          event.stopPropagation(); // Prevent the click event from bubbling up
+          const enemies = getEnemies();
+          enemies.splice(index, 1); // Remove the enemy from the array
+          setEnemies(enemies); // Update localStorage
+          populateEnemySlots(); // Refresh the enemy slots
+        });
+      }
+      
+    
+    });
+
+  }
+
+  populateEnemySlots();
   populatePartySlots(getPlayers(), getParty());
   updateCornerDisplay();
 
@@ -1591,6 +1754,7 @@ document.addEventListener("DOMContentLoaded", () => {
           localStorage.removeItem("system");
           localStorage.removeItem("skillComp");
           localStorage.removeItem("userComp");
+          localStorage.removeItem("enemies");
           location.reload();
         }
       break;
@@ -4128,10 +4292,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 <img alt="${player.Name}" class="pic card xs:min-w-6 sm:size-7 sm:min-w-7 md:min-w-8 md:size-8 size-6 border-4 border-double border-neutral" id="avatar-${player.id}">
                 <h3 class="font-bold truncate text-sm text-left"><i>Lv<b>${player.Level}</b></i> ${player.Name}</h3>
               </div>
-              <div class="flex gap-2 justify-end items-center">
-              <input class="btn btn-sm form-input hover-sfx place-self-center click-sfx" type="submit" id="form-stock-${player.id}" value="Add to Stock" data-hoversound="sounds/cursor.mp3">
-              <input class="btn btn-sm form-input hover-sfx place-self-center click-sfx" type="submit" id="form-edit-${player.id}" value="Edit" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
-              <input class="btn btn-sm btn-square form-input hover-sfx place-self-center click-sfx" type="submit" id="form-delete-${player.id}" value="X" data-hoversound="sounds/cursor.mp3">
+              <div class="flex gap-1 justify-end items-center">
+              <input class="btn btn-xs form-input hover-sfx place-self-center click-sfx" type="submit" id="form-enemy-${player.id}" value="Add Enemy" data-hoversound="sounds/cursor.mp3">
+              <input class="btn btn-xs form-input hover-sfx place-self-center click-sfx" type="submit" id="form-stock-${player.id}" value="Add Stock" data-hoversound="sounds/cursor.mp3">
+              <input class="btn btn-xs form-input hover-sfx place-self-center click-sfx" type="submit" id="form-edit-${player.id}" value="Edit" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
+              <input class="btn btn-xs btn-square form-input hover-sfx place-self-center click-sfx" type="submit" id="form-delete-${player.id}" value="X" data-hoversound="sounds/cursor.mp3">
               </div>
               </div>
             `).join("")}
@@ -4163,7 +4328,82 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById(`form-stock-${player.id}`).addEventListener('click', () => {
               addToStock(player.id);
             });
+
+            document.getElementById(`form-enemy-${player.id}`).addEventListener('click', () => {
+              addToEnemy(player.id);
+            });
           });
+          }
+
+          // Copy from compendium to enemy
+          function addToEnemy(userId) {
+            let compendium = getuserComp();
+            let user = compendium.find(user => user.id === userId);
+            let enemies = getEnemies();
+
+            // Generate a unique 24-character ID
+            const generateId = () => {
+              const chars = "0123456789abcdef";
+              let id = "";
+              for (let i = 0; i < 24; i++) {
+                id += chars[Math.floor(Math.random() * chars.length)];
+              }
+              return id;
+            };
+
+            newid = generateId();
+
+            const enemy = {
+              id: newid,
+              Name: user.Name,
+              Type: user.Type,
+              Level: user.Level,
+              Strength: user.Strength,
+              Magic: user.Magic,
+              Vitality: user.Vitality,
+              Agility: user.Agility,
+              Luck: user.Luck,
+              Status: "Normal",
+              STR_TN: user.STR_TN,
+              MG_TN: user.MG_TN,
+              VT_TN: user.VT_TN,
+              AG_TN: user.AG_TN,
+              LK_TN: user.LK_TN,
+              Melee_Power: user.Melee_Power,
+              Ranged_Power: user.Ranged_Power,
+              Magic_Power: user.Magic_Power,
+              Initiative: user.Initiative,
+              Dodge_TN: user.Dodge_TN,
+              Talk_TN: user.Talk_TN,
+              HP_Max: user.HP_Max,
+              HP_Current: user.HP_Max,
+              MP_Max: user.MP_Max,
+              MP_Current: user.MP_Max,
+              Fate_Max: user.Fate_Max,
+              Fate_Current: user.Fate_Max,
+            };
+            enemies.push(enemy);
+            localStorage.setItem('enemies', JSON.stringify(enemies));
+
+            // Add image to IndexedDB if it exists
+            (async () => {
+                try {
+                  const file = await getImageFromIndexedDB(userId);
+                  if (file) {
+                    // Save image under new id
+                    await saveImageToIndexedDB(newid, file);
+                    //console.log(`Image saved under new ID: ${newid}`);
+                  } else {
+                    //console.log("No file found for the given userId.");
+                  }
+                } catch (error) {
+                  //console.log("Error saving image under new ID:", error);
+                }
+            })();
+
+            setTimeout(() => { populateEnemySlots(); }, 250);
+            termtext(`<anim:term-blue><color:green>Success</color> <color:red>Enemy</color> <color:blue>${user.Name}</color> has been added.\n`);
+            playSound("sounds/Ting.mp3");
           }
 
           // Copy from compendium to stock
