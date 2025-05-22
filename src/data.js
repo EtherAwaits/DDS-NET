@@ -294,22 +294,22 @@ document.addEventListener("DOMContentLoaded", () => {
         const player = players.find((p) => p.id === playerId);
         if (player) {
           // Check and update player status
-          if (player.Status !== "Dead" && player.HP_Current === 0) {
+          if (player.Status !== "Dead" && player.HP_Current === 0) { // Player is Killed
             player.Status = "Dead";
             playSound("sounds/Dead.mp3", 1);
-            termtext(`<anim:term-pulse><color:red>WARNING!!!</color> <color:blue>${player.Name}</color> has been <color:red>killed</color>.\n`);
+            termtext(`<color:red>WARNING!!!</color> <color:blue>${player.Name}</color> has been <color:red>killed</color>.\n`);
           } 
           else if (player.Status === "Normal" && player.HP_Current <= player.HP_Max / 2) {
             player.Status = "Low_HP";  
             termtext(`<anim:term-shake><color:red>WARNING!!!</color> <color:blue>${player.Name}</color> is in critical condition.\n`);
             playSound("sounds/Bark.mp3", 0.5);
           } 
-          else if (player.Status === "Dead" && player.HP_Current > 0) {  
+          else if (player.Status === "Dead" && player.HP_Current > 0) { // Player is Revived
             player.Status = player.HP_Current <= player.HP_Max / 2 ? "Low_HP": "Normal";
-            playSound("sounds/Raise.mp3", 1);
+            playSound("sounds/Raise.mp3", 1); 
             termtext(`<anim:term-green><color:blue>${player.Name}</color> has been <color:green>revived</color>.\n`);
           } 
-          else if (player.Status === "Low_HP" && player.HP_Current > player.HP_Max / 2) {
+          else if (player.Status === "Low_HP" && player.HP_Current > player.HP_Max / 2) { // Player no longer critical
             player.Status = "Normal";
             playSound("sounds/Heal.mp3", 1);
             termtext(`<anim:term-bounce><color:blue>${player.Name}</color> is no longer in critical condition.\n`);
@@ -368,7 +368,6 @@ document.addEventListener("DOMContentLoaded", () => {
           break;
           case 'Sleep':
             document.getElementById(`party-slot-${i}`).classList.add(`bg-slate-600`);
-            document.getElementById(`party-slot-${i}`).classList.add(`rotate-180`);
           break;
           case 'Stone':
             document.getElementById(`party-slot-${i}`).classList.add(`bg-gray-600`);
@@ -457,12 +456,13 @@ document.addEventListener("DOMContentLoaded", () => {
       enemySlot.className = "enemy-member w-full card bg-gradient-to-br from-primary to-primary/30 shadow-secondary/50 shadow-lg outline outline-2 outline-double outline-secondary/50 hover:shadow-accent/50";
       enemySlot.setAttribute("data-id", enemy.id);
       enemySlot.id = `enemy-slot-${index + 1}`;
-      enemySlot.tabIndex = 0;
       let icon = `${enemy.Status}.png`;
-      enemySlot.innerHTML = `
-        <div class="flex justify-center gap-3 cursor-pointer click-sfx w-full min-h-20 party-menu" data-clicksound="sounds/Okay.mp3" data-volume="0.5">
+      let player = enemy;
 
+      enemySlot.innerHTML = `
         <input class="btn btn-xs btn-square form-input hover-sfx click-sfx absolute bottom-0 right-0 z-50" type="submit" id="form-delete-${index + 1}" value="X" data-hoversound="sounds/cursor.mp3">
+
+        <div class="enemy-member-inside flex justify-center gap-3 cursor-pointer click-sfx w-full min-h-20 party-menu" data-clicksound="sounds/Okay.mp3" data-volume="0.5" data-id="${enemy.id}" id="enemy-inner-${index + 1}">
 
           <div class="space-y-3">
             <img alt="${enemy.Name}" class="pic card xs:min-w-6 sm:size-7 sm:min-w-7 md:min-w-8 md:size-8 size-6 hidden border-4 border-double border-neutral" id="enemy-avatar-${index + 1}">
@@ -525,10 +525,99 @@ document.addEventListener("DOMContentLoaded", () => {
           populateEnemySlots(); // Refresh the enemy slots
         });
       }
+      else{
+        console.error(`Delete button for enemy ${index + 1} not found.`);
+      }
+
+      // Check and update player status
+          if (player.Status !== "Dead" && player.HP_Current === 0) {
+            player.Status = "Dead";
+            playSound("sounds/Dead.mp3", 1);
+            termtext(`<color:red>Enemy</color> <color:blue>${player.Name}</color> has been <color:red>killed</color>.\n`);
+          } 
+          else if (player.Status === "Normal" && player.HP_Current <= player.HP_Max / 2) {
+            player.Status = "Low_HP";  
+            termtext(`<anim:term-shake><color:red>Enemy</color> <color:blue>${player.Name}</color> is in critical condition.\n`);
+            playSound("sounds/Bark.mp3", 0.5);
+          } 
+          else if (player.Status === "Dead" && player.HP_Current > 0) {  
+            player.Status = player.HP_Current <= player.HP_Max / 2 ? "Low_HP": "Normal";
+            playSound("sounds/Raise.mp3", 1);
+            termtext(`<anim:term-green><color:red>Enemy</color> <color:blue>${player.Name}</color> has been <color:green>revived</color>.\n`);
+          } 
+          else if (player.Status === "Low_HP" && player.HP_Current > player.HP_Max / 2) {
+            player.Status = "Normal";
+            playSound("sounds/Heal.mp3", 1);
+            termtext(`<anim:term-bounce><color:red>Enemy</color> <color:blue>${player.Name}</color> is no longer in critical condition.\n`);
+          }
+
+          if (player.HP_Current <= player.HP_Max / 2)
+          {
+            document.getElementById(`enemy-slot-${index + 1}`).classList.remove(`from-primary`);
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`from-red-600`);
+          }
+
+          setEnemies(enemies);
+
+      switch (player.Status) {
+          case 'Dead':
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add("grayscale");
+            break;
+          case 'Bind':
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`bg-yellow-600`);
+          break;
+          case 'Charm':
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`bg-pink-600`);
+          break;
+          case 'Cursed':
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`bg-purple-600`);
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add("animate-pulse");
+          break;
+          case 'Fly':
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`bg-gray-600`);
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add("animate-spin");
+          break;
+          case 'Freeze':
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`bg-blue-600`);
+          break;
+          case 'Frog':
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`bg-lime-600`);
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`animate-bounce`);
+          break;
+          case 'Happy':
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`bg-yellow-600`);
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`animate-bounce`);
+          break;
+          case 'Mute':
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`bg-slate-600`);
+          break;
+          case 'Panic':
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`bg-violet-600`);
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`animate-bounce`);
+          break;
+          case 'Poison':
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`bg-purple-600`);
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add("animate-pulse");
+          break;
+          case 'Shock':
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`bg-yellow-600`);
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`animate-bounce`);
+          break;
+          case 'Sleep':
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`bg-slate-600`);
+          break;
+          case 'Stone':
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`bg-gray-600`);
+          break;
+          case 'Stun':
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`bg-cyan-600`);
+          break;
+          default:	
+        }
       
+      attachEnemySlotClickEvents();
     
     });
-
   }
 
   populateEnemySlots();
@@ -546,14 +635,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let currentPlayer = null;
 
-  function openForm(formType, player = null, playerid = null, skillid = null) {
+  function openForm(formType, player = null, playerid = null, skillid = null, parm5=null) {
     const formDisplay = document.getElementById("player-form"); // Ensure this element exists
     if (!formDisplay) {
       console.error("Error: 'formDisplay' element not found.");
       return;
     }
     // Update the form display dynamically based on the formType
-    updateFormDisplay(formType, player, playerid, skillid);
+    updateFormDisplay(formType, player, playerid, skillid,parm5);
 
     // Remove the hidden class to show the form
     playerForm.classList.remove("hidden");
@@ -601,6 +690,29 @@ document.addEventListener("DOMContentLoaded", () => {
         if (player) {
           newSlot.classList.add("party-member-selected");
           openForm("quick", player);
+        }
+      });
+    });
+  }
+
+  
+  // Attach Click Events to Enemy Slots
+  function attachEnemySlotClickEvents() {
+    const enemySlots = document.querySelectorAll(".enemy-member-inside");
+
+    enemySlots.forEach((slot, index) => {
+      // Remove any existing click listener
+      slot.replaceWith(slot.cloneNode(true)); // Clone and replace the node to clear listeners
+      const newSlot = document.getElementById(`enemy-inner-${index + 1}`); // Get the new node
+
+      // Add the click listener to the new element
+      newSlot.addEventListener("click", () => {
+        const enemies = getEnemies();
+        const enemyId = newSlot.getAttribute("data-id");
+        const enemy = enemies.find((e) => e.id === enemyId);
+        if (enemy) {
+          enemySlots[index].classList.add("enemy-member-selected");
+          openForm("quick", enemy,"enemy");
         }
       });
     });
@@ -1015,11 +1127,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function updateFormDisplay(formName, mode = null, playerid = null, skillid = null) {
+  function updateFormDisplay(formName, mode = null, playerid = null, skillid = null, parm5 = null) {
     const formDisplay = document.getElementById("player-form");
     switch (formName) {
       case "quick":
         currentPlayer = mode;
+
         termtext(`<color:yellow>Opening</color> Data Analyzer for <color:blue>${currentPlayer.Name}</color>.\n`);
         formDisplay.innerHTML = `  
 			   <div class="form text-bold text-white p-4 bg-gradient-to-b from-secondary to- shadow-lg shadow-secondary/50  motion-reduced">  
@@ -1074,7 +1187,70 @@ document.addEventListener("DOMContentLoaded", () => {
 				  </div>  
 			   </div>  
 				`;
-        setupFormEventListenersQuick();
+
+        function updateFormValuesQuick(player) {
+          document.getElementById("form-player-name").textContent = player.Name;
+          document.getElementById("form-hp").value = 0;
+          document.getElementById("form-mp").value = 0;
+          document.getElementById("form-fate").textContent = player.Fate_Current;
+          document.getElementById("form-status").value = player.Status;
+        }
+
+        function setupFormEventListenersQuick(mode = null) {
+          const fateIncrease = document.getElementById("fate-increase");
+          const fateDecrease = document.getElementById("fate-decrease");
+          const formCancel = document.getElementById("form-cancel");
+          const formConfirm = document.getElementById("form-confirm");
+
+          fateIncrease.addEventListener("click", () => {
+            if (currentPlayer && currentPlayer.Fate_Current < currentPlayer.Fate_Max) {
+              currentPlayer.Fate_Current++;
+              document.getElementById("form-fate").textContent = currentPlayer.Fate_Current;
+            }
+          });
+
+          fateDecrease.addEventListener("click", () => {
+            if (currentPlayer && currentPlayer.Fate_Current > 0) {
+              currentPlayer.Fate_Current--;
+              document.getElementById("form-fate").textContent = currentPlayer.Fate_Current;
+            }
+          });
+
+          formConfirm.addEventListener("click", () => {
+            if (currentPlayer) {
+              const players = getPlayers();
+              const enemies = getEnemies();
+              const formHP = document.getElementById("form-hp");
+              const formMP = document.getElementById("form-mp");
+              const formStatus = document.getElementById("form-status");
+
+              // Update currentPlayer's stats
+              currentPlayer.HP_Current = Math.min(currentPlayer.HP_Max, Math.max(0, currentPlayer.HP_Current - formHP.value));
+              currentPlayer.MP_Current = Math.min(currentPlayer.MP_Max, Math.max(0, currentPlayer.MP_Current - formMP.value));
+              currentPlayer.Status = formStatus.value;
+
+              // Save updated players to local storage
+              if (playerid !== "enemy") {
+                const search = players.map((player) => player.id === currentPlayer.id ? currentPlayer : player);
+                setPlayers(search);
+              } else {
+                const search = enemies.map((player) => player.id === currentPlayer.id ? currentPlayer : player);
+                setEnemies(search);
+              }
+
+              // Refresh party slots
+              populatePartySlots();
+            }
+
+            termtext(`<anim:term-blue><b>Data Updated</b>.\n`);
+            closeForm();
+            updateBottomDisplay("None");
+          });
+
+          formCancel.addEventListener("click", closeForm);
+        }
+
+        setupFormEventListenersQuick(playerid);
         updateFormValuesQuick(currentPlayer);
         let player = currentPlayer;
         compendium = getskillComp();
@@ -1084,12 +1260,13 @@ document.addEventListener("DOMContentLoaded", () => {
           document.getElementById(`fate-decrease`).classList.add("hidden");
           document.getElementById(`fate-label`).classList.add("hidden");
         }
-        if (!player.skills) {
+        if (!player.skills && playerid === null) {
           let players = getPlayers();
           player = players.find((p) => p.id === player.id);
           player.skills = [];
           localStorage.setItem('players', JSON.stringify(players));
         }
+        console.log(player);
         document.getElementById("skill-display").innerHTML = `
           <div class="card grid grid-cols-1 p-12 gap-2 bg-base-300 border-neutral border-2 max-h-80 overflow-y-auto">
             ${compendium.filter(skill => player.skills.includes(skill.id)).map((skill) => {
@@ -1125,15 +1302,21 @@ document.addEventListener("DOMContentLoaded", () => {
         // Implements the logic for using a skill
         function useSkill(playerId, skillId) {
           const system = getSystem();
+          const enemies = getEnemies();
           const players = getPlayers();
-          const player = players.find((p) => p.id === playerId);
+          const search = playerid === "enemy" ? enemies : players;
+          const player = search.find((p) => p.id === playerId);
           const skill = compendium.find((s) => s.id === skillId);
           
           // Check if the skill cost can be paid
           if (skill.costType === "FATE") {
             if (player.Fate_Current - skill.costNum >= 0) {
               player.Fate_Current = Math.min(player.Fate_Max, Math.max(0, player.Fate_Current - skill.costNum));
-              setPlayers(players);
+              if (playerid !== "enemy") {
+                setPlayers(search);
+              } else {
+                setEnemies(search);
+              }
             } 
             else {
               playSound("sounds/Dead.mp3");
@@ -1174,7 +1357,11 @@ document.addEventListener("DOMContentLoaded", () => {
             player.HP_Current = Math.min(player.HP_Max, Math.max(0, player.HP_Current + recovery));
             player.MP_Current = Math.min(player.MP_Max, Math.max(0, player.MP_Current + recovery));
             termtext(`<anim:term-red><color:red>ERROR </color><color:blue>${player.Name}</color> can't use <color:purple>${skill.name}</color> while having <color:pink>${player.Status}</color>.\n<anim:term-green><color:blue>${player.Name}</color> rested and gained <color:purple>${recovery}</color> HP & MP\n`);
-            setPlayers(players);
+             if (playerid !== "enemy") {
+                setPlayers(search);
+              } else {
+                setEnemies(search);
+              }
             populatePartySlots(getPlayers(), getParty());
             closeForm();
             return;
@@ -1183,7 +1370,11 @@ document.addEventListener("DOMContentLoaded", () => {
             let roll = Math.floor(Math.random() * 10) + 1;
             player.HP_Current = Math.min(player.HP_Max, Math.max(0, player.HP_Current - roll));
             termtext(`<anim:term-red><color:darkred>WARNING </color><color:blue>${player.Name}</color> took <color:purple>${roll}</color> damage from <color:pink>${player.Status}</color>.\n<anim:term-shake>Any damage dealt by <color:blue>${player.Name}</color> will be halved.\n`);
-            setPlayers(players);
+             if (playerid !== "enemy") {
+                setPlayers(search);
+              } else {
+                setEnemies(search);
+              }
             populatePartySlots(getPlayers(), getParty());
           }
           if (player.Status === "Panic") {
@@ -1210,8 +1401,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 case 4:
                   termtext(`<anim:term-shake><color:blue>${player.Name}</color> begins to suddenly <color:pink>Sleep</color>.\n`);
                   player.Status = "Sleep";
-                  let players = getPlayers();
-                  setPlayers(players);
+                   if (playerid !== "enemy") {
+                    setPlayers(search);
+                  } else {
+                    setEnemies(search);
+                  }
                   updateFormValuesQuick(player.id);
                   break;
                 case 5:
@@ -1227,7 +1421,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 break;
                 default:
               } 
-              setPlayers(players);
+
+              if (playerid !== "enemy") {
+                setPlayers(search);
+              } else {
+                setEnemies(search);
+              }
               populatePartySlots(getPlayers(), getParty());
               closeForm();
               return;
@@ -1250,7 +1449,11 @@ document.addEventListener("DOMContentLoaded", () => {
                   break;
                   default:
                 } 
-                setPlayers(players);
+                 if (playerid !== "enemy") {
+                    setPlayers(search);
+                  } else {
+                    setEnemies(search);
+                  }
                 populatePartySlots(getPlayers(), getParty());
                 closeForm();
                 return;
@@ -1268,15 +1471,16 @@ document.addEventListener("DOMContentLoaded", () => {
           }
           playSound("sounds/Okay.mp3");
           termtext(`<color:blue>${player.Name}</color> used <color:purple>${skill.name}</color>.\n${skill.description}\n`);
+          let usertype = playerid === "enemy" ? "enemy" : "skill";
           switch (skill.roll) {
             case "Attack":
-              openForm("tnroll", "skill", player.id, skill.id);
+              openForm("tnroll", "skill", player.id, skill.id, usertype);
             break;
             case "TN":
-              openForm("tnroll", "skill", player.id, skill.id);
+              openForm("tnroll", "skill", player.id, skill.id, usertype);
             break;
             case "Power":
-              openForm("proll", "skill", player.id, skill.id);
+              openForm("proll", "skill", player.id, skill.id, usertype);
             break;
             case "Passive":
               switch (skill.costType) {
@@ -1292,7 +1496,12 @@ document.addEventListener("DOMContentLoaded", () => {
             break;
             default:  
           } 
-          setPlayers(players);
+
+           if (playerid !== "enemy") {
+                setPlayers(search);
+              } else {
+                setEnemies(search);
+              }
           populatePartySlots(getPlayers(), getParty());
         }
         
@@ -1740,7 +1949,7 @@ document.addEventListener("DOMContentLoaded", () => {
 						<input class="btn btn-sm btn-square form-input hover-sfx" type="submit" id="form-confirm" value="✔" data-hoversound="sounds/cursor.mp3">
 					</div>
 				`;
-        termtext(`<anim:term-pulse><color:yellow>Opening</color> <color:red>DATA RESET</color>.\n`);
+        termtext(`<color:yellow>Opening</color> <color:red>DATA RESET</color>.\n`);
         let formCanceler = document.getElementById("form-cancel");
         formCanceler.addEventListener("click", closeForm);
         playSound("sounds/warning.mp3");
@@ -2441,7 +2650,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
           function roller(playerId) {
               let players = getPlayers();
-              let currentPlayer = players.find((p) => p.id === playerId);
+              let enemies = getEnemies();
+              const search = parm5 === "enemy" ? enemies : players;
+              let currentPlayer = search.find((p) => p.id === playerId);
 
               // Reset the formula
               let baseTN = 0;
@@ -2724,6 +2935,7 @@ document.addEventListener("DOMContentLoaded", () => {
               formConfirmrd.addEventListener("click", () => {
                 let result = "Failure";
                 let players = getPlayers();
+                let enemies = getEnemies();
                 let system = getSystem();
 
                 if (!currentPlayer) {
@@ -2795,17 +3007,17 @@ document.addEventListener("DOMContentLoaded", () => {
                   case "Critical Fumble":
                     switch (mode) {
                       case "talk":
-                        termtext(`<anim:term-red><color:Yellow>Talk Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> Conversation has fumbled, tensions have greatly increased.\n`);
+                        termtext(`<anim:term-red><color:Yellow>Talk Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<color:darkred>Warning</color> Conversation has fumbled, tensions have greatly increased.\n`);
                         setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
                         break;
                       case "recover":
                         switch (rules) {
                           case "1":
-                            termtext(`<anim:term-red><color:Yellow>Recovery Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> Recovery fumbled, <color:blue>${currentPlayer.Name}</color> doesn't feel so good.\n`);
+                            termtext(`<anim:term-red><color:Yellow>Recovery Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<color:darkred>Warning</color> Recovery fumbled, <color:blue>${currentPlayer.Name}</color> doesn't feel so good.\n`);
                             setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
                             break;
                           default:
-                            termtext(`<anim:term-red><color:Yellow>Recovery Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> Recovery fumbled, <color:blue>${currentPlayer.Name}</color> doesn't feel so good, HP & MP are halved.\n`);
+                            termtext(`<anim:term-red><color:Yellow>Recovery Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<color:darkred>Warning</color> Recovery fumbled, <color:blue>${currentPlayer.Name}</color> doesn't feel so good, HP & MP are halved.\n`);
                             currentPlayer.HP_Current = Math.floor(currentPlayer.HP_Current / 2);
                             currentPlayer.MP_Current = Math.floor(currentPlayer.MP_Current / 2);
                             setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
@@ -2814,51 +3026,49 @@ document.addEventListener("DOMContentLoaded", () => {
                       case "surprise":
                         switch (rules) {
                           case "1":
-                            termtext(`<anim:term-red><color:Yellow>Encounter Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> <color:blue>${currentPlayer.Name}</color> is surprised.\n`);
+                            termtext(`<anim:term-red><color:Yellow>Encounter Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<color:darkred>Warning</color> <color:blue>${currentPlayer.Name}</color> is surprised.\n`);
                             setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
                             break;
                           default:
-                            termtext(`<anim:term-red><color:Yellow>Encounter Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> <color:blue>${currentPlayer.Name}</color> is shocked! No power dice given in the Initiative roll.\n`);
+                            termtext(`<anim:term-red><color:Yellow>Encounter Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<color:darkred>Warning</color> <color:blue>${currentPlayer.Name}</color> is shocked! No power dice given in the Initiative roll.\n`);
                             currentPlayer.Status = "Shock";
                             setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
                         }
                         break;
                       case "evade":
-                        termtext(`<anim:term-red><color:Yellow>Evasion Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> Evasion fumbled, <color:blue>${currentPlayer.Name}</color> is wide open for attack.\n`);
+                        termtext(`<anim:term-red><color:Yellow>Evasion Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<color:darkred>Warning</color> Evasion fumbled, <color:blue>${currentPlayer.Name}</color> is wide open for attack.\n`);
                         setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
                         break;
                       case "ranged":
-                        termtext(`<anim:term-red><color:Yellow>Ranged Attack Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> Attack fumbled, <color:blue>${currentPlayer.Name}'s</color> fires wildly!\n`);
+                        termtext(`<anim:term-red><color:Yellow>Ranged Attack Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<color:darkred>Warning</color> Attack fumbled, <color:blue>${currentPlayer.Name}'s</color> fires wildly!\n`);
                         setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
                         break;
                       case "magic":
-                        termtext(`<anim:term-red><color:Yellow>Magic Attack Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> Attack fumbled, <color:blue>${currentPlayer.Name}'s</color> casts wildly!\n`);
+                        termtext(`<anim:term-red><color:Yellow>Magic Attack Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<color:darkred>Warning</color> Attack fumbled, <color:blue>${currentPlayer.Name}'s</color> casts wildly!\n`);
                         setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
                         break;
                       case "melee":
-                        termtext(`<anim:term-red><color:Yellow>Melee Attack Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> Attack fumbled, <color:blue>${currentPlayer.Name}'s</color> swings wildly!\n`);
+                        termtext(`<anim:term-red><color:Yellow>Melee Attack Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<color:darkred>Warning</color> Attack fumbled, <color:blue>${currentPlayer.Name}'s</color> swings wildly!\n`);
                         setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
                         break;
                       case "skill":
                         let compendium = getskillComp();
-                        let players = getPlayers();
-                        let player = players.find((p) => p.id === playerid);
                         let skill = compendium.find((s) => s.id === skillid);
                         switch (skill.baseTN) {
                           case 'Strength':
-                            termtext(`<anim:term-red><color:Yellow>${skill.name}</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> Attack fumbled, <color:blue>${currentPlayer.Name}'s</color> swings wildly!\n`);
+                            termtext(`<anim:term-red><color:Yellow>${skill.name}</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<color:darkred>Warning</color> Attack fumbled, <color:blue>${currentPlayer.Name}'s</color> swings wildly!\n`);
                             setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1);}, 250);
                             break;
                           case 'Magic':
-                            termtext(`<anim:term-red><color:Yellow>${skill.name}</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> Attack fumbled, <color:blue>${currentPlayer.Name}'s</color> casts wildly!\n`);
+                            termtext(`<anim:term-red><color:Yellow>${skill.name}</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<color:darkred>Warning</color> Attack fumbled, <color:blue>${currentPlayer.Name}'s</color> casts wildly!\n`);
                             setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
                             break;  
                           case 'Agility':
-                            termtext(`<anim:term-red><color:Yellow>${skill.name}</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> Attack fumbled, <color:blue>${currentPlayer.Name}'s</color> fires wildly!\n`);
+                            termtext(`<anim:term-red><color:Yellow>${skill.name}</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<color:darkred>Warning</color> Attack fumbled, <color:blue>${currentPlayer.Name}'s</color> fires wildly!\n`);
                             setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
                             break;
                           case 'Talk':
-                            termtext(`<anim:term-red><color:Yellow>${skill.name}</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> Conversation has fumbled, tensions have greatly increased.\n`);
+                            termtext(`<anim:term-red><color:Yellow>${skill.name}</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<color:darkred>Warning</color> Conversation has fumbled, tensions have greatly increased.\n`);
                             setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
                             break;
                           default:
@@ -2915,8 +3125,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         break;
                       case "skill":
                         let compendium = getskillComp();
-                        let players = getPlayers();
-                        let player = players.find((p) => p.id === playerid);
                         let skill = compendium.find((s) => s.id === skillid);
                         switch (skill.baseTN) {
                           case 'Strength':
@@ -2985,8 +3193,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         break;
                       case "skill":
                         let compendium = getskillComp();
-                        let players = getPlayers();
-                        let player = players.find((p) => p.id === playerid);
                         let skill = compendium.find((s) => s.id === skillid);
                         switch (skill.baseTN) {
                           case 'Strength':
@@ -3048,8 +3254,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         break;
                       case "skill":
                         let compendium = getskillComp();
-                        let players = getPlayers();
-                        let player = players.find((p) => p.id === playerid);
                         let skill = compendium.find((s) => s.id === skillid);
                         switch (skill.baseTN) {
                           case 'Strength':
@@ -3075,7 +3279,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         console.log(`${skill.roll} `);
                         if (skill.roll === "Attack") {
                           console.log(`Running `);
-                          setTimeout(() => { openForm("proll", "skill", player.id, skill.id); }, 750);
+                          setTimeout(() => { openForm("proll", "skill", currentPlayer.id, skill.id, parm5); }, 750);
                         }
                         break;
                       default:
@@ -3123,8 +3327,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         break;
                       case "skill":
                         let compendium = getskillComp();
-                        let players = getPlayers();
-                        let player = players.find((p) => p.id === playerid);
                         let skill = compendium.find((s) => s.id === skillid);
                         switch (skill.baseTN) {
                           case 'Strength':
@@ -3148,7 +3350,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             setTimeout(() => { playSound("sounds/Saveting.mp3", 1);}, 250);
                         }
                         if (skill.roll === "Attack") {
-                          setTimeout(() => { openForm("proll", "skill", player.id, skill.id); }, 750);
+                          setTimeout(() => { openForm("proll", "skill", currentPlayer.id, skill.id, parm5); }, 750);
                         }
                         break;
                       default:
@@ -3158,14 +3360,21 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 
                 let compendium = getskillComp();
-                players = getPlayers();
                 let skill = compendium.find((s) => s.id === skillid);
                
-                // Update players data in localStorage
-                const updatedPlayers = players.map((player) =>
-                  player.id === currentPlayer.id ? currentPlayer : player,
-                );
-                setPlayers(updatedPlayers);
+                if (parm5 !== "enemy") {
+                  // Update players data in localStorage
+                  const index = search.findIndex((p) => p.id === currentPlayer.id);
+                  players[index] = currentPlayer;
+                  setPlayers(players);
+                } else {
+                  // Update enemies data in localStorage
+                  const index = search.findIndex((p) => p.id === currentPlayer.id);
+                  enemies[index] = currentPlayer;
+                  setEnemies(enemies);
+                  populateEnemySlots();
+                }
+
                 populatePartySlots(getPlayers(), getParty());
                 closeForm();
               });
@@ -3240,7 +3449,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
           function rollerp(playerId) {
               let players = getPlayers();
-              let currentPlayer = players.find((p) => p.id === playerId);
+              let enemies = getEnemies();
+              const search = parm5 === "enemy" ? enemies : players;
+              let currentPlayer = search.find((p) => p.id === playerId);
 
               // Reset the formula
               let baseTN = 0;
@@ -3529,8 +3740,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     break;
                   case "skill":
                     let compendium = getskillComp();
-                    let players = getPlayers();
-                    let player = players.find((p) => p.id === playerid);
                     let skill = compendium.find((s) => s.id === skillid);
                     switch (skill.baseTN) {
                       case "Melee":
@@ -3555,11 +3764,20 @@ document.addEventListener("DOMContentLoaded", () => {
                     setTimeout(() => { playSound("sounds/Saveting.mp3", 1); }, 250);
                 }
 
-                // Update players data in localStorage
-                const updatedPlayers = players.map((player) =>
-                  player.id === currentPlayer.id ? currentPlayer : player,
-                );
-                setPlayers(updatedPlayers);
+               
+                if (parm5 !== "enemy") {
+                  // Update players data in localStorage
+                  const index = search.findIndex((p) => p.id === currentPlayer.id);
+                  players[index] = currentPlayer;
+                  setPlayers(players);
+                } else {
+                  // Update enemies data in localStorage
+                  const index = search.findIndex((p) => p.id === currentPlayer.id);
+                  enemies[index] = currentPlayer;
+                  setEnemies(enemies);
+                  populateEnemySlots();
+                }
+
                 if (mode === "skill") { populatePartySlots(getPlayers(), getParty(), true); }
                 closeForm();
               });
@@ -4381,6 +4599,7 @@ document.addEventListener("DOMContentLoaded", () => {
               MP_Current: user.MP_Max,
               Fate_Max: user.Fate_Max,
               Fate_Current: user.Fate_Max,
+              skills: user.skills,
             };
             enemies.push(enemy);
             localStorage.setItem('enemies', JSON.stringify(enemies));
@@ -4499,7 +4718,7 @@ document.addEventListener("DOMContentLoaded", () => {
             document.body.appendChild(downloadAnchorNode); // required for firefox
             downloadAnchorNode.click();
             downloadAnchorNode.remove();
-            termtext(`<anim:term-bounce><color:green>Success</color> Exported User Compendium.\n<anim:term-pulse><color:purple>Note:</color> Assigned skills will not transfer and must be reassigned upon import.\n`);
+            termtext(`<anim:term-bounce><color:green>Success</color> Exported User Compendium.\n<color:purple>Note:</color> Assigned skills will not transfer and must be reassigned upon import.\n`);
   
           });
   
@@ -4539,62 +4758,6 @@ document.addEventListener("DOMContentLoaded", () => {
         termtext(`<anim:term-pulse><color:red>Debug</color> Section unfinished.\n`);
         formCancelerrrrrrrr.addEventListener("click", closeForm);
     }
-  }
-
-  function setupFormEventListenersQuick() {
-    const fateIncrease = document.getElementById("fate-increase");
-    const fateDecrease = document.getElementById("fate-decrease");
-    const formCancel = document.getElementById("form-cancel");
-    const formConfirm = document.getElementById("form-confirm");
-
-    fateIncrease.addEventListener("click", () => {
-      if (currentPlayer && currentPlayer.Fate_Current < currentPlayer.Fate_Max) {
-        currentPlayer.Fate_Current++;
-        document.getElementById("form-fate").textContent = currentPlayer.Fate_Current;
-      }
-    });
-
-    fateDecrease.addEventListener("click", () => {
-      if (currentPlayer && currentPlayer.Fate_Current > 0) {
-        currentPlayer.Fate_Current--;
-        document.getElementById("form-fate").textContent = currentPlayer.Fate_Current;
-      }
-    });
-
-    formConfirm.addEventListener("click", () => {
-      if (currentPlayer) {
-        const players = getPlayers();
-        const formHP = document.getElementById("form-hp");
-        const formMP = document.getElementById("form-mp");
-        const formStatus = document.getElementById("form-status");
-
-        // Update currentPlayer's stats
-        currentPlayer.HP_Current = Math.min(currentPlayer.HP_Max, Math.max(0, currentPlayer.HP_Current - formHP.value));
-        currentPlayer.MP_Current = Math.min(currentPlayer.MP_Max, Math.max(0, currentPlayer.MP_Current - formMP.value));
-        currentPlayer.Status = formStatus.value;
-
-        // Save updated players to local storage
-        const updatedPlayers = players.map((player) => player.id === currentPlayer.id ? currentPlayer : player);
-        setPlayers(updatedPlayers);
-
-        // Refresh party slots
-        populatePartySlots();
-      }
-
-      termtext(`<anim:term-blue><b>Data Updated</b>.\n`);
-      closeForm();
-	  updateBottomDisplay("None");
-    });
-
-    formCancel.addEventListener("click", closeForm);
-  }
-
-  function updateFormValuesQuick(player) {
-    document.getElementById("form-player-name").textContent = player.Name;
-    document.getElementById("form-hp").value = 0;
-    document.getElementById("form-mp").value = 0;
-    document.getElementById("form-fate").textContent = player.Fate_Current;
-    document.getElementById("form-status").value = player.Status;
   }
 
   function updateCornerDisplay() {
@@ -4890,7 +5053,6 @@ function getImageFromIndexedDB(id) {
     }
   });
 }
-
 
 function ClearImages() {
   return new Promise(async (resolve, reject) => {
