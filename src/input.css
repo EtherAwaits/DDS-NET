@@ -28,6 +28,9 @@ body {
 [data-theme="ddsnet"] .party-member {
 	@apply rounded-tl-2xl;
 }
+[data-theme="ddsnet"] .enemy-member {
+	@apply rounded-tl-2xl;
+}
 [data-theme="ddsnet"] .pic {
 	@apply rounded-tl-2xl;
 }
@@ -55,6 +58,10 @@ body {
 	@apply rounded-br-2xl;
 }
 [data-theme="arcticjourney"] .pic {
+	@apply rounded-tl-2xl;
+	@apply rounded-br-2xl;
+}
+[data-theme="arcticjourney"] .enemy-member {
 	@apply rounded-tl-2xl;
 	@apply rounded-br-2xl;
 }
@@ -176,6 +183,35 @@ body {
 	outline-width: 4px;
 	animation: bounce .2s .5;
 }
+
+.enemy-member {
+	@apply card;
+	user-select: none;
+	padding: .2rem .2rem;
+	font-family: monospace;	
+}
+.enemy-member:hover {
+	@apply outline-accent;
+	padding: .3rem .3rem;
+	outline-style: double;
+	outline-width: 4px;
+	transition: outline-width 0.1s;
+}
+.enemy-member:focus {
+	@apply outline-accent;
+	padding: .3rem .3rem;
+	outline-style: double;
+	outline-width: 4px;
+	transition: outline-width 0.1s;
+	animation: bounce .2s .5;
+}
+.enemy-member-selected {
+	@apply outline-accent shadow-lg shadow-accent/50;
+	outline-style: double;
+	outline-width: 4px;
+	animation: bounce .2s .5;
+}
+
 .tab-button {
 	@apply outline-secondary;
 	outline-style: double;

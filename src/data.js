@@ -95,30 +95,26 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("Initialized 'party' in localStorage.");
   }
 
-  // Check if 'system' key exists in localStorage
-  if (!localStorage.getItem("system")) {
-    termtext(`<color:purple>Note</color> <b>System</b> data not found, generated default system data.\nYou may change these in the Config within the CHANGE menu.\n\n<anim:term-pulse><color:yellow> UNREAD MESSAGES (1)</color>:\nTo everyone on this network...\n A serious threat is closing in on humanity at this very moment.\nThis program will surely be of use to you. <color:blue>-S</color>\n\n`);
-    // Set default party data
-    const defaultSystem = {
-      moon: 8, // New = 0, 1/8 = 1, 2/8 = 2, 3/8 = 3, 4/8... FULL = 8, 1/8 = 9, 2/8 = 10
-      macca: 100,
-      rules: 0, // 0 = X, 1 = TC
-      username: "<USER>",
-      config1: "ddsnet", // Theme, 0 = DDS
-      config2: 0,
-      config3: 0,
-      config4: 0,
-      config5: 0,
-      config6: 0,
-      config7: 0,
-      config8: 0,
-      config9: 0,
-    };
-    localStorage.setItem("system", JSON.stringify(defaultSystem));
-    console.log("Initialized 'system' in localStorage.");
+  // Check if 'enemy' key exists in localStorage
+  if (!localStorage.getItem("enemies")) {
+    termtext(`<color:purple>Note</color> <b>Enemy</b> data not found, generated default enemy data.\n`);
+    // Set default enemy data
+    const defaultEnemy = [];
+    // Store the enemy array in localStorage
+    localStorage.setItem("enemies", JSON.stringify(defaultEnemy));
+    console.log("Initialized 'enemies' in localStorage.");
+}
+
+ // Check if 'initiative' key exists in localStorage
+  if (!localStorage.getItem("initiative")) {
+    termtext(`<color:purple>Note</color> <b>Initiative</b> data not found, generated default initiative data.\n`);
+    // Set default initiative data
+    const defaultInitiative = [];
+    localStorage.setItem("initiative", JSON.stringify(defaultInitiative));
+    console.log("Initialized 'initiative' in localStorage.");
   }
 
-    // Check if 'players' key exists in localStorage
+    // Check if 'userComp' key exists in localStorage
     if (!localStorage.getItem("userComp")) {
       // Set one example compendium user.
       const defaultPlayers = [
@@ -150,7 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
         },
         {
           id: "675d3a6e255a567836776d15",
-          Name: "Best Cait Sith",
+          Name: "Beast Cait Sith",
           Type: "Demon",
           Level: 5,
           Strength: 6,
@@ -175,24 +171,55 @@ document.addEventListener("DOMContentLoaded", () => {
           skills:["buff-01","healing-01"],
         },
       ];
-  
+      termtext(`<color:purple>Note</color> <b>User Compendium</b> not found, generated default user compendium data.\n`);
       // Store the userComp array in localStorage
       localStorage.setItem("userComp", JSON.stringify(defaultPlayers));
       console.log("Initialized 'userComp' in localStorage.");
     }
 
+    // Check if 'system' key exists in localStorage
+      if (!localStorage.getItem("system")) {
+        termtext(`<color:purple>Note</color> <b>System</b> data not found, generated default system data.\nYou may change these in the Config within the CHANGE menu.\n\n<anim:term-pulse><color:yellow> UNREAD MESSAGES (1)</color>:\nTo everyone on this network...\n A serious threat is closing in on humanity at this very moment.\nThis program will surely be of use to you. <color:blue>-S</color>\n\n`);
+        // Set default party data
+        const defaultSystem = {
+          moon: 8, // New = 0, 1/8 = 1, 2/8 = 2, 3/8 = 3, 4/8... FULL = 8, 1/8 = 9, 2/8 = 10
+          macca: 100,
+          rules: 0, // 0 = X, 1 = TC
+          username: "<USER>",
+          config1: "ddsnet", // Theme, 0 = DDS
+          config2: 0, // Current Turn in Initiative
+          config3: 0,
+          config4: 0,
+          config5: 0,
+          config6: 0,
+          config7: 0,
+          config8: 0,
+          config9: 0,
+        };
+        localStorage.setItem("system", JSON.stringify(defaultSystem));
+        console.log("Initialized 'system' in localStorage.");
+      }
+
   // Centralized Retrieval
   const getParty = () => JSON.parse(localStorage.getItem("party")) || {}; // const party = getParty();
   const getPlayers = () => JSON.parse(localStorage.getItem("players")) || []; // const players = getPlayers();
   const getSystem = () => JSON.parse(localStorage.getItem("system")) || []; // const system = getSystem();
-  const getskillComp = () => JSON.parse(localStorage.getItem("skillComp")) || []; // const skillsCompendium = getskillsCompendium();
-  const getuserComp = () => JSON.parse(localStorage.getItem("userComp")) || []; // const userCompendium = getuserCompendium();
+  const getskillComp = () => JSON.parse(localStorage.getItem("skillComp")) || []; // const skillsComp = getskillsComp();
+  const getuserComp = () => JSON.parse(localStorage.getItem("userComp")) || []; // const userComp = getuserCompe();
+  const getEnemies = () => JSON.parse(localStorage.getItem("enemies")) || []; // const enemies = getenemies();
+  const getInitiative = () => JSON.parse(localStorage.getItem("initiative")) || []; // const initiative = getInitiative();
   //Centralized Updates
   const setParty = (party) => localStorage.setItem("party", JSON.stringify(party));
   const setPlayers = (players) => localStorage.setItem("players", JSON.stringify(players));
   const setSystem = (system) => localStorage.setItem("system", JSON.stringify(system));
 	const setskillComp = (skillComp) => localStorage.setItem("skillComp", JSON.stringify(skillsComp));
   const setuserComp = (userComp) => localStorage.setItem("userComp", JSON.stringify(userComp));
+  const setEnemies = (enemy) => localStorage.setItem("enemies", JSON.stringify(enemy));
+  const setInitiative = (initiative) => {
+    // Sort by init_num descending before saving
+    const sorted = [...initiative].sort((a, b) => b.init_num - a.init_num);
+    localStorage.setItem("initiative", JSON.stringify(sorted));
+  };
 
   const sys = getSystem();
   const user = sys.username;
@@ -209,9 +236,10 @@ document.addEventListener("DOMContentLoaded", () => {
     document.documentElement.setAttribute('data-theme', theme);
   }
 
-
   // Generates the 6 slots using the ID's in the "party" data
   function populatePartySlots(players, party, noevent = false) {
+    populateEnemySlots();
+
     for (let i = 1; i <= 6; i++) {
       party = getParty();
       players = getPlayers();
@@ -222,22 +250,22 @@ document.addEventListener("DOMContentLoaded", () => {
         const player = players.find((p) => p.id === playerId);
         if (player) {
           // Check and update player status
-          if (player.Status !== "Dead" && player.HP_Current === 0) {
+          if (player.Status !== "Dead" && player.HP_Current === 0) { // Player is Killed
             player.Status = "Dead";
             playSound("sounds/Dead.mp3", 1);
-            termtext(`<anim:term-pulse><color:red>WARNING!!!</color> <color:blue>${player.Name}</color> has been <color:red>killed</color>.\n`);
+            termtext(`<color:red>WARNING!!!</color> <color:blue>${player.Name}</color> has been <color:red>killed</color>.\n`);
           } 
           else if (player.Status === "Normal" && player.HP_Current <= player.HP_Max / 2) {
             player.Status = "Low_HP";  
             termtext(`<anim:term-shake><color:red>WARNING!!!</color> <color:blue>${player.Name}</color> is in critical condition.\n`);
             playSound("sounds/Bark.mp3", 0.5);
           } 
-          else if (player.Status === "Dead" && player.HP_Current > 0) {  
+          else if (player.Status === "Dead" && player.HP_Current > 0) { // Player is Revived
             player.Status = player.HP_Current <= player.HP_Max / 2 ? "Low_HP": "Normal";
-            playSound("sounds/Raise.mp3", 1);
+            playSound("sounds/Raise.mp3", 1); 
             termtext(`<anim:term-green><color:blue>${player.Name}</color> has been <color:green>revived</color>.\n`);
           } 
-          else if (player.Status === "Low_HP" && player.HP_Current > player.HP_Max / 2) {
+          else if (player.Status === "Low_HP" && player.HP_Current > player.HP_Max / 2) { // Player no longer critical
             player.Status = "Normal";
             playSound("sounds/Heal.mp3", 1);
             termtext(`<anim:term-bounce><color:blue>${player.Name}</color> is no longer in critical condition.\n`);
@@ -296,7 +324,6 @@ document.addEventListener("DOMContentLoaded", () => {
           break;
           case 'Sleep':
             document.getElementById(`party-slot-${i}`).classList.add(`bg-slate-600`);
-            document.getElementById(`party-slot-${i}`).classList.add(`rotate-180`);
           break;
           case 'Stone':
             document.getElementById(`party-slot-${i}`).classList.add(`bg-gray-600`);
@@ -331,7 +358,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   <label class="absolute inset-0 flex items-center text-sm font-bold text-white">
                     MP ${player.MP_Current}/${player.MP_Max}
                   </label>
-			  </div>
+			          </div>
               </div>
 			  <div class="stat-bar" id="player-fate${i}">
                 <div class="bar-bg relative">
@@ -339,9 +366,10 @@ document.addEventListener("DOMContentLoaded", () => {
                   <label class="absolute inset-0 flex items-center text-sm font-bold text-white">
                     FATE ${player.Fate_Current}/${player.Fate_Max}
                   </label>
-			  </div>
+			          </div>
             </div>
           </div>
+        </div>
 		`;
     if (player.Fate_Max === 0) {
       document.getElementById(`player-fate${i}`).classList.add("hidden");
@@ -353,11 +381,19 @@ document.addEventListener("DOMContentLoaded", () => {
 				const avatar = document.getElementById(`avatar-${i}`);	
 				avatar.src = url;
 				avatar.classList.remove("hidden");
-				}
 			}
-      
-		  displayPlayer();
-      }
+		}
+
+    const system = getSystem();
+    const initiative = getInitiative();
+    if (initiative.length > 0 && player.id === initiative[system.config2].id) {
+      document.getElementById(`party-slot-${i}`).classList.add("border-2", "border-info");
+    } else {
+      document.getElementById(`party-slot-${i}`).classList.remove("border-2", "border-info");
+    }
+
+        displayPlayer();
+        }
       } else {
         partySlot.innerHTML = `
 		    <div class="flex items-center justify-center cursor-pointer h-full">
@@ -367,6 +403,348 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!noevent) {
       attachPartySlotClickEvents();
     }
+  }
+
+  function populateEnemySlots() {
+    document.getElementById("enemy-list").innerHTML = ""; // Clear existing enemy slots
+    const enemies = getEnemies();
+    let initiative = getInitiative();
+    let sys = getSystem();
+
+    // Ensure all initiative entries are still in party or enemy list.
+    initiative = initiative.filter((init) => {
+      const playerExists = Object.values(getParty()).some((playerId) => playerId === init.id);
+      const enemyExists = enemies.some((enemy) => enemy.id === init.id);
+      return playerExists || enemyExists;
+    });
+    setInitiative(initiative); // Update localStorage with filtered initiative
+
+    if (sys.config2 >= initiative.length) {
+      sys.config2 = sys.config2 = Math.max(0, sys.config2 - 1); // Decrease current turn index if necessary
+      setSystem(sys); // Update localStorage
+    }
+
+    if (enemies.length < 1) 
+    {
+      document.getElementById("enemy-display").classList.add("hidden");
+      const sys = getSystem();
+      sys.config2 = 0; // Reset current turn to 0 when enemies are present
+      setSystem(sys); // Update localStorage
+    } else {
+      document.getElementById("enemy-display").classList.remove("hidden");
+    }
+    enemies.forEach((enemy, index) => {
+      const enemySlot = document.createElement("div");
+      enemySlot.className = "enemy-member w-full card bg-gradient-to-br from-primary to-primary/30 shadow-secondary/50 shadow-lg outline outline-2 outline-double outline-secondary/50 hover:shadow-accent/50";
+      enemySlot.setAttribute("data-id", enemy.id);
+      enemySlot.id = `enemy-slot-${index + 1}`;
+      let icon = `${enemy.Status}.png`;
+      let player = enemy;
+
+      enemySlot.innerHTML = `
+        <input class="btn btn-xs btn-square form-input hover-sfx click-sfx absolute bottom-0 right-0 z-50" type="submit" id="form-delete-${index + 1}" value="X" data-hoversound="sounds/cursor.mp3">
+
+        <div class="enemy-member-inside flex justify-center gap-3 cursor-pointer click-sfx w-full min-h-20" data-clicksound="sounds/Okay.mp3" data-volume="0.5" data-id="${enemy.id}" id="enemy-inner-${index + 1}">
+
+          <div class="space-y-3">
+            <img alt="${enemy.Name}" class="pic card xs:min-w-6 sm:size-7 sm:min-w-7 md:min-w-8 md:size-8 size-6 hidden border-4 border-double border-neutral" id="enemy-avatar-${index + 1}">
+            <img src="views/${icon}" alt="${enemy.Status}" class="xs:min-w-7 sm:size-8 sm:min-w-8 md:min-w-9 md:size-9 size-7">
+          </div>
+          
+          <div class="w-3/4">
+                  <h3 class="text-white"><i>Lv<b>${enemy.Level}</b></i> ${enemy.Name}</h3>
+                  <div class="stat-bar">
+                    <div class="bar-bg relative">
+                      <div class="bar-fill bg-gradient-to-r from-red-600 to-orange-400" style="width: ${(enemy.HP_Current / enemy.HP_Max) * 100}%;"></div>
+                      <label class="absolute inset-0 flex items-center text-sm font-bold text-white">
+                        HP ${enemy.HP_Current}/${enemy.HP_Max}
+                      </label>
+                    </div>
+                  </div>
+                  <div class="stat-bar">
+                    <div class="bar-bg relative">
+                      <div class="bar-fill2 bg-gradient-to-r from-blue-600 to-cyan-400" style="width: ${(enemy.MP_Current / enemy.MP_Max) * 100}%;"></div>
+                      <label class="absolute inset-0 flex items-center text-sm font-bold text-white">
+                        MP ${enemy.MP_Current}/${enemy.MP_Max}
+                      </label>
+                    </div>
+                  </div>
+            <div class="stat-bar ${enemy.Fate_Max <= 0 ? 'hidden' : ''}" id="enemy-fate${index + 1}">
+                    <div class="bar-bg relative">
+                      <div class="bar-fill3 bg-gradient-to-r from-green-600 to-lime-400" style="width: ${(enemy.Fate_Current / enemy.Fate_Max) * 100}%;"></div>
+                      <label class="absolute inset-0 flex items-center text-sm font-bold text-white">
+                        FATE ${enemy.Fate_Current}/${enemy.Fate_Max}
+                      </label>
+                    </div>
+              </div>
+            </div>
+        </div>
+      `;
+
+      async function displayPlayer() {
+        const file = await getImageFromIndexedDB(enemy.id);
+        if (file) {
+          const url = URL.createObjectURL(file);
+          const avatar = document.getElementById(`enemy-avatar-${index + 1}`);	
+          avatar.src = url;
+          avatar.classList.remove("hidden");
+          }
+        }
+        
+      displayPlayer();
+      document.getElementById("enemy-list").appendChild(enemySlot);
+
+      const deleteButton = document.getElementById(`form-delete-${index + 1}`);
+      if (deleteButton) {
+        deleteButton.addEventListener("click", (event) => {
+          termtext(`<color:green>Success</color> <color:red>Enemy</color> <color:blue>${enemy.Name}</color> has been removed.\n`);
+          playSound("sounds/Dead.mp3", 1);
+          event.stopPropagation(); // Prevent the click event from bubbling up
+          const enemies = getEnemies();
+
+          // Check if enemy is in the initiative list and remove it.
+          let initiative = getInitiative();
+          const system = getSystem();
+          const initiativeIndex = initiative.findIndex((init) => init.id === enemy.id);
+          if (initiativeIndex !== -1) {
+            initiative.splice(initiativeIndex, 1); // Remove the enemy from the initiative array
+            // Adjust current turn if necessary
+            if (system.config2 >= initiativeIndex) {
+              system.config2 = Math.max(0, system.config2 - 1); // Decrease current turn index if necessary
+            }  
+            setSystem(system); // Update localStorage
+            setInitiative(initiative); // Update localStorage
+          }
+   
+          console.log(`Removed enemy from initiative: ${enemy.Name}`);
+          enemies.splice(index, 1); // Remove the enemy from the array
+          console.log(`enemies.length: ${enemies.length}`);
+          if (enemies.length < 1) {
+            setInitiative([]); // Update localStorage
+          }
+          setEnemies(enemies); // Update localStorage
+          populateEnemySlots(); // Refresh the enemy slots
+        });
+      }
+      else{
+        console.error(`Delete button for enemy ${index + 1} not found.`);
+      }
+
+      // Check and update player status
+          if (player.Status !== "Dead" && player.HP_Current === 0) {
+            player.Status = "Dead";
+            playSound("sounds/Dead.mp3", 1);
+            termtext(`<color:red>Enemy</color> <color:blue>${player.Name}</color> has been <color:red>killed</color>.\n`);
+          } 
+          else if (player.Status === "Normal" && player.HP_Current <= player.HP_Max / 2) {
+            player.Status = "Low_HP";  
+            termtext(`<anim:term-shake><color:red>Enemy</color> <color:blue>${player.Name}</color> is in critical condition.\n`);
+            playSound("sounds/Bark.mp3", 0.5);
+          } 
+          else if (player.Status === "Dead" && player.HP_Current > 0) {  
+            player.Status = player.HP_Current <= player.HP_Max / 2 ? "Low_HP": "Normal";
+            playSound("sounds/Raise.mp3", 1);
+            termtext(`<anim:term-green><color:red>Enemy</color> <color:blue>${player.Name}</color> has been <color:green>revived</color>.\n`);
+          } 
+          else if (player.Status === "Low_HP" && player.HP_Current > player.HP_Max / 2) {
+            player.Status = "Normal";
+            playSound("sounds/Heal.mp3", 1);
+            termtext(`<anim:term-bounce><color:red>Enemy</color> <color:blue>${player.Name}</color> is no longer in critical condition.\n`);
+          }
+
+          if (player.HP_Current <= player.HP_Max / 2)
+          {
+            document.getElementById(`enemy-slot-${index + 1}`).classList.remove(`from-primary`);
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`from-red-600`);
+          }
+
+          setEnemies(enemies);
+
+        const system = getSystem();
+        const initiative = getInitiative();
+
+        if (initiative.length > 0 && enemy.id === initiative[system.config2].id) {
+          document.getElementById(`enemy-slot-${index+1}`).classList.add("border-2", "border-info");
+        }
+
+      switch (player.Status) {
+          case 'Dead':
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add("grayscale");
+            break;
+          case 'Bind':
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`bg-yellow-600`);
+          break;
+          case 'Charm':
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`bg-pink-600`);
+          break;
+          case 'Cursed':
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`bg-purple-600`);
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add("animate-pulse");
+          break;
+          case 'Fly':
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`bg-gray-600`);
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add("animate-spin");
+          break;
+          case 'Freeze':
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`bg-blue-600`);
+          break;
+          case 'Frog':
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`bg-lime-600`);
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`animate-bounce`);
+          break;
+          case 'Happy':
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`bg-yellow-600`);
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`animate-bounce`);
+          break;
+          case 'Mute':
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`bg-slate-600`);
+          break;
+          case 'Panic':
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`bg-violet-600`);
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`animate-bounce`);
+          break;
+          case 'Poison':
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`bg-purple-600`);
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add("animate-pulse");
+          break;
+          case 'Shock':
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`bg-yellow-600`);
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`animate-bounce`);
+          break;
+          case 'Sleep':
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`bg-slate-600`);
+          break;
+          case 'Stone':
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`bg-gray-600`);
+          break;
+          case 'Stun':
+            document.getElementById(`enemy-slot-${index + 1}`).classList.add(`bg-cyan-600`);
+          break;
+          default:	
+        }
+      
+      attachEnemySlotClickEvents();
+    
+    });
+
+    // Create Initiative Slots
+    const initDisplay = document.getElementById("turn-tracker-display");
+    const initouterDisplay = document.getElementById("turn-tracker-controls");
+    const players = getPlayers();
+    const system = getSystem();
+    let currentTurn = system.config2; // Get the current turn from system config
+
+    if (initiative.length === 0)
+    {
+      currentTurn = 0;
+      system.config2 = currentTurn; // Update the system config
+      setSystem(system); // Save the updated system config
+      initouterDisplay.innerHTML = `
+        <div class="grid grid-cols-3 justify-items-center p-1">
+					<input class="btn btn-sm form-input hover-sfx click-sfx z-50 col-span-3" type="submit" id="Open-Tracker" value="Begin Combat" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
+				</div>	
+      `;
+
+    } else if (currentTurn > initiative.length - 1) {
+      currentTurn = initiative.length - 1;
+      system.config2 = currentTurn; // Update the system config
+      setSystem(system); // Save the updated system config
+      initouterDisplay.innerHTML = `
+					<input class="btn btn-sm form-input hover-sfx click-sfx z-50 col-span-3" type="submit" id="Open-Tracker" value="Initiative" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
+					<input class="btn btn-sm btn-square form-input click-sfx hover-sfx click-sfx z-50" type="submit" id="Close-Tracker" value="X" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
+					<input class="btn btn-sm btn-square form-input click-sfx hover-sfx click-sfx z-50" type="submit" id="Backward-Tracker" value="<-" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
+					<input class="btn btn-sm btn-square form-input click-sfx hover-sfx click-sfx z-50" type="submit" id="Forward-Tracker" value="->" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
+      `;
+    } else {
+      initouterDisplay.innerHTML = `
+					<input class="btn btn-sm form-input hover-sfx click-sfx z-50 col-span-3" type="submit" id="Open-Tracker" value="Initiative" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
+					<input class="btn btn-sm btn-square form-input click-sfx hover-sfx click-sfx z-50" type="submit" id="Close-Tracker" value="X" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
+					<input class="btn btn-sm btn-square form-input click-sfx hover-sfx click-sfx z-50" type="submit" id="Backward-Tracker" value="<-" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
+					<input class="btn btn-sm btn-square form-input click-sfx hover-sfx click-sfx z-50" type="submit" id="Forward-Tracker" value="->" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
+      `;
+    }
+
+    const initButton = document.getElementById(`Open-Tracker`);
+    const closeButton = document.getElementById(`Close-Tracker`)
+    const backButton = document.getElementById(`Backward-Tracker`);
+    const nextButton = document.getElementById(`Forward-Tracker`);
+
+    // Event listener for the initiative button
+    if (initButton) {
+      initButton.replaceWith(initButton.cloneNode(true)); // Clone and replace the node to clear listeners
+      const newInitButton = document.getElementById(`Open-Tracker`); // Get the new node
+      newInitButton.addEventListener("click", () => {
+        openForm("initiative");
+      });
+      
+    }
+
+    if (closeButton) {
+      // Event listener for the close button
+      closeButton.replaceWith(closeButton.cloneNode(true)); // Clone and replace the node to clear listeners
+      const newcloseButton = document.getElementById(`Close-Tracker`); // Get the new node
+      newcloseButton.addEventListener("click", () => {
+          setInitiative([]); // Clear the initiative array
+          populatePartySlots(); // Refresh the enemy slots
+      });
+    }
+    
+    if (backButton) {
+     // Event listener for the back button
+      backButton.replaceWith(backButton.cloneNode(true)); // Clone and replace the node to clear listeners
+      const newBackButton = document.getElementById(`Backward-Tracker`); // Get the new node
+      newBackButton.addEventListener("click", () => {
+        // Decrease the current turn
+        if (currentTurn > 0) {
+          currentTurn--;
+        } else {
+          currentTurn = initiative.length - 1; // Wrap around to the last turn
+        }
+          system.config2 = currentTurn; // Update the system config
+          setSystem(system); // Save the updated system config
+          populatePartySlots(); // Refresh the enemy slots        
+      });
+    }
+
+    if (nextButton) {
+      // Event listener for the forward button
+      nextButton.replaceWith(nextButton.cloneNode(true)); // Clone and replace the node to clear listeners
+      const newForwardButton = document.getElementById(`Forward-Tracker`); // Get the new node  
+      newForwardButton.addEventListener("click", () => {
+        // Decrease the current turn
+        if (currentTurn < initiative.length - 1) {
+          currentTurn++;
+        } else {
+          currentTurn = 0; // Wrap around to the first turn
+        }
+          system.config2 = currentTurn; // Update the system config
+          setSystem(system); // Save the updated system config
+          populatePartySlots(); // Refresh the enemy slots        
+      });
+    }
+
+    initiative.sort((a, b) => b.init_num - a.init_num); 
+
+    if (initDisplay || initiative.length > 0) {
+      initDisplay.innerHTML = ""; // Clear existing initiative slots
+      
+      initiative.forEach((init, index) => {
+        const user = init.type === "Party" ? players.find(p => p.id === init.id) : enemies.find(e => e.id === init.id);
+        const initSlot = document.createElement("div");
+        initSlot.className = "flex-none card h-[64px] w-[64px] bg-gradient-to-br from-primary to-primary/30 shadow-secondary/50 shadow-lg outline-2 outline-double outline-neutral text-xs p-1 overflow-hidden";
+        initSlot.id = `turn-slot-${index + 1}`;
+        initSlot.innerHTML = `
+          <p class="overflow-hidden h-5/6">${user.Name}</p>
+          <div class="bar-bg relative">
+          <div class="bar-fill bg-gradient-to-r from-red-600 to-orange-400" style="width: ${(user.HP_Current / user.HP_Max) * 100}%;"></div>
+        `;
+        if (index === currentTurn) {
+          initSlot.classList.remove("outline-neutral");
+          initSlot.classList.add("outline-info");
+        }
+        initDisplay.appendChild(initSlot);
+      });
+   }
   }
 
   populatePartySlots(getPlayers(), getParty());
@@ -383,14 +761,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let currentPlayer = null;
 
-  function openForm(formType, player = null, playerid = null, skillid = null) {
+  function openForm(formType, player = null, playerid = null, skillid = null, parm5=null) {
     const formDisplay = document.getElementById("player-form"); // Ensure this element exists
     if (!formDisplay) {
       console.error("Error: 'formDisplay' element not found.");
       return;
     }
     // Update the form display dynamically based on the formType
-    updateFormDisplay(formType, player, playerid, skillid);
+    updateFormDisplay(formType, player, playerid, skillid,parm5);
 
     // Remove the hidden class to show the form
     playerForm.classList.remove("hidden");
@@ -442,6 +820,32 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   }
+  
+  // Attach Click Events to Enemy Slots
+  function attachEnemySlotClickEvents() {
+    const enemySlots = document.querySelectorAll(".enemy-member-inside");
+    const system = getSystem();
+    const initiative = getInitiative();
+    let currentTurn = system.config2; // Get the current turn from system config
+
+    enemySlots.forEach((slot, index) => {
+      // Remove any existing click listener
+      slot.replaceWith(slot.cloneNode(true)); // Clone and replace the node to clear listeners
+      const newSlot = document.getElementById(`enemy-inner-${index + 1}`); // Get the new node
+
+      // Add the click listener to the new element
+      newSlot.addEventListener("click", () => {
+        const enemies = getEnemies();
+        const enemyId = newSlot.getAttribute("data-id");
+        const enemy = enemies.find((e) => e.id === enemyId);
+        
+        if (enemy) {
+          enemySlots[index].classList.add("enemy-member-selected");
+          openForm("quick", enemy,"enemy");
+        }
+      });
+    });
+  }
 
   const tabs = document.querySelectorAll(".tab-button");
   const bottomDisplay = document.getElementById("bottom-display");
@@ -481,7 +885,7 @@ document.addEventListener("DOMContentLoaded", () => {
     switch (tabName) {
       case "comp":
         termtext(`<color:green>DDS-NET@${user}</color>:<color:blue>~/COMP</color>$ Opening Computer protocol.\n`);
-		triggerLED('/led/comp');
+		    triggerLED('/led/comp');
         bottomDisplay.innerHTML = `
 					<div class="flex justify-center p-4  motion-reduced">
 						<div class="menu card grid grid-cols-2 gap-2 flex bg-gradient-to-b shadow-lg from-slate-950 to- bg-#000 p-4 w-full text-white rounded-md bg-opacity-50 shadow-lg shadow-primary/50">
@@ -631,8 +1035,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         break;
       case "skills":
-		termtext(`<color:green>DDS-NET@${user}</color>:<color:blue>~/SKILLS</color>$ Opening Skill protocol.\n`);
-		triggerLED('/led/skills');
+        termtext(`<color:green>DDS-NET@${user}</color>:<color:blue>~/SKILLS</color>$ Opening Skill protocol.\n`);
+        triggerLED('/led/skills');
         bottomDisplay.innerHTML = `
 					<div class="flex justify-center p-4  motion-reduced">
 						<div class="menu card grid grid-cols-2 gap-2 flex bg-gradient-to-b shadow-lg from-slate-950 to- bg-#000 p-4 w-full text-white rounded-md bg-opacity-50 shadow-primary/50">
@@ -690,8 +1094,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         break;
       case "status":
-		termtext(`<color:green>DDS-NET@${user}</color>:<color:blue>~/STATUS</color>$ Opening Analysis protocol.\n`);
-		triggerLED('/led/status');
+        termtext(`<color:green>DDS-NET@${user}</color>:<color:blue>~/STATUS</color>$ Opening Analysis protocol.\n`);
+        triggerLED('/led/status');
         bottomDisplay.innerHTML = `
 					<div class="flex justify-center p-4  motion-reduced">
 						<div class="menu card grid grid-cols-2 gap-2 flex bg-gradient-to-b shadow-lg from-slate-950 to- bg-#000 p-4 w-full text-white rounded-md bg-opacity-50 shadow-primary/50">
@@ -729,7 +1133,7 @@ document.addEventListener("DOMContentLoaded", () => {
         break;
       case "change":
         termtext(`<color:green>DDS-NET@${user}</color>:<color:blue>~/CHANGE</color>$ Opening Editing protocol.\n`);
-		triggerLED('/led/change');
+    		triggerLED('/led/change');
         bottomDisplay.innerHTML = `
 					<div class="flex justify-center p-4  motion-reduced">
 						<div class="menu card grid grid-cols-2 gap-2 flex bg-gradient-to-b shadow-lg from-slate-950 to- bg-#000 p-4 w-full text-white rounded-md bg-opacity-50 shadow-primary/50">
@@ -773,11 +1177,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         break;
       case "help":
-		termtext(`<color:green>DDS-NET@${user}</color>:<color:blue>~/STATUS/HELP</color>$ Opening Assistance protocol.\n`);
-		triggerLED('/led/help');
+        termtext(`<color:green>DDS-NET@${user}</color>:<color:blue>~/STATUS/HELP</color>$ Opening Assistance protocol.\n`);
+        triggerLED('/led/help');
         bottomDisplay.innerHTML = `
 					<div class="flex justify-center p-4  motion-reduced">
-						<div class="menu card grid grid-cols-2 gap-2 flex bg-gradient-to-b shadow-lg from-slate-950 to- bg-#000 p-4 w-full text-white rounded-md bg-opacity-50 shadow-primary/50">
+						<div class="menu card grid grid-cols-2 gap-2 bg-gradient-to-b shadow-lg from-slate-950 to- bg-#000 p-4 w-full text-white rounded-md bg-opacity-50 shadow-primary/50">
 							<div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-volume="0.5" data-clicksound="sounds/Okay.mp3" id="about-button">About DDS-NET</div>
 							<div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-volume="0.5" data-clicksound="sounds/Okay.mp3" id="support-button">Feedback / Contribution</div>
 							<div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-volume="0.5" data-clicksound="sounds/Okay.mp3" id="creation-button">Character Creation</div>
@@ -852,11 +1256,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function updateFormDisplay(formName, mode = null, playerid = null, skillid = null) {
+  function updateFormDisplay(formName, mode = null, playerid = null, skillid = null, parm5 = null) {
     const formDisplay = document.getElementById("player-form");
     switch (formName) {
       case "quick":
         currentPlayer = mode;
+
         termtext(`<color:yellow>Opening</color> Data Analyzer for <color:blue>${currentPlayer.Name}</color>.\n`);
         formDisplay.innerHTML = `  
 			   <div class="form text-bold text-white p-4 bg-gradient-to-b from-secondary to- shadow-lg shadow-secondary/50  motion-reduced">  
@@ -911,7 +1316,70 @@ document.addEventListener("DOMContentLoaded", () => {
 				  </div>  
 			   </div>  
 				`;
-        setupFormEventListenersQuick();
+
+        function updateFormValuesQuick(player) {
+          document.getElementById("form-player-name").textContent = player.Name;
+          document.getElementById("form-hp").value = 0;
+          document.getElementById("form-mp").value = 0;
+          document.getElementById("form-fate").textContent = player.Fate_Current;
+          document.getElementById("form-status").value = player.Status;
+        }
+
+        function setupFormEventListenersQuick(mode = null) {
+          const fateIncrease = document.getElementById("fate-increase");
+          const fateDecrease = document.getElementById("fate-decrease");
+          const formCancel = document.getElementById("form-cancel");
+          const formConfirm = document.getElementById("form-confirm");
+
+          fateIncrease.addEventListener("click", () => {
+            if (currentPlayer && currentPlayer.Fate_Current < currentPlayer.Fate_Max) {
+              currentPlayer.Fate_Current++;
+              document.getElementById("form-fate").textContent = currentPlayer.Fate_Current;
+            }
+          });
+
+          fateDecrease.addEventListener("click", () => {
+            if (currentPlayer && currentPlayer.Fate_Current > 0) {
+              currentPlayer.Fate_Current--;
+              document.getElementById("form-fate").textContent = currentPlayer.Fate_Current;
+            }
+          });
+
+          formConfirm.addEventListener("click", () => {
+            if (currentPlayer) {
+              const players = getPlayers();
+              const enemies = getEnemies();
+              const formHP = document.getElementById("form-hp");
+              const formMP = document.getElementById("form-mp");
+              const formStatus = document.getElementById("form-status");
+
+              // Update currentPlayer's stats
+              currentPlayer.HP_Current = Math.min(currentPlayer.HP_Max, Math.max(0, currentPlayer.HP_Current - formHP.value));
+              currentPlayer.MP_Current = Math.min(currentPlayer.MP_Max, Math.max(0, currentPlayer.MP_Current - formMP.value));
+              currentPlayer.Status = formStatus.value;
+
+              // Save updated players to local storage
+              if (playerid !== "enemy") {
+                const search = players.map((player) => player.id === currentPlayer.id ? currentPlayer : player);
+                setPlayers(search);
+              } else {
+                const search = enemies.map((player) => player.id === currentPlayer.id ? currentPlayer : player);
+                setEnemies(search);
+              }
+
+              // Refresh party slots
+              populatePartySlots();
+            }
+
+            termtext(`<anim:term-blue><b>Data Updated</b>.\n`);
+            closeForm();
+            updateBottomDisplay("None");
+          });
+
+          formCancel.addEventListener("click", closeForm);
+        }
+
+        setupFormEventListenersQuick(playerid);
         updateFormValuesQuick(currentPlayer);
         let player = currentPlayer;
         compendium = getskillComp();
@@ -921,7 +1389,7 @@ document.addEventListener("DOMContentLoaded", () => {
           document.getElementById(`fate-decrease`).classList.add("hidden");
           document.getElementById(`fate-label`).classList.add("hidden");
         }
-        if (!player.skills) {
+        if (!player.skills && playerid === null) {
           let players = getPlayers();
           player = players.find((p) => p.id === player.id);
           player.skills = [];
@@ -962,15 +1430,21 @@ document.addEventListener("DOMContentLoaded", () => {
         // Implements the logic for using a skill
         function useSkill(playerId, skillId) {
           const system = getSystem();
+          const enemies = getEnemies();
           const players = getPlayers();
-          const player = players.find((p) => p.id === playerId);
+          const search = playerid === "enemy" ? enemies : players;
+          const player = search.find((p) => p.id === playerId);
           const skill = compendium.find((s) => s.id === skillId);
           
           // Check if the skill cost can be paid
           if (skill.costType === "FATE") {
             if (player.Fate_Current - skill.costNum >= 0) {
               player.Fate_Current = Math.min(player.Fate_Max, Math.max(0, player.Fate_Current - skill.costNum));
-              setPlayers(players);
+              if (playerid !== "enemy") {
+                setPlayers(search);
+              } else {
+                setEnemies(search);
+              }
             } 
             else {
               playSound("sounds/Dead.mp3");
@@ -1011,7 +1485,11 @@ document.addEventListener("DOMContentLoaded", () => {
             player.HP_Current = Math.min(player.HP_Max, Math.max(0, player.HP_Current + recovery));
             player.MP_Current = Math.min(player.MP_Max, Math.max(0, player.MP_Current + recovery));
             termtext(`<anim:term-red><color:red>ERROR </color><color:blue>${player.Name}</color> can't use <color:purple>${skill.name}</color> while having <color:pink>${player.Status}</color>.\n<anim:term-green><color:blue>${player.Name}</color> rested and gained <color:purple>${recovery}</color> HP & MP\n`);
-            setPlayers(players);
+             if (playerid !== "enemy") {
+                setPlayers(search);
+              } else {
+                setEnemies(search);
+              }
             populatePartySlots(getPlayers(), getParty());
             closeForm();
             return;
@@ -1020,7 +1498,11 @@ document.addEventListener("DOMContentLoaded", () => {
             let roll = Math.floor(Math.random() * 10) + 1;
             player.HP_Current = Math.min(player.HP_Max, Math.max(0, player.HP_Current - roll));
             termtext(`<anim:term-red><color:darkred>WARNING </color><color:blue>${player.Name}</color> took <color:purple>${roll}</color> damage from <color:pink>${player.Status}</color>.\n<anim:term-shake>Any damage dealt by <color:blue>${player.Name}</color> will be halved.\n`);
-            setPlayers(players);
+             if (playerid !== "enemy") {
+                setPlayers(search);
+              } else {
+                setEnemies(search);
+              }
             populatePartySlots(getPlayers(), getParty());
           }
           if (player.Status === "Panic") {
@@ -1047,8 +1529,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 case 4:
                   termtext(`<anim:term-shake><color:blue>${player.Name}</color> begins to suddenly <color:pink>Sleep</color>.\n`);
                   player.Status = "Sleep";
-                  let players = getPlayers();
-                  setPlayers(players);
+                   if (playerid !== "enemy") {
+                    setPlayers(search);
+                  } else {
+                    setEnemies(search);
+                  }
                   updateFormValuesQuick(player.id);
                   break;
                 case 5:
@@ -1064,7 +1549,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 break;
                 default:
               } 
-              setPlayers(players);
+
+              if (playerid !== "enemy") {
+                setPlayers(search);
+              } else {
+                setEnemies(search);
+              }
               populatePartySlots(getPlayers(), getParty());
               closeForm();
               return;
@@ -1087,7 +1577,11 @@ document.addEventListener("DOMContentLoaded", () => {
                   break;
                   default:
                 } 
-                setPlayers(players);
+                 if (playerid !== "enemy") {
+                    setPlayers(search);
+                  } else {
+                    setEnemies(search);
+                  }
                 populatePartySlots(getPlayers(), getParty());
                 closeForm();
                 return;
@@ -1105,15 +1599,16 @@ document.addEventListener("DOMContentLoaded", () => {
           }
           playSound("sounds/Okay.mp3");
           termtext(`<color:blue>${player.Name}</color> used <color:purple>${skill.name}</color>.\n${skill.description}\n`);
+          let usertype = playerid === "enemy" ? "enemy" : "skill";
           switch (skill.roll) {
             case "Attack":
-              openForm("tnroll", "skill", player.id, skill.id);
+              openForm("tnroll", "skill", player.id, skill.id, usertype);
             break;
             case "TN":
-              openForm("tnroll", "skill", player.id, skill.id);
+              openForm("tnroll", "skill", player.id, skill.id, usertype);
             break;
             case "Power":
-              openForm("proll", "skill", player.id, skill.id);
+              openForm("proll", "skill", player.id, skill.id, usertype);
             break;
             case "Passive":
               switch (skill.costType) {
@@ -1129,7 +1624,12 @@ document.addEventListener("DOMContentLoaded", () => {
             break;
             default:  
           } 
-          setPlayers(players);
+
+           if (playerid !== "enemy") {
+                setPlayers(search);
+              } else {
+                setEnemies(search);
+              }
           populatePartySlots(getPlayers(), getParty());
         }
         
@@ -1577,7 +2077,7 @@ document.addEventListener("DOMContentLoaded", () => {
 						<input class="btn btn-sm btn-square form-input hover-sfx" type="submit" id="form-confirm" value="✔" data-hoversound="sounds/cursor.mp3">
 					</div>
 				`;
-        termtext(`<anim:term-pulse><color:yellow>Opening</color> <color:red>DATA RESET</color>.\n`);
+        termtext(`<color:yellow>Opening</color> <color:red>DATA RESET</color>.\n`);
         let formCanceler = document.getElementById("form-cancel");
         formCanceler.addEventListener("click", closeForm);
         playSound("sounds/warning.mp3");
@@ -1591,6 +2091,8 @@ document.addEventListener("DOMContentLoaded", () => {
           localStorage.removeItem("system");
           localStorage.removeItem("skillComp");
           localStorage.removeItem("userComp");
+          localStorage.removeItem("enemies");
+          localStorage.removeItem("initiative");
           location.reload();
         }
       break;
@@ -2060,7 +2562,7 @@ document.addEventListener("DOMContentLoaded", () => {
           deleteImageFromIndexedDB(currentPlayer.id);
           players.splice(index, 1);
           localStorage.setItem("players", JSON.stringify(players));
-
+          populatePartySlots();
           closeForm();
         }
     break;
@@ -2277,7 +2779,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
           function roller(playerId) {
               let players = getPlayers();
-              let currentPlayer = players.find((p) => p.id === playerId);
+              let enemies = getEnemies();
+              const search = parm5 === "enemy" ? enemies : players;
+              let currentPlayer = search.find((p) => p.id === playerId);
 
               // Reset the formula
               let baseTN = 0;
@@ -2560,6 +3064,7 @@ document.addEventListener("DOMContentLoaded", () => {
               formConfirmrd.addEventListener("click", () => {
                 let result = "Failure";
                 let players = getPlayers();
+                let enemies = getEnemies();
                 let system = getSystem();
 
                 if (!currentPlayer) {
@@ -2631,17 +3136,17 @@ document.addEventListener("DOMContentLoaded", () => {
                   case "Critical Fumble":
                     switch (mode) {
                       case "talk":
-                        termtext(`<anim:term-red><color:Yellow>Talk Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> Conversation has fumbled, tensions have greatly increased.\n`);
+                        termtext(`<anim:term-red><color:Yellow>Talk Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<color:darkred>Warning</color> Conversation has fumbled, tensions have greatly increased.\n`);
                         setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
                         break;
                       case "recover":
                         switch (rules) {
                           case "1":
-                            termtext(`<anim:term-red><color:Yellow>Recovery Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> Recovery fumbled, <color:blue>${currentPlayer.Name}</color> doesn't feel so good.\n`);
+                            termtext(`<anim:term-red><color:Yellow>Recovery Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<color:darkred>Warning</color> Recovery fumbled, <color:blue>${currentPlayer.Name}</color> doesn't feel so good.\n`);
                             setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
                             break;
                           default:
-                            termtext(`<anim:term-red><color:Yellow>Recovery Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> Recovery fumbled, <color:blue>${currentPlayer.Name}</color> doesn't feel so good, HP & MP are halved.\n`);
+                            termtext(`<anim:term-red><color:Yellow>Recovery Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<color:darkred>Warning</color> Recovery fumbled, <color:blue>${currentPlayer.Name}</color> doesn't feel so good, HP & MP are halved.\n`);
                             currentPlayer.HP_Current = Math.floor(currentPlayer.HP_Current / 2);
                             currentPlayer.MP_Current = Math.floor(currentPlayer.MP_Current / 2);
                             setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
@@ -2650,51 +3155,49 @@ document.addEventListener("DOMContentLoaded", () => {
                       case "surprise":
                         switch (rules) {
                           case "1":
-                            termtext(`<anim:term-red><color:Yellow>Encounter Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> <color:blue>${currentPlayer.Name}</color> is surprised.\n`);
+                            termtext(`<anim:term-red><color:Yellow>Encounter Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<color:darkred>Warning</color> <color:blue>${currentPlayer.Name}</color> is surprised.\n`);
                             setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
                             break;
                           default:
-                            termtext(`<anim:term-red><color:Yellow>Encounter Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> <color:blue>${currentPlayer.Name}</color> is shocked! No power dice given in the Initiative roll.\n`);
+                            termtext(`<anim:term-red><color:Yellow>Encounter Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<color:darkred>Warning</color> <color:blue>${currentPlayer.Name}</color> is shocked! No power dice given in the Initiative roll.\n`);
                             currentPlayer.Status = "Shock";
                             setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
                         }
                         break;
                       case "evade":
-                        termtext(`<anim:term-red><color:Yellow>Evasion Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> Evasion fumbled, <color:blue>${currentPlayer.Name}</color> is wide open for attack.\n`);
+                        termtext(`<anim:term-red><color:Yellow>Evasion Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<color:darkred>Warning</color> Evasion fumbled, <color:blue>${currentPlayer.Name}</color> is wide open for attack.\n`);
                         setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
                         break;
                       case "ranged":
-                        termtext(`<anim:term-red><color:Yellow>Ranged Attack Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> Attack fumbled, <color:blue>${currentPlayer.Name}'s</color> fires wildly!\n`);
+                        termtext(`<anim:term-red><color:Yellow>Ranged Attack Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<color:darkred>Warning</color> Attack fumbled, <color:blue>${currentPlayer.Name}'s</color> fires wildly!\n`);
                         setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
                         break;
                       case "magic":
-                        termtext(`<anim:term-red><color:Yellow>Magic Attack Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> Attack fumbled, <color:blue>${currentPlayer.Name}'s</color> casts wildly!\n`);
+                        termtext(`<anim:term-red><color:Yellow>Magic Attack Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<color:darkred>Warning</color> Attack fumbled, <color:blue>${currentPlayer.Name}'s</color> casts wildly!\n`);
                         setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
                         break;
                       case "melee":
-                        termtext(`<anim:term-red><color:Yellow>Melee Attack Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> Attack fumbled, <color:blue>${currentPlayer.Name}'s</color> swings wildly!\n`);
+                        termtext(`<anim:term-red><color:Yellow>Melee Attack Roll</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<color:darkred>Warning</color> Attack fumbled, <color:blue>${currentPlayer.Name}'s</color> swings wildly!\n`);
                         setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
                         break;
                       case "skill":
                         let compendium = getskillComp();
-                        let players = getPlayers();
-                        let player = players.find((p) => p.id === playerid);
                         let skill = compendium.find((s) => s.id === skillid);
                         switch (skill.baseTN) {
                           case 'Strength':
-                            termtext(`<anim:term-red><color:Yellow>${skill.name}</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> Attack fumbled, <color:blue>${currentPlayer.Name}'s</color> swings wildly!\n`);
+                            termtext(`<anim:term-red><color:Yellow>${skill.name}</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<color:darkred>Warning</color> Attack fumbled, <color:blue>${currentPlayer.Name}'s</color> swings wildly!\n`);
                             setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1);}, 250);
                             break;
                           case 'Magic':
-                            termtext(`<anim:term-red><color:Yellow>${skill.name}</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> Attack fumbled, <color:blue>${currentPlayer.Name}'s</color> casts wildly!\n`);
+                            termtext(`<anim:term-red><color:Yellow>${skill.name}</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<color:darkred>Warning</color> Attack fumbled, <color:blue>${currentPlayer.Name}'s</color> casts wildly!\n`);
                             setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
                             break;  
                           case 'Agility':
-                            termtext(`<anim:term-red><color:Yellow>${skill.name}</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> Attack fumbled, <color:blue>${currentPlayer.Name}'s</color> fires wildly!\n`);
+                            termtext(`<anim:term-red><color:Yellow>${skill.name}</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<color:darkred>Warning</color> Attack fumbled, <color:blue>${currentPlayer.Name}'s</color> fires wildly!\n`);
                             setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
                             break;
                           case 'Talk':
-                            termtext(`<anim:term-red><color:Yellow>${skill.name}</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<anim:term-pulse><color:darkred>Warning</color> Conversation has fumbled, tensions have greatly increased.\n`);
+                            termtext(`<anim:term-red><color:Yellow>${skill.name}</color> <color:darkred>Critical Fumble!</color> <color:blue>${currentPlayer.Name}</color> rolled <color:darkred>${roll}%</color> with <color:purple>${finalTN}% TN</color>.\n<color:darkred>Warning</color> Conversation has fumbled, tensions have greatly increased.\n`);
                             setTimeout(() => { playSound("sounds/Bossdeath.mp3", 1); }, 250);
                             break;
                           default:
@@ -2751,8 +3254,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         break;
                       case "skill":
                         let compendium = getskillComp();
-                        let players = getPlayers();
-                        let player = players.find((p) => p.id === playerid);
                         let skill = compendium.find((s) => s.id === skillid);
                         switch (skill.baseTN) {
                           case 'Strength':
@@ -2821,8 +3322,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         break;
                       case "skill":
                         let compendium = getskillComp();
-                        let players = getPlayers();
-                        let player = players.find((p) => p.id === playerid);
                         let skill = compendium.find((s) => s.id === skillid);
                         switch (skill.baseTN) {
                           case 'Strength':
@@ -2884,8 +3383,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         break;
                       case "skill":
                         let compendium = getskillComp();
-                        let players = getPlayers();
-                        let player = players.find((p) => p.id === playerid);
                         let skill = compendium.find((s) => s.id === skillid);
                         switch (skill.baseTN) {
                           case 'Strength':
@@ -2911,7 +3408,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         console.log(`${skill.roll} `);
                         if (skill.roll === "Attack") {
                           console.log(`Running `);
-                          setTimeout(() => { openForm("proll", "skill", player.id, skill.id); }, 750);
+                          setTimeout(() => { openForm("proll", "skill", currentPlayer.id, skill.id, parm5); }, 750);
                         }
                         break;
                       default:
@@ -2959,8 +3456,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         break;
                       case "skill":
                         let compendium = getskillComp();
-                        let players = getPlayers();
-                        let player = players.find((p) => p.id === playerid);
                         let skill = compendium.find((s) => s.id === skillid);
                         switch (skill.baseTN) {
                           case 'Strength':
@@ -2984,7 +3479,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             setTimeout(() => { playSound("sounds/Saveting.mp3", 1);}, 250);
                         }
                         if (skill.roll === "Attack") {
-                          setTimeout(() => { openForm("proll", "skill", player.id, skill.id); }, 750);
+                          setTimeout(() => { openForm("proll", "skill", currentPlayer.id, skill.id, parm5); }, 750);
                         }
                         break;
                       default:
@@ -2994,14 +3489,21 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 
                 let compendium = getskillComp();
-                players = getPlayers();
                 let skill = compendium.find((s) => s.id === skillid);
                
-                // Update players data in localStorage
-                const updatedPlayers = players.map((player) =>
-                  player.id === currentPlayer.id ? currentPlayer : player,
-                );
-                setPlayers(updatedPlayers);
+                if (parm5 !== "enemy") {
+                  // Update players data in localStorage
+                  const index = search.findIndex((p) => p.id === currentPlayer.id);
+                  players[index] = currentPlayer;
+                  setPlayers(players);
+                } else {
+                  // Update enemies data in localStorage
+                  const index = search.findIndex((p) => p.id === currentPlayer.id);
+                  enemies[index] = currentPlayer;
+                  setEnemies(enemies);
+                  populateEnemySlots();
+                }
+
                 populatePartySlots(getPlayers(), getParty());
                 closeForm();
               });
@@ -3076,7 +3578,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
           function rollerp(playerId) {
               let players = getPlayers();
-              let currentPlayer = players.find((p) => p.id === playerId);
+              let enemies = getEnemies();
+              const search = parm5 === "enemy" ? enemies : players;
+              let currentPlayer = search.find((p) => p.id === playerId);
 
               // Reset the formula
               let baseTN = 0;
@@ -3365,8 +3869,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     break;
                   case "skill":
                     let compendium = getskillComp();
-                    let players = getPlayers();
-                    let player = players.find((p) => p.id === playerid);
                     let skill = compendium.find((s) => s.id === skillid);
                     switch (skill.baseTN) {
                       case "Melee":
@@ -3391,11 +3893,20 @@ document.addEventListener("DOMContentLoaded", () => {
                     setTimeout(() => { playSound("sounds/Saveting.mp3", 1); }, 250);
                 }
 
-                // Update players data in localStorage
-                const updatedPlayers = players.map((player) =>
-                  player.id === currentPlayer.id ? currentPlayer : player,
-                );
-                setPlayers(updatedPlayers);
+               
+                if (parm5 !== "enemy") {
+                  // Update players data in localStorage
+                  const index = search.findIndex((p) => p.id === currentPlayer.id);
+                  players[index] = currentPlayer;
+                  setPlayers(players);
+                } else {
+                  // Update enemies data in localStorage
+                  const index = search.findIndex((p) => p.id === currentPlayer.id);
+                  enemies[index] = currentPlayer;
+                  setEnemies(enemies);
+                  populateEnemySlots();
+                }
+
                 if (mode === "skill") { populatePartySlots(getPlayers(), getParty(), true); }
                 closeForm();
               });
@@ -4128,10 +4639,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 <img alt="${player.Name}" class="pic card xs:min-w-6 sm:size-7 sm:min-w-7 md:min-w-8 md:size-8 size-6 border-4 border-double border-neutral" id="avatar-${player.id}">
                 <h3 class="font-bold truncate text-sm text-left"><i>Lv<b>${player.Level}</b></i> ${player.Name}</h3>
               </div>
-              <div class="flex gap-2 justify-end items-center">
-              <input class="btn btn-sm form-input hover-sfx place-self-center click-sfx" type="submit" id="form-stock-${player.id}" value="Add to Stock" data-hoversound="sounds/cursor.mp3">
-              <input class="btn btn-sm form-input hover-sfx place-self-center click-sfx" type="submit" id="form-edit-${player.id}" value="Edit" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
-              <input class="btn btn-sm btn-square form-input hover-sfx place-self-center click-sfx" type="submit" id="form-delete-${player.id}" value="X" data-hoversound="sounds/cursor.mp3">
+              <div class="flex gap-1 justify-end items-center">
+              <input class="btn btn-xs form-input hover-sfx place-self-center click-sfx" type="submit" id="form-enemy-${player.id}" value="Add Enemy" data-hoversound="sounds/cursor.mp3">
+              <input class="btn btn-xs form-input hover-sfx place-self-center click-sfx" type="submit" id="form-stock-${player.id}" value="Add Stock" data-hoversound="sounds/cursor.mp3">
+              <input class="btn btn-xs form-input hover-sfx place-self-center click-sfx" type="submit" id="form-edit-${player.id}" value="Edit" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
+              <input class="btn btn-xs btn-square form-input hover-sfx place-self-center click-sfx" type="submit" id="form-delete-${player.id}" value="X" data-hoversound="sounds/cursor.mp3">
               </div>
               </div>
             `).join("")}
@@ -4163,7 +4675,83 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById(`form-stock-${player.id}`).addEventListener('click', () => {
               addToStock(player.id);
             });
+
+            document.getElementById(`form-enemy-${player.id}`).addEventListener('click', () => {
+              addToEnemy(player.id);
+            });
           });
+          }
+
+          // Copy from compendium to enemy
+          function addToEnemy(userId) {
+            let compendium = getuserComp();
+            let user = compendium.find(user => user.id === userId);
+            let enemies = getEnemies();
+
+            // Generate a unique 24-character ID
+            const generateId = () => {
+              const chars = "0123456789abcdef";
+              let id = "";
+              for (let i = 0; i < 24; i++) {
+                id += chars[Math.floor(Math.random() * chars.length)];
+              }
+              return id;
+            };
+
+            newid = generateId();
+
+            const enemy = {
+              id: newid,
+              Name: user.Name,
+              Type: user.Type,
+              Level: user.Level,
+              Strength: user.Strength,
+              Magic: user.Magic,
+              Vitality: user.Vitality,
+              Agility: user.Agility,
+              Luck: user.Luck,
+              Status: "Normal",
+              STR_TN: user.STR_TN,
+              MG_TN: user.MG_TN,
+              VT_TN: user.VT_TN,
+              AG_TN: user.AG_TN,
+              LK_TN: user.LK_TN,
+              Melee_Power: user.Melee_Power,
+              Ranged_Power: user.Ranged_Power,
+              Magic_Power: user.Magic_Power,
+              Initiative: user.Initiative,
+              Dodge_TN: user.Dodge_TN,
+              Talk_TN: user.Talk_TN,
+              HP_Max: user.HP_Max,
+              HP_Current: user.HP_Max,
+              MP_Max: user.MP_Max,
+              MP_Current: user.MP_Max,
+              Fate_Max: user.Fate_Max,
+              Fate_Current: user.Fate_Max,
+              skills: user.skills,
+            };
+            enemies.push(enemy);
+            localStorage.setItem('enemies', JSON.stringify(enemies));
+
+            // Add image to IndexedDB if it exists
+            (async () => {
+                try {
+                  const file = await getImageFromIndexedDB(userId);
+                  if (file) {
+                    // Save image under new id
+                    await saveImageToIndexedDB(newid, file);
+                    //console.log(`Image saved under new ID: ${newid}`);
+                  } else {
+                    //console.log("No file found for the given userId.");
+                  }
+                } catch (error) {
+                  //console.log("Error saving image under new ID:", error);
+                }
+            })();
+
+            setTimeout(() => { populateEnemySlots(); }, 250);
+            termtext(`<anim:term-blue><color:green>Success</color> <color:red>Enemy</color> <color:blue>${user.Name}</color> has been added.\n`);
+            playSound("sounds/Ting.mp3");
           }
 
           // Copy from compendium to stock
@@ -4259,7 +4847,7 @@ document.addEventListener("DOMContentLoaded", () => {
             document.body.appendChild(downloadAnchorNode); // required for firefox
             downloadAnchorNode.click();
             downloadAnchorNode.remove();
-            termtext(`<anim:term-bounce><color:green>Success</color> Exported User Compendium.\n<anim:term-pulse><color:purple>Note:</color> Assigned skills will not transfer and must be reassigned upon import.\n`);
+            termtext(`<anim:term-bounce><color:green>Success</color> Exported User Compendium.\n<color:purple>Note:</color> Assigned skills will not transfer and must be reassigned upon import.\n`);
   
           });
   
@@ -4288,7 +4876,197 @@ document.addEventListener("DOMContentLoaded", () => {
           });
 
         break;
-      default:
+      case "initiative":
+        termtext(`<color:yellow>Opening</color> Initiative Tracker.\n`);
+        formDisplay.innerHTML = `
+          <div class="form text-white p-4 max-w-[640px] bg-gradient-to-b from-secondary to- shadow-lg shadow-secondary/50">
+            <h1 class="text-center font-bold mb-2">Initiative Tracker</h1>
+            <i class="text-center"> Set or roll initiative for each combatant. </i>
+ 
+            <div id="initiative-display"></div>
+
+            <div class="w-full justify-center gap-6 p-2 flex">
+              <div class="tooltip tooltip-secondary" data-tip="Set initiative for all combatants."><input class="btn btn-sm form-input hover-sfx click-sfx" type="submit" id="form-create" value="Set Initiative" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3"></div>
+              <div class="tooltip tooltip-secondary" data-tip="Quick Roll initiative for combatants without a set initiative."><input class="btn btn-sm form-input hover-sfx click-sfx" type="submit" id="form-roll" value="Roll All" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3"></div>
+              <div class="tooltip tooltip-secondary" data-tip="Reset initiative for all combatants."><input class="btn btn-sm form-input hover-sfx click-sfx" type="submit" id="form-reset" value="Reset" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3"></div>
+              <input class="btn btn-sm btn-square form-input hover-sfx click-sfx" type="submit" id="form-cancel" value="X" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Negative.mp3">
+            </div>
+          </div>
+        `;
+        const formCancelInitiative = document.getElementById("form-cancel");
+        const formCreateInitiative = document.getElementById("form-create");
+        const formResetInitiative = document.getElementById("form-reset");
+        const formRollInitiative = document.getElementById("form-roll");
+        formCancelInitiative.addEventListener("click", closeForm);
+        const initiativeDisplay = document.getElementById("initiative-display");
+        let user = [];
+        let initiative = getInitiative();
+
+        refreshInitiative();
+
+        function resetInitiative() {
+          const players = getPlayers();
+          const enemies = getEnemies();
+          const party = getParty();
+          
+          // Create array of party members, finding them with id.
+          const partyMembers = Object.values(party).map(memberId => players.find(player => player.id === memberId)).filter(Boolean);
+          // Combine players within party and enemies into a single array.
+          user = [...partyMembers, ...enemies];
+
+          initiative = [...partyMembers, ...enemies].map((member) => {
+            // Determine if the member is from partyMembers or enemies
+            const isParty = partyMembers.some(p => p.id === member.id);
+            return {
+              id: member.id,
+              init_num: 0,
+              type: isParty ? "Party" : "Enemy",
+            };
+          });
+        }
+
+        function saveInitiative() {
+          initiative.forEach((entry) => {
+            const input = document.getElementById(`form-init-${entry.id}`);
+            if (input) {
+              const value = parseInt(input.value, 10);
+              if (!isNaN(value) && value >= 0 && value <= 99) {
+                entry.init_num = value;
+              } else {
+                termtext(`<anim:term-shake><color:red>Error</color> Invalid initiative number for <color:blue>${entry.id}</color>. Must be between 0 and 99.\n`);
+                return;
+              }
+            }
+          });
+          setInitiative(initiative);
+          termtext(`<anim:term-blue><color:green>Success</color> Initiative has been set.\n`);
+          playSound("sounds/Comp.mp3");
+          populatePartySlots();
+          closeForm();
+        }
+
+        function refreshInitiative() {
+          const players = getPlayers();
+          const enemies = getEnemies();
+          
+          if (initiative.length === 0) {
+            resetInitiative();
+          } else {
+            user = initiative.map((entry) => {
+              const player = players.find(p => p.id === entry.id);
+              const enemy = enemies.find(e => e.id === entry.id);
+              let found = [];
+              if (player) found.push(player);
+              if (enemy) found.push(enemy);
+              return found[0] || found[1]; 
+            });
+            
+          }
+            initiativeDisplay.innerHTML = `
+            <div class="card grid grid-cols-1 p-12 gap-2 bg-base-300 border-neutral border-2 max-h-80 overflow-y-auto">
+            ${initiative.map((entry, idx) => {
+              const userEntry = user.find(u => u.id === entry.id);
+              return `
+              <div class="btn grid grid-cols-2 bg-gradient-to-br from-primary to- hover:border-accent hover:border-single hover:border-2 hover:shadow-lg hover:shadow-accent/50 p-2">
+                <div class="flex gap-2 justify-start items-center">
+                <img alt="${userEntry?.Name || ''}" class="pic card xs:min-w-6 sm:size-7 sm:min-w-7 md:min-w-8 md:size-8 size-6 border-4 border-double border-neutral" id="avatar-${entry.id}">
+                <h3 class="font-bold truncate text-sm text-left"><i>Lv<b>${userEntry?.Level || ''}</b></i> ${userEntry?.Name || ''}</h3>
+                </div>
+                <div class="flex gap-2 justify-end items-center">
+                #<input type="number" min="0" max="99" id="form-init-${entry.id}" class="input form-input hover-sfx w-10" value="${entry.init_num}" data-hoversound="sounds/cursor.mp3">
+                <div class="tooltip tooltip-secondary" data-tip="Quick Roll Initiative"><input class="btn btn-xs form-input hover-sfx place-self-center click-sfx" type="submit" id="form-edit-${entry.id}" value="Roll" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3"></div>
+                <div class="tooltip tooltip-secondary" data-tip="Remove"><input class="btn btn-xs btn-square form-input hover-sfx place-self-center click-sfx" type="submit" id="form-delete-${entry.id}" value="X" data-hoversound="sounds/cursor.mp3"></div>
+                </div>
+              </div>
+              `;
+            }).join("")}
+            </div>
+            `;
+          // Load avatars from IndexedDB
+          initiative.forEach(async (entry) => {
+            const file = await getImageFromIndexedDB(entry.id);
+            if (file) {
+              const url = URL.createObjectURL(file);
+              const avatar = document.getElementById(`avatar-${entry.id}`);
+              avatar.src = url;
+            }
+            else {
+              document.getElementById(`avatar-${entry.id}`).classList.add("opacity-0");
+            }
+          });
+
+          // Add event listeners for roll and delete buttons
+          initiative.forEach((entry) => {
+            document.getElementById(`form-edit-${entry.id}`).addEventListener('click', () => {
+              const input = document.getElementById(`form-init-${entry.id}`);
+              if (input) {
+                let result = initiativeRoll(user.find(u => u.id === entry.id));
+                input.value = result;
+              }
+            });
+            document.getElementById(`form-delete-${entry.id}`).addEventListener('click', () => {
+              playSound("sounds/Dead.mp3");
+              initiative = initiative.filter(e => e.id !== entry.id);
+              refreshInitiative();
+            });
+          });
+        }
+
+        formCreateInitiative.addEventListener("click", () => {
+          saveInitiative();
+        });
+
+        formResetInitiative.addEventListener("click", () => {
+          resetInitiative();
+          refreshInitiative();
+        });
+
+        formRollInitiative.addEventListener("click", () => {
+
+          // only roll initiative for entries with 0 initiative.
+          initiative.forEach((entry) => {
+            const input = document.getElementById(`form-init-${entry.id}`);
+            if (input.value === "0" || input.value === "") {
+              let result = initiativeRoll(user.find(u => u.id === entry.id));
+              input.value = result;
+            }
+          });
+        });
+
+        function initiativeRoll (user) {
+
+          // Apply modifiers
+          let finalTN = user.Initiative;
+          let dice = 1;
+          let result = 0;
+          let roll = 0;
+          console.log(`${finalTN}`);
+          termtext(`<anim:term-blue><color:yellow>Initiative</color> Rolling for <color:blue>${user.Name}</color>.\n`);
+
+          // Handle criticals 
+          while (dice > 0) {
+            roll = Math.floor(Math.random() * 10) + 1;
+            result = Number(roll) + Number(result);
+            if (roll === 10) {
+              termtext(`<anim:term-bounce><color:lightgreen>Critical!</color> <color:blue>${user.Name}</color> rolled a <color:lightgreen>${roll}</color>! Added another d10.\n`);
+              dice++;
+            } else {
+              termtext(`<anim:term-bounce><color:blue>${user.Name}</color> rolled a <color:green>${roll}</color>.\n`);
+            }
+            dice--;
+          }
+
+          result = Number(result) + Number(finalTN);
+
+          termtext(`With an initiative bonus of <color:purple>${finalTN}</color>.\n`);
+          termtext(`<anim:term-blue><color:yellow>Initiative</color> Resulting in a total initiative of <color:lightgreen>${result} Power</color>.\n`);
+          setTimeout(() => { playSound("sounds/Boots.mp3", 1); }, 250);
+
+          return result;
+        }
+    
+      break;
+        default:
         formDisplay.innerHTML = `
 					<div class="form text-white rounded-lg rounded-tl-3xl p-4 w-1/2 bg-gradient-to-b from-accent to- shadow-lg shadow-secondary/50">  
 						<h2 class="align-text-center font-bold mb-4">Sorry! This feature isn't ready yet. </h2>
@@ -4299,62 +5077,6 @@ document.addEventListener("DOMContentLoaded", () => {
         termtext(`<anim:term-pulse><color:red>Debug</color> Section unfinished.\n`);
         formCancelerrrrrrrr.addEventListener("click", closeForm);
     }
-  }
-
-  function setupFormEventListenersQuick() {
-    const fateIncrease = document.getElementById("fate-increase");
-    const fateDecrease = document.getElementById("fate-decrease");
-    const formCancel = document.getElementById("form-cancel");
-    const formConfirm = document.getElementById("form-confirm");
-
-    fateIncrease.addEventListener("click", () => {
-      if (currentPlayer && currentPlayer.Fate_Current < currentPlayer.Fate_Max) {
-        currentPlayer.Fate_Current++;
-        document.getElementById("form-fate").textContent = currentPlayer.Fate_Current;
-      }
-    });
-
-    fateDecrease.addEventListener("click", () => {
-      if (currentPlayer && currentPlayer.Fate_Current > 0) {
-        currentPlayer.Fate_Current--;
-        document.getElementById("form-fate").textContent = currentPlayer.Fate_Current;
-      }
-    });
-
-    formConfirm.addEventListener("click", () => {
-      if (currentPlayer) {
-        const players = getPlayers();
-        const formHP = document.getElementById("form-hp");
-        const formMP = document.getElementById("form-mp");
-        const formStatus = document.getElementById("form-status");
-
-        // Update currentPlayer's stats
-        currentPlayer.HP_Current = Math.min(currentPlayer.HP_Max, Math.max(0, currentPlayer.HP_Current - formHP.value));
-        currentPlayer.MP_Current = Math.min(currentPlayer.MP_Max, Math.max(0, currentPlayer.MP_Current - formMP.value));
-        currentPlayer.Status = formStatus.value;
-
-        // Save updated players to local storage
-        const updatedPlayers = players.map((player) => player.id === currentPlayer.id ? currentPlayer : player);
-        setPlayers(updatedPlayers);
-
-        // Refresh party slots
-        populatePartySlots();
-      }
-
-      termtext(`<anim:term-blue><b>Data Updated</b>.\n`);
-      closeForm();
-	  updateBottomDisplay("None");
-    });
-
-    formCancel.addEventListener("click", closeForm);
-  }
-
-  function updateFormValuesQuick(player) {
-    document.getElementById("form-player-name").textContent = player.Name;
-    document.getElementById("form-hp").value = 0;
-    document.getElementById("form-mp").value = 0;
-    document.getElementById("form-fate").textContent = player.Fate_Current;
-    document.getElementById("form-status").value = player.Status;
   }
 
   function updateCornerDisplay() {
@@ -4650,7 +5372,6 @@ function getImageFromIndexedDB(id) {
     }
   });
 }
-
 
 function ClearImages() {
   return new Promise(async (resolve, reject) => {
