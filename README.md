@@ -145,6 +145,8 @@ MIT License
 
 ## 📝Changelog
 
+- **1.4** ⚔️Enemy Combat System
+
 - **1.3** 😈User Compendium
 
 - **1.2** 📖Custom Skills & Compendium
@@ -161,7 +163,7 @@ MIT License
 
 - ~~😈User Compendium~~
 
-- ⚔️Enemy Combat System
+- ~~⚔️Enemy Combat System~~
 
 - 📞VTT API Handling
 
