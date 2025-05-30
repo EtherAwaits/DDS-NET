@@ -21,8 +21,20 @@
 	<div class="flex flex-col crt h-screen">
 
 		<!-- Optional Section: Enemy Display -->
-		<div id="enemy-display hidden">
-			<div class="grid grid-cols-3 card bg-gradient-to-b from-secondary to-base-300 shadow-lg shadow-secondary/50 gap-2 p-4 party-menu fixed top-0 w-5/6 max-h-[122px] lg:max-h-[222px] overflow-y-auto outline-secondary outline-double outline-4" id="enemy-list"></div>
+		<div id="enemy-display" class="fixed top-0 flex card bg-gradient-to-b from-secondary to-base-300 shadow-lg shadow-secondary/50 gap-2 p-2 party-menu max-w-5/6 outline-secondary outline-double outline-4">
+			<div class="flex" id="turn-tracker">
+				
+				<div class="grid grid-cols-3 justify-items-center p-1" id="turn-tracker-controls">
+					<input class="btn btn-sm form-input hover-sfx click-sfx z-50 col-span-3" type="submit" id="Open-Tracker" value="Initiative" data-hoversound="sounds/cursor.mp3">
+					<input class="btn btn-sm btn-square form-input hover-sfx click-sfx z-50" type="submit" id="Close-Tracker" value="X" data-hoversound="sounds/cursor.mp3">
+					<input class="btn btn-sm btn-square form-input hover-sfx click-sfx z-50" type="submit" id="Backward-Tracker" value="<-" data-hoversound="sounds/cursor.mp3">
+					<input class="btn btn-sm btn-square form-input hover-sfx click-sfx z-50" type="submit" id="Forward-Tracker" value="->" data-hoversound="sounds/cursor.mp3">
+				</div>	
+				<div class="flex gap-2 overflow-x-auto p-1" id="turn-tracker-display"></div>
+			</div>
+
+			<div class="grid grid-cols-3 gap-2 p-2 party-menu max-h-[122px] lg:max-h-[222px] overflow-y-auto" id="enemy-list"></div>
+		
 		</div>	
 		
 		<!-- Corner Display -->

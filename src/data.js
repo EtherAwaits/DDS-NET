@@ -99,74 +99,22 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!localStorage.getItem("enemies")) {
     termtext(`<color:purple>Note</color> <b>Enemy</b> data not found, generated default enemy data.\n`);
     // Set default enemy data
-    const defaultEnemy = [
-    {
-      id: "675d0a6e255a537876669d15",
-      Name: "Fairy Jack Frost",
-      Type: "Demon",
-      Level: 5,
-      Strength: 5,
-      Magic: 7,
-      Vitality: 5,
-      Agility: 6,
-      Luck: 7,
-      Status: "Normal",
-      STR_TN: 30,
-      MG_TN: 40,
-      VT_TN: 30,
-      AG_TN: 35,
-      LK_TN: 40,
-      Melee_Power: 10,
-      Ranged_Power: 6,
-      Magic_Power: 12,
-      Initiative: 5,
-      Dodge_TN: 16,
-      Talk_TN: 34,
-      HP_Max: 60,
-      MP_Max: 36,
-      HP_Current: 60,
-      MP_Current: 36,
-      Fate_Max: 4,
-      Fate_Current: 4,
-      skills:["ice-01","healing-01"],
-    },
-    {
-      id: "675d3a6e255a56783666d15",
-      Name: "Beast Cait Sith",
-      Type: "Demon",
-      Level: 5,
-      Strength: 6,
-      Magic: 7,
-      Vitality: 5,
-      Agility: 7,
-      Luck: 4,
-      Status: "Normal",
-      STR_TN: 35,
-      MG_TN: 40,
-      VT_TN: 30,
-      AG_TN: 40,
-      LK_TN: 25,
-      Melee_Power: 11,
-      Ranged_Power: 6,
-      Magic_Power: 12,
-      Initiative: 6,
-      Dodge_TN: 17,
-      Talk_TN: 28,
-      HP_Max: 60,
-      MP_Max: 36,
-      HP_Current: 60,
-      MP_Current: 36,
-      Fate_Max: 0,
-      Fate_Current: 0,
-      skills:["buff-01","healing-01"],
-    },
-  ];
+    const defaultEnemy = [];
     // Store the enemy array in localStorage
     localStorage.setItem("enemies", JSON.stringify(defaultEnemy));
     console.log("Initialized 'enemies' in localStorage.");
 }
 
-    // Check if 'players' key exists in localStorage
+ // Check if 'initiative' key exists in localStorage
+  if (!localStorage.getItem("initiative")) {
+    termtext(`<color:purple>Note</color> <b>Initiative</b> data not found, generated default initiative data.\n`);
+    // Set default initiative data
+    const defaultInitiative = [];
+    localStorage.setItem("initiative", JSON.stringify(defaultInitiative));
+    console.log("Initialized 'initiative' in localStorage.");
+  }
+
+    // Check if 'userComp' key exists in localStorage
     if (!localStorage.getItem("userComp")) {
       // Set one example compendium user.
       const defaultPlayers = [
@@ -239,7 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
           rules: 0, // 0 = X, 1 = TC
           username: "<USER>",
           config1: "ddsnet", // Theme, 0 = DDS
-          config2: 0,
+          config2: 0, // Current Turn in Initiative
           config3: 0,
           config4: 0,
           config5: 0,
@@ -259,6 +207,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const getskillComp = () => JSON.parse(localStorage.getItem("skillComp")) || []; // const skillsComp = getskillsComp();
   const getuserComp = () => JSON.parse(localStorage.getItem("userComp")) || []; // const userComp = getuserCompe();
   const getEnemies = () => JSON.parse(localStorage.getItem("enemies")) || []; // const enemies = getenemies();
+  const getInitiative = () => JSON.parse(localStorage.getItem("initiative")) || []; // const initiative = getInitiative();
   //Centralized Updates
   const setParty = (party) => localStorage.setItem("party", JSON.stringify(party));
   const setPlayers = (players) => localStorage.setItem("players", JSON.stringify(players));
@@ -266,6 +215,11 @@ document.addEventListener("DOMContentLoaded", () => {
 	const setskillComp = (skillComp) => localStorage.setItem("skillComp", JSON.stringify(skillsComp));
   const setuserComp = (userComp) => localStorage.setItem("userComp", JSON.stringify(userComp));
   const setEnemies = (enemy) => localStorage.setItem("enemies", JSON.stringify(enemy));
+  const setInitiative = (initiative) => {
+    // Sort by init_num descending before saving
+    const sorted = [...initiative].sort((a, b) => b.init_num - a.init_num);
+    localStorage.setItem("initiative", JSON.stringify(sorted));
+  };
 
   const sys = getSystem();
   const user = sys.username;
@@ -284,6 +238,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Generates the 6 slots using the ID's in the "party" data
   function populatePartySlots(players, party, noevent = false) {
+    populateEnemySlots();
+
     for (let i = 1; i <= 6; i++) {
       party = getParty();
       players = getPlayers();
@@ -425,11 +381,19 @@ document.addEventListener("DOMContentLoaded", () => {
 				const avatar = document.getElementById(`avatar-${i}`);	
 				avatar.src = url;
 				avatar.classList.remove("hidden");
-				}
 			}
-      
-		  displayPlayer();
-      }
+		}
+
+    const system = getSystem();
+    const initiative = getInitiative();
+    if (initiative.length > 0 && player.id === initiative[system.config2].id) {
+      document.getElementById(`party-slot-${i}`).classList.add("border-2", "border-info");
+    } else {
+      document.getElementById(`party-slot-${i}`).classList.remove("border-2", "border-info");
+    }
+
+        displayPlayer();
+        }
       } else {
         partySlot.innerHTML = `
 		    <div class="flex items-center justify-center cursor-pointer h-full">
@@ -438,18 +402,36 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (!noevent) {
       attachPartySlotClickEvents();
-      populateEnemySlots();
     }
   }
 
   function populateEnemySlots() {
     document.getElementById("enemy-list").innerHTML = ""; // Clear existing enemy slots
     const enemies = getEnemies();
+    let initiative = getInitiative();
+    let sys = getSystem();
+
+    // Ensure all initiative entries are still in party or enemy list.
+    initiative = initiative.filter((init) => {
+      const playerExists = Object.values(getParty()).some((playerId) => playerId === init.id);
+      const enemyExists = enemies.some((enemy) => enemy.id === init.id);
+      return playerExists || enemyExists;
+    });
+    setInitiative(initiative); // Update localStorage with filtered initiative
+
+    if (sys.config2 >= initiative.length) {
+      sys.config2 = sys.config2 = Math.max(0, sys.config2 - 1); // Decrease current turn index if necessary
+      setSystem(sys); // Update localStorage
+    }
+
     if (enemies.length < 1) 
     {
-      document.getElementById("enemy-list").classList.add("hidden");
+      document.getElementById("enemy-display").classList.add("hidden");
+      const sys = getSystem();
+      sys.config2 = 0; // Reset current turn to 0 when enemies are present
+      setSystem(sys); // Update localStorage
     } else {
-      document.getElementById("enemy-list").classList.remove("hidden");
+      document.getElementById("enemy-display").classList.remove("hidden");
     }
     enemies.forEach((enemy, index) => {
       const enemySlot = document.createElement("div");
@@ -462,7 +444,7 @@ document.addEventListener("DOMContentLoaded", () => {
       enemySlot.innerHTML = `
         <input class="btn btn-xs btn-square form-input hover-sfx click-sfx absolute bottom-0 right-0 z-50" type="submit" id="form-delete-${index + 1}" value="X" data-hoversound="sounds/cursor.mp3">
 
-        <div class="enemy-member-inside flex justify-center gap-3 cursor-pointer click-sfx w-full min-h-20 party-menu" data-clicksound="sounds/Okay.mp3" data-volume="0.5" data-id="${enemy.id}" id="enemy-inner-${index + 1}">
+        <div class="enemy-member-inside flex justify-center gap-3 cursor-pointer click-sfx w-full min-h-20" data-clicksound="sounds/Okay.mp3" data-volume="0.5" data-id="${enemy.id}" id="enemy-inner-${index + 1}">
 
           <div class="space-y-3">
             <img alt="${enemy.Name}" class="pic card xs:min-w-6 sm:size-7 sm:min-w-7 md:min-w-8 md:size-8 size-6 hidden border-4 border-double border-neutral" id="enemy-avatar-${index + 1}">
@@ -502,7 +484,6 @@ document.addEventListener("DOMContentLoaded", () => {
       async function displayPlayer() {
         const file = await getImageFromIndexedDB(enemy.id);
         if (file) {
-          console.log(enemy.id);
           const url = URL.createObjectURL(file);
           const avatar = document.getElementById(`enemy-avatar-${index + 1}`);	
           avatar.src = url;
@@ -520,7 +501,27 @@ document.addEventListener("DOMContentLoaded", () => {
           playSound("sounds/Dead.mp3", 1);
           event.stopPropagation(); // Prevent the click event from bubbling up
           const enemies = getEnemies();
+
+          // Check if enemy is in the initiative list and remove it.
+          let initiative = getInitiative();
+          const system = getSystem();
+          const initiativeIndex = initiative.findIndex((init) => init.id === enemy.id);
+          if (initiativeIndex !== -1) {
+            initiative.splice(initiativeIndex, 1); // Remove the enemy from the initiative array
+            // Adjust current turn if necessary
+            if (system.config2 >= initiativeIndex) {
+              system.config2 = Math.max(0, system.config2 - 1); // Decrease current turn index if necessary
+            }  
+            setSystem(system); // Update localStorage
+            setInitiative(initiative); // Update localStorage
+          }
+   
+          console.log(`Removed enemy from initiative: ${enemy.Name}`);
           enemies.splice(index, 1); // Remove the enemy from the array
+          console.log(`enemies.length: ${enemies.length}`);
+          if (enemies.length < 1) {
+            setInitiative([]); // Update localStorage
+          }
           setEnemies(enemies); // Update localStorage
           populateEnemySlots(); // Refresh the enemy slots
         });
@@ -558,6 +559,13 @@ document.addEventListener("DOMContentLoaded", () => {
           }
 
           setEnemies(enemies);
+
+        const system = getSystem();
+        const initiative = getInitiative();
+
+        if (initiative.length > 0 && enemy.id === initiative[system.config2].id) {
+          document.getElementById(`enemy-slot-${index+1}`).classList.add("border-2", "border-info");
+        }
 
       switch (player.Status) {
           case 'Dead':
@@ -618,9 +626,127 @@ document.addEventListener("DOMContentLoaded", () => {
       attachEnemySlotClickEvents();
     
     });
+
+    // Create Initiative Slots
+    const initDisplay = document.getElementById("turn-tracker-display");
+    const initouterDisplay = document.getElementById("turn-tracker-controls");
+    const players = getPlayers();
+    const system = getSystem();
+    let currentTurn = system.config2; // Get the current turn from system config
+
+    if (initiative.length === 0)
+    {
+      currentTurn = 0;
+      system.config2 = currentTurn; // Update the system config
+      setSystem(system); // Save the updated system config
+      initouterDisplay.innerHTML = `
+        <div class="grid grid-cols-3 justify-items-center p-1">
+					<input class="btn btn-sm form-input hover-sfx click-sfx z-50 col-span-3" type="submit" id="Open-Tracker" value="Begin Combat" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
+				</div>	
+      `;
+
+    } else if (currentTurn > initiative.length - 1) {
+      currentTurn = initiative.length - 1;
+      system.config2 = currentTurn; // Update the system config
+      setSystem(system); // Save the updated system config
+      initouterDisplay.innerHTML = `
+					<input class="btn btn-sm form-input hover-sfx click-sfx z-50 col-span-3" type="submit" id="Open-Tracker" value="Initiative" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
+					<input class="btn btn-sm btn-square form-input click-sfx hover-sfx click-sfx z-50" type="submit" id="Close-Tracker" value="X" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
+					<input class="btn btn-sm btn-square form-input click-sfx hover-sfx click-sfx z-50" type="submit" id="Backward-Tracker" value="<-" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
+					<input class="btn btn-sm btn-square form-input click-sfx hover-sfx click-sfx z-50" type="submit" id="Forward-Tracker" value="->" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
+      `;
+    } else {
+      initouterDisplay.innerHTML = `
+					<input class="btn btn-sm form-input hover-sfx click-sfx z-50 col-span-3" type="submit" id="Open-Tracker" value="Initiative" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
+					<input class="btn btn-sm btn-square form-input click-sfx hover-sfx click-sfx z-50" type="submit" id="Close-Tracker" value="X" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
+					<input class="btn btn-sm btn-square form-input click-sfx hover-sfx click-sfx z-50" type="submit" id="Backward-Tracker" value="<-" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
+					<input class="btn btn-sm btn-square form-input click-sfx hover-sfx click-sfx z-50" type="submit" id="Forward-Tracker" value="->" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3">
+      `;
+    }
+
+    const initButton = document.getElementById(`Open-Tracker`);
+    const closeButton = document.getElementById(`Close-Tracker`)
+    const backButton = document.getElementById(`Backward-Tracker`);
+    const nextButton = document.getElementById(`Forward-Tracker`);
+
+    // Event listener for the initiative button
+    if (initButton) {
+      initButton.replaceWith(initButton.cloneNode(true)); // Clone and replace the node to clear listeners
+      const newInitButton = document.getElementById(`Open-Tracker`); // Get the new node
+      newInitButton.addEventListener("click", () => {
+        openForm("initiative");
+      });
+      
+    }
+
+    if (closeButton) {
+      // Event listener for the close button
+      closeButton.replaceWith(closeButton.cloneNode(true)); // Clone and replace the node to clear listeners
+      const newcloseButton = document.getElementById(`Close-Tracker`); // Get the new node
+      newcloseButton.addEventListener("click", () => {
+          setInitiative([]); // Clear the initiative array
+          populatePartySlots(); // Refresh the enemy slots
+      });
+    }
+    
+    if (backButton) {
+     // Event listener for the back button
+      backButton.replaceWith(backButton.cloneNode(true)); // Clone and replace the node to clear listeners
+      const newBackButton = document.getElementById(`Backward-Tracker`); // Get the new node
+      newBackButton.addEventListener("click", () => {
+        // Decrease the current turn
+        if (currentTurn > 0) {
+          currentTurn--;
+        } else {
+          currentTurn = initiative.length - 1; // Wrap around to the last turn
+        }
+          system.config2 = currentTurn; // Update the system config
+          setSystem(system); // Save the updated system config
+          populatePartySlots(); // Refresh the enemy slots        
+      });
+    }
+
+    if (nextButton) {
+      // Event listener for the forward button
+      nextButton.replaceWith(nextButton.cloneNode(true)); // Clone and replace the node to clear listeners
+      const newForwardButton = document.getElementById(`Forward-Tracker`); // Get the new node  
+      newForwardButton.addEventListener("click", () => {
+        // Decrease the current turn
+        if (currentTurn < initiative.length - 1) {
+          currentTurn++;
+        } else {
+          currentTurn = 0; // Wrap around to the first turn
+        }
+          system.config2 = currentTurn; // Update the system config
+          setSystem(system); // Save the updated system config
+          populatePartySlots(); // Refresh the enemy slots        
+      });
+    }
+
+    initiative.sort((a, b) => b.init_num - a.init_num); 
+
+    if (initDisplay || initiative.length > 0) {
+      initDisplay.innerHTML = ""; // Clear existing initiative slots
+      
+      initiative.forEach((init, index) => {
+        const user = init.type === "Party" ? players.find(p => p.id === init.id) : enemies.find(e => e.id === init.id);
+        const initSlot = document.createElement("div");
+        initSlot.className = "flex-none card h-[64px] w-[64px] bg-gradient-to-br from-primary to-primary/30 shadow-secondary/50 shadow-lg outline-2 outline-double outline-neutral text-xs p-1 overflow-hidden";
+        initSlot.id = `turn-slot-${index + 1}`;
+        initSlot.innerHTML = `
+          <p class="overflow-hidden h-5/6">${user.Name}</p>
+          <div class="bar-bg relative">
+          <div class="bar-fill bg-gradient-to-r from-red-600 to-orange-400" style="width: ${(user.HP_Current / user.HP_Max) * 100}%;"></div>
+        `;
+        if (index === currentTurn) {
+          initSlot.classList.remove("outline-neutral");
+          initSlot.classList.add("outline-info");
+        }
+        initDisplay.appendChild(initSlot);
+      });
+   }
   }
 
-  populateEnemySlots();
   populatePartySlots(getPlayers(), getParty());
   updateCornerDisplay();
 
@@ -694,11 +820,13 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   }
-
   
   // Attach Click Events to Enemy Slots
   function attachEnemySlotClickEvents() {
     const enemySlots = document.querySelectorAll(".enemy-member-inside");
+    const system = getSystem();
+    const initiative = getInitiative();
+    let currentTurn = system.config2; // Get the current turn from system config
 
     enemySlots.forEach((slot, index) => {
       // Remove any existing click listener
@@ -710,6 +838,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const enemies = getEnemies();
         const enemyId = newSlot.getAttribute("data-id");
         const enemy = enemies.find((e) => e.id === enemyId);
+        
         if (enemy) {
           enemySlots[index].classList.add("enemy-member-selected");
           openForm("quick", enemy,"enemy");
@@ -756,7 +885,7 @@ document.addEventListener("DOMContentLoaded", () => {
     switch (tabName) {
       case "comp":
         termtext(`<color:green>DDS-NET@${user}</color>:<color:blue>~/COMP</color>$ Opening Computer protocol.\n`);
-		triggerLED('/led/comp');
+		    triggerLED('/led/comp');
         bottomDisplay.innerHTML = `
 					<div class="flex justify-center p-4  motion-reduced">
 						<div class="menu card grid grid-cols-2 gap-2 flex bg-gradient-to-b shadow-lg from-slate-950 to- bg-#000 p-4 w-full text-white rounded-md bg-opacity-50 shadow-lg shadow-primary/50">
@@ -906,8 +1035,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         break;
       case "skills":
-		termtext(`<color:green>DDS-NET@${user}</color>:<color:blue>~/SKILLS</color>$ Opening Skill protocol.\n`);
-		triggerLED('/led/skills');
+        termtext(`<color:green>DDS-NET@${user}</color>:<color:blue>~/SKILLS</color>$ Opening Skill protocol.\n`);
+        triggerLED('/led/skills');
         bottomDisplay.innerHTML = `
 					<div class="flex justify-center p-4  motion-reduced">
 						<div class="menu card grid grid-cols-2 gap-2 flex bg-gradient-to-b shadow-lg from-slate-950 to- bg-#000 p-4 w-full text-white rounded-md bg-opacity-50 shadow-primary/50">
@@ -965,8 +1094,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         break;
       case "status":
-		termtext(`<color:green>DDS-NET@${user}</color>:<color:blue>~/STATUS</color>$ Opening Analysis protocol.\n`);
-		triggerLED('/led/status');
+        termtext(`<color:green>DDS-NET@${user}</color>:<color:blue>~/STATUS</color>$ Opening Analysis protocol.\n`);
+        triggerLED('/led/status');
         bottomDisplay.innerHTML = `
 					<div class="flex justify-center p-4  motion-reduced">
 						<div class="menu card grid grid-cols-2 gap-2 flex bg-gradient-to-b shadow-lg from-slate-950 to- bg-#000 p-4 w-full text-white rounded-md bg-opacity-50 shadow-primary/50">
@@ -1004,7 +1133,7 @@ document.addEventListener("DOMContentLoaded", () => {
         break;
       case "change":
         termtext(`<color:green>DDS-NET@${user}</color>:<color:blue>~/CHANGE</color>$ Opening Editing protocol.\n`);
-		triggerLED('/led/change');
+    		triggerLED('/led/change');
         bottomDisplay.innerHTML = `
 					<div class="flex justify-center p-4  motion-reduced">
 						<div class="menu card grid grid-cols-2 gap-2 flex bg-gradient-to-b shadow-lg from-slate-950 to- bg-#000 p-4 w-full text-white rounded-md bg-opacity-50 shadow-primary/50">
@@ -1048,11 +1177,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         break;
       case "help":
-		termtext(`<color:green>DDS-NET@${user}</color>:<color:blue>~/STATUS/HELP</color>$ Opening Assistance protocol.\n`);
-		triggerLED('/led/help');
+        termtext(`<color:green>DDS-NET@${user}</color>:<color:blue>~/STATUS/HELP</color>$ Opening Assistance protocol.\n`);
+        triggerLED('/led/help');
         bottomDisplay.innerHTML = `
 					<div class="flex justify-center p-4  motion-reduced">
-						<div class="menu card grid grid-cols-2 gap-2 flex bg-gradient-to-b shadow-lg from-slate-950 to- bg-#000 p-4 w-full text-white rounded-md bg-opacity-50 shadow-primary/50">
+						<div class="menu card grid grid-cols-2 gap-2 bg-gradient-to-b shadow-lg from-slate-950 to- bg-#000 p-4 w-full text-white rounded-md bg-opacity-50 shadow-primary/50">
 							<div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-volume="0.5" data-clicksound="sounds/Okay.mp3" id="about-button">About DDS-NET</div>
 							<div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-volume="0.5" data-clicksound="sounds/Okay.mp3" id="support-button">Feedback / Contribution</div>
 							<div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-volume="0.5" data-clicksound="sounds/Okay.mp3" id="creation-button">Character Creation</div>
@@ -1266,7 +1395,6 @@ document.addEventListener("DOMContentLoaded", () => {
           player.skills = [];
           localStorage.setItem('players', JSON.stringify(players));
         }
-        console.log(player);
         document.getElementById("skill-display").innerHTML = `
           <div class="card grid grid-cols-1 p-12 gap-2 bg-base-300 border-neutral border-2 max-h-80 overflow-y-auto">
             ${compendium.filter(skill => player.skills.includes(skill.id)).map((skill) => {
@@ -1964,6 +2092,7 @@ document.addEventListener("DOMContentLoaded", () => {
           localStorage.removeItem("skillComp");
           localStorage.removeItem("userComp");
           localStorage.removeItem("enemies");
+          localStorage.removeItem("initiative");
           location.reload();
         }
       break;
@@ -2433,7 +2562,7 @@ document.addEventListener("DOMContentLoaded", () => {
           deleteImageFromIndexedDB(currentPlayer.id);
           players.splice(index, 1);
           localStorage.setItem("players", JSON.stringify(players));
-
+          populatePartySlots();
           closeForm();
         }
     break;
@@ -4747,7 +4876,197 @@ document.addEventListener("DOMContentLoaded", () => {
           });
 
         break;
-      default:
+      case "initiative":
+        termtext(`<color:yellow>Opening</color> Initiative Tracker.\n`);
+        formDisplay.innerHTML = `
+          <div class="form text-white p-4 max-w-[640px] bg-gradient-to-b from-secondary to- shadow-lg shadow-secondary/50">
+            <h1 class="text-center font-bold mb-2">Initiative Tracker</h1>
+            <i class="text-center"> Set or roll initiative for each combatant. </i>
+ 
+            <div id="initiative-display"></div>
+
+            <div class="w-full justify-center gap-6 p-2 flex">
+              <div class="tooltip tooltip-secondary" data-tip="Set initiative for all combatants."><input class="btn btn-sm form-input hover-sfx click-sfx" type="submit" id="form-create" value="Set Initiative" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3"></div>
+              <div class="tooltip tooltip-secondary" data-tip="Quick Roll initiative for combatants without a set initiative."><input class="btn btn-sm form-input hover-sfx click-sfx" type="submit" id="form-roll" value="Roll All" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3"></div>
+              <div class="tooltip tooltip-secondary" data-tip="Reset initiative for all combatants."><input class="btn btn-sm form-input hover-sfx click-sfx" type="submit" id="form-reset" value="Reset" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3"></div>
+              <input class="btn btn-sm btn-square form-input hover-sfx click-sfx" type="submit" id="form-cancel" value="X" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Negative.mp3">
+            </div>
+          </div>
+        `;
+        const formCancelInitiative = document.getElementById("form-cancel");
+        const formCreateInitiative = document.getElementById("form-create");
+        const formResetInitiative = document.getElementById("form-reset");
+        const formRollInitiative = document.getElementById("form-roll");
+        formCancelInitiative.addEventListener("click", closeForm);
+        const initiativeDisplay = document.getElementById("initiative-display");
+        let user = [];
+        let initiative = getInitiative();
+
+        refreshInitiative();
+
+        function resetInitiative() {
+          const players = getPlayers();
+          const enemies = getEnemies();
+          const party = getParty();
+          
+          // Create array of party members, finding them with id.
+          const partyMembers = Object.values(party).map(memberId => players.find(player => player.id === memberId)).filter(Boolean);
+          // Combine players within party and enemies into a single array.
+          user = [...partyMembers, ...enemies];
+
+          initiative = [...partyMembers, ...enemies].map((member) => {
+            // Determine if the member is from partyMembers or enemies
+            const isParty = partyMembers.some(p => p.id === member.id);
+            return {
+              id: member.id,
+              init_num: 0,
+              type: isParty ? "Party" : "Enemy",
+            };
+          });
+        }
+
+        function saveInitiative() {
+          initiative.forEach((entry) => {
+            const input = document.getElementById(`form-init-${entry.id}`);
+            if (input) {
+              const value = parseInt(input.value, 10);
+              if (!isNaN(value) && value >= 0 && value <= 99) {
+                entry.init_num = value;
+              } else {
+                termtext(`<anim:term-shake><color:red>Error</color> Invalid initiative number for <color:blue>${entry.id}</color>. Must be between 0 and 99.\n`);
+                return;
+              }
+            }
+          });
+          setInitiative(initiative);
+          termtext(`<anim:term-blue><color:green>Success</color> Initiative has been set.\n`);
+          playSound("sounds/Comp.mp3");
+          populatePartySlots();
+          closeForm();
+        }
+
+        function refreshInitiative() {
+          const players = getPlayers();
+          const enemies = getEnemies();
+          
+          if (initiative.length === 0) {
+            resetInitiative();
+          } else {
+            user = initiative.map((entry) => {
+              const player = players.find(p => p.id === entry.id);
+              const enemy = enemies.find(e => e.id === entry.id);
+              let found = [];
+              if (player) found.push(player);
+              if (enemy) found.push(enemy);
+              return found[0] || found[1]; 
+            });
+            
+          }
+            initiativeDisplay.innerHTML = `
+            <div class="card grid grid-cols-1 p-12 gap-2 bg-base-300 border-neutral border-2 max-h-80 overflow-y-auto">
+            ${initiative.map((entry, idx) => {
+              const userEntry = user.find(u => u.id === entry.id);
+              return `
+              <div class="btn grid grid-cols-2 bg-gradient-to-br from-primary to- hover:border-accent hover:border-single hover:border-2 hover:shadow-lg hover:shadow-accent/50 p-2">
+                <div class="flex gap-2 justify-start items-center">
+                <img alt="${userEntry?.Name || ''}" class="pic card xs:min-w-6 sm:size-7 sm:min-w-7 md:min-w-8 md:size-8 size-6 border-4 border-double border-neutral" id="avatar-${entry.id}">
+                <h3 class="font-bold truncate text-sm text-left"><i>Lv<b>${userEntry?.Level || ''}</b></i> ${userEntry?.Name || ''}</h3>
+                </div>
+                <div class="flex gap-2 justify-end items-center">
+                #<input type="number" min="0" max="99" id="form-init-${entry.id}" class="input form-input hover-sfx w-10" value="${entry.init_num}" data-hoversound="sounds/cursor.mp3">
+                <div class="tooltip tooltip-secondary" data-tip="Quick Roll Initiative"><input class="btn btn-xs form-input hover-sfx place-self-center click-sfx" type="submit" id="form-edit-${entry.id}" value="Roll" data-hoversound="sounds/cursor.mp3" data-clicksound="sounds/Okay.mp3"></div>
+                <div class="tooltip tooltip-secondary" data-tip="Remove"><input class="btn btn-xs btn-square form-input hover-sfx place-self-center click-sfx" type="submit" id="form-delete-${entry.id}" value="X" data-hoversound="sounds/cursor.mp3"></div>
+                </div>
+              </div>
+              `;
+            }).join("")}
+            </div>
+            `;
+          // Load avatars from IndexedDB
+          initiative.forEach(async (entry) => {
+            const file = await getImageFromIndexedDB(entry.id);
+            if (file) {
+              const url = URL.createObjectURL(file);
+              const avatar = document.getElementById(`avatar-${entry.id}`);
+              avatar.src = url;
+            }
+            else {
+              document.getElementById(`avatar-${entry.id}`).classList.add("opacity-0");
+            }
+          });
+
+          // Add event listeners for roll and delete buttons
+          initiative.forEach((entry) => {
+            document.getElementById(`form-edit-${entry.id}`).addEventListener('click', () => {
+              const input = document.getElementById(`form-init-${entry.id}`);
+              if (input) {
+                let result = initiativeRoll(user.find(u => u.id === entry.id));
+                input.value = result;
+              }
+            });
+            document.getElementById(`form-delete-${entry.id}`).addEventListener('click', () => {
+              playSound("sounds/Dead.mp3");
+              initiative = initiative.filter(e => e.id !== entry.id);
+              refreshInitiative();
+            });
+          });
+        }
+
+        formCreateInitiative.addEventListener("click", () => {
+          saveInitiative();
+        });
+
+        formResetInitiative.addEventListener("click", () => {
+          resetInitiative();
+          refreshInitiative();
+        });
+
+        formRollInitiative.addEventListener("click", () => {
+
+          // only roll initiative for entries with 0 initiative.
+          initiative.forEach((entry) => {
+            const input = document.getElementById(`form-init-${entry.id}`);
+            if (input.value === "0" || input.value === "") {
+              let result = initiativeRoll(user.find(u => u.id === entry.id));
+              input.value = result;
+            }
+          });
+        });
+
+        function initiativeRoll (user) {
+
+          // Apply modifiers
+          let finalTN = user.Initiative;
+          let dice = 1;
+          let result = 0;
+          let roll = 0;
+          console.log(`${finalTN}`);
+          termtext(`<anim:term-blue><color:yellow>Initiative</color> Rolling for <color:blue>${user.Name}</color>.\n`);
+
+          // Handle criticals 
+          while (dice > 0) {
+            roll = Math.floor(Math.random() * 10) + 1;
+            result = Number(roll) + Number(result);
+            if (roll === 10) {
+              termtext(`<anim:term-bounce><color:lightgreen>Critical!</color> <color:blue>${user.Name}</color> rolled a <color:lightgreen>${roll}</color>! Added another d10.\n`);
+              dice++;
+            } else {
+              termtext(`<anim:term-bounce><color:blue>${user.Name}</color> rolled a <color:green>${roll}</color>.\n`);
+            }
+            dice--;
+          }
+
+          result = Number(result) + Number(finalTN);
+
+          termtext(`With an initiative bonus of <color:purple>${finalTN}</color>.\n`);
+          termtext(`<anim:term-blue><color:yellow>Initiative</color> Resulting in a total initiative of <color:lightgreen>${result} Power</color>.\n`);
+          setTimeout(() => { playSound("sounds/Boots.mp3", 1); }, 250);
+
+          return result;
+        }
+    
+      break;
+        default:
         formDisplay.innerHTML = `
 					<div class="form text-white rounded-lg rounded-tl-3xl p-4 w-1/2 bg-gradient-to-b from-accent to- shadow-lg shadow-secondary/50">  
 						<h2 class="align-text-center font-bold mb-4">Sorry! This feature isn't ready yet. </h2>
