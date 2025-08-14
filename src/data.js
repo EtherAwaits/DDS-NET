@@ -1,11 +1,14 @@
 document.addEventListener("DOMContentLoaded", () => {
 	async function triggerLED(endpoint) {
+    return; // Disabled for now
+    /*
             try {
                 const response = await fetch(endpoint);
                 const result = await response.text();
             } catch (err) {
                 console.error("Error:", err);
             }
+    */
         }
   // Check if 'players' key exists in localStorage
   if (!localStorage.getItem("players")) {
