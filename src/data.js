@@ -1196,7 +1196,7 @@ document.addEventListener("DOMContentLoaded", () => {
 						</div>
 					</div>
 				`;
-	    	const skill = document.getElementById("support-button");
+	    	const skill = document.getElementById("skill-button");
         if (skill) {
           skill.addEventListener("click", () => {
           termtext(`<color:yellow>Help</color> <b>Skill Management</b>.\nSkills are the main method of rolling on DDS-NET. While various presets exist under the "FIGHT" and "SKILLS" tabs. But instead of typing in the information yourself every time, you can create a skill in the skill compendium. Simply go to the Skill Compendium under "CHANGE" and create all the skills you need with your own copy of the Core Rulebook. Once created, these skills can be assigned to players under the "STATUS" tab.\n\n`);
