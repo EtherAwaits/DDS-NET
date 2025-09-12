@@ -1185,7 +1185,6 @@ document.addEventListener("DOMContentLoaded", () => {
         bottomDisplay.innerHTML = `
 					<div class="flex justify-center p-4  motion-reduced">
 						<div class="menu card grid grid-cols-2 gap-2 bg-gradient-to-b shadow-lg from-slate-950 to- bg-#000 p-4 w-full text-white rounded-md bg-opacity-50 shadow-primary/50">
-							<div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-volume="0.5" data-clicksound="sounds/Okay.mp3" id="about-button">About DDS-NET</div>
 							<div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-volume="0.5" data-clicksound="sounds/Okay.mp3" id="support-button">Feedback / Contribution</div>
 							<div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-volume="0.5" data-clicksound="sounds/Okay.mp3" id="creation-button">Character Creation</div>
 							<div tabindex="0" class="menu-option hover-sfx click-sfx hover:shadow-md hover:shadow-accent/50" data-hoversound="sounds/cursor.mp3" data-volume="0.5" data-clicksound="sounds/Okay.mp3" id="rolling-button">Dice Rolling</div>
@@ -1202,7 +1201,7 @@ document.addEventListener("DOMContentLoaded", () => {
           termtext(`<color:yellow>Help</color> <b>Skill Management</b>.\nSkills are the main method of rolling on DDS-NET. While various presets exist under the "FIGHT" and "SKILLS" tabs. But instead of typing in the information yourself every time, you can create a skill in the skill compendium. Simply go to the Skill Compendium under "CHANGE" and create all the skills you need with your own copy of the Core Rulebook. Once created, these skills can be assigned to players under the "STATUS" tab.\n\n`);
           });
         }
-        const support = document.getElementById("about-button");
+        const support = document.getElementById("support-button");
         if (support) {
           support.addEventListener("click", () => {
             termtext("<color:yellow>Help</color> <b>Support / Contribution</b>.\nIf you have any questions or feedback feel free to reach out to etherawaits on discord. If you wish to support my project, please consider helping me with my hosting costs. You can donate at <u>https://ko-fi.com/etherawaits</u>. This project is open source! You can contribute and peek inside the system at <u>https://github.com/EtherAwaits/DDS-NET</u>.\n\n");
